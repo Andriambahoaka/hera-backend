@@ -1,0 +1,7 @@
+node_modules/
+
+# Firebase Admin SDK key
+firebase-adminsdk.json
+
+# Environment variables
+.env
