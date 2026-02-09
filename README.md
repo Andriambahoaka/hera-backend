@@ -18,13 +18,13 @@ The API is built with Node.js and TypeScript and is designed to be deployed usin
 
 ## Project Structure
 src/
-├── app.ts # Express app configuration
-├── server.ts # HTTP server bootstrap
-├── routes/ # API routes
-├── controllers/ # Business logic
-├── models/ # MongoDB models
-├── utils/ # Utilities & helpers
-└── uploads/ # Uploaded files
+├── app.ts (Express app configuration)
+├── server.ts (HTTP server bootstrap)
+├── routes/ (API routes)
+├── controllers/ (Business logic)
+├── models/ (MongoDB models)
+├── utils/ (Utilities & helpers)
+└── uploads/ (Uploaded files)
 
 
 ---
@@ -68,11 +68,11 @@ The API will be available at:
 http://localhost:3000
 
 ### Running with Docker (Recommended)
-- Build and start the services
-  docker compose up --build -d
+- Build and start the services :
+  "docker compose up --build -d"
 
-- Stop the services
-  docker compose down
+- Stop the services :
+  "docker compose down"
 
 The API will be available at:
 http://localhost:3000
@@ -80,16 +80,16 @@ http://localhost:3000
 ### Health Check
 
 - A health endpoint is available to verify that the service is running:
- GET /healthz
+ "GET /healthz"
 
 ### Logs & Maintenance
 
 - View API logs:
-  docker compose logs api
+  "docker compose logs api"
 
 - Restart the API service:
 
- docker compose restart api
+ "docker compose restart api"
 
 ### Security Notes
 
