@@ -5,11 +5,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      MONGO_URI: mongodb://mongo:27017/hera_db
-      JWT_SECRET: change_me
+    env_file:
+      - .env
     depends_on:
       - mongo
 
