@@ -18,6 +18,7 @@ import {
 } from "../utils/responseHandler";
 
 import { ERRORS } from "../utils/messages.util";
+import { send } from "process";
 
 // =============================
 // AUTH CONTROLLERS
@@ -71,14 +72,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
 export const generateApiKey = async (_: Request, res: Response) => {
   try {
     const result = await generateApiKeyService();
-    return res.json({
-      status: "success",
-      ...result,
-    });
+    return sendSuccess(res, result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "error", message: "Erreur génération API Key" });
+    return sendInternalError(res, error);
   }
 };
 
@@ -87,19 +83,12 @@ export const refreshApiKey = async (req: Request, res: Response) => {
     const { refreshKey } = req.body;
 
     if (!refreshKey) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "refreshKey manquant" });
+      return sendBadRequestError(res, "refreshKey manquant");
     }
 
     const result = await refreshApiKeyService(refreshKey);
-    return res.json({
-      status: "success",
-      ...result,
-    });
+    return sendSuccess(res, result);
   } catch (error) {
-    return res
-      .status(403)
-      .json({ status: "error", message: "refreshKey invalide" });
+    return sendUnauthorizedError(res, "refreshKey invalide");
   }
 };
