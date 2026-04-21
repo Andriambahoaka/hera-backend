@@ -6,3 +6,6 @@ firebase-adminsdk.json
 # Environment variables
 .env
 
+# Build output
+dist/
+
