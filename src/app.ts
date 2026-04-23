@@ -22,6 +22,7 @@ import activityRoutes from "./routes/activity.route";
 
 
 import { APP } from "./utils/messages.util";
+import { errorMiddleware } from "./middleware/error.middleware";
 
 // =============================
 // ENV
@@ -107,6 +108,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/packs", packRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/activities", activityRoutes);
+
+app.use(errorMiddleware);
 
 // =============================
 // Healthcheck
