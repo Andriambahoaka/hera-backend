@@ -1,49 +1,38 @@
 import { Request, Response, NextFunction } from 'express';
 import ApiKey from '../models/apiKey.model';
+import { sendUnauthorizedError, sendForbiddenError,sendInternalError } from '../utils/responseHandler';
 
-const apiKeyAuth = async (
+const apiKeyMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      res.status(401).json({
-        status: 'error',
-        message: 'API Key manquante',
-      });
+    if (!authHeader?.startsWith("Bearer ")) {
+      sendUnauthorizedError(res, "API Key manquante");
       return;
     }
 
-    const key = authHeader.replace(/^Bearer\s+/i, '');
-
+    const key = authHeader.split(" ")[1];
     const record = await ApiKey.findOne({ key });
 
     if (!record) {
-      res.status(403).json({
-        status: 'error',
-        message: 'API Key invalide',
-      });
-      return;
+       sendForbiddenError(res, "API Key invalide");
+       return;
     }
 
     if (record.expiresAt && record.expiresAt < new Date()) {
-      res.status(401).json({
-        status: 'error',
-        message: 'API Key expirée',
-      });
+      sendUnauthorizedError(res, "API Key expirée");
       return;
     }
 
     next();
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Erreur API Key',
-    });
+  } catch (error: any) {
+    sendInternalError(res, error.message || "Erreur interne du serveur");
   }
 };
 
-export default apiKeyAuth;
+export default apiKeyMiddleware;
+
+

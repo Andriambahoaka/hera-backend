@@ -10,6 +10,8 @@ import PackAccess from "../models/packAccess.model";
 import cloudinary from "../config/cloudinary";
 import { UploadApiResponse, UploadApiErrorResponse } from "cloudinary";
 
+import { AppError } from "../shared/errors/AppError";
+
 import {
   ERRORS,
   SUCCESS
@@ -135,16 +137,12 @@ export class UserService {
     return { message: SUCCESS.PASSWORD_UPDATED };
   }
 
-  static async updatePassword(token: string, oldPassword: string, newPassword: string) {
-    if (!token) throw new Error(ERRORS.TOKEN_MISSING);
-    if (!oldPassword || !newPassword) throw new Error(ERRORS.OLD_NEW_PASSWORD_REQUIRED);
-
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "RANDOM_TOKEN_SECRET");
-    const user = await User.findById(decoded.userId);
-    if (!user) throw new Error(ERRORS.USER_NOT_FOUND_BY_EMAIL);
+  static async updatePassword(userId: string, oldPassword: string, newPassword: string) {
+    const user = await User.findById(userId);
+    if (!user) throw new AppError(ERRORS.USER_NOT_FOUND, 404);
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) throw new Error(ERRORS.OLD_PASSWORD_INCORRECT);
+    if (!isMatch) throw new AppError(ERRORS.OLD_PASSWORD_INCORRECT, 400);
 
     user.password = await bcrypt.hash(newPassword, 10);
     user.firstLogin = false;

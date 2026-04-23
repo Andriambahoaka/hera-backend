@@ -7,9 +7,8 @@ import { ERRORS } from "./messages.util";
 export const sendSuccess = (
   res: Response,
   data: unknown,
-  message: string = "Success"
 ): Response => {
-  return res.status(200).json({ message, data });
+  return res.status(200).json(data);
 };
 
 /**

@@ -8,6 +8,8 @@ import {
   sendUnauthorizedError,
 } from "../utils/responseHandler";
 import { ERRORS } from "../utils/messages.util";
+import { AppError } from "../shared/errors/AppError";
+import { asyncHandler } from "../shared/utils/asyncHandler";
 
 const getTokenFromHeader = (req: Request): string | null => {
   const authHeader = req.headers["authorization"];
@@ -92,20 +94,22 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
-export const updatePassword = async (req: Request, res: Response) => {
-  try {
-    const token = getTokenFromHeader(req);
-    if (!token) return sendBadRequestError(res, ERRORS.TOKEN_MISSING);
+export const updatePassword = asyncHandler(async (req: Request, res: Response) => {
+  const { oldPassword, newPassword } = req.body;
 
-    const { oldPassword, newPassword } = req.body;
-    if (!oldPassword || !newPassword) return sendBadRequestError(res, ERRORS.OLD_NEW_PASSWORD_REQUIRED);
-
-    const result = await UserService.updatePassword(token, oldPassword, newPassword);
-    return sendSuccess(res, result);
-  } catch (error: any) {
-    sendInternalError(res, error.message);
+  if (!oldPassword || !newPassword) {
+    throw new AppError(ERRORS.OLD_NEW_PASSWORD_REQUIRED, 400);
   }
-};
+  const userId = req.auth?.userId;
+
+  if (!userId) {
+    throw new AppError("UNAUTHORIZED", 401);
+  }
+
+  const result = await UserService.updatePassword(userId, oldPassword, newPassword);
+  return sendSuccess(res, result);
+
+});
 
 export const deleteDeviceToken = async (req: Request, res: Response) => {
   try {

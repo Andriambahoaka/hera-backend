@@ -10,9 +10,8 @@ export const ERRORS = {
   CREDENTIALS_INCORRECT: "Paire identifiant/mot de passe incorrect",
 
   // User
-  USER_NOT_FOUND: "Utilisateur non trouvé.",
+  USER_NOT_FOUND: "Utilisateur introuvable.",
   USER_EXISTS: "Un utilisateur avec cet email existe déjà.",
-  USER_NOT_FOUND_BY_EMAIL: "Utilisateur introuvable.",
   USER_TYPE_REQUIRED: "type_id et name sont requis.",
   USER_ID_REQUIRED: "userId requis.",
 
@@ -52,7 +51,7 @@ export const SUCCESS = {
   RESET_EMAIL_SENT: "Email de réinitialisation envoyé.",
 
   // Password
-  PASSWORD_UPDATED: "Mot de passe mis à jour",
+  PASSWORD_UPDATED: "Mot de passe mis à jour avec succès.",
   PASSWORD_RESET: "Mot de passe réinitialisé avec succès",
 
   // Image
