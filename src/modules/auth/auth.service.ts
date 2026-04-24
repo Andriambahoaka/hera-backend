@@ -6,12 +6,12 @@ import nodemailer from "nodemailer";
 import axios from "axios";
 import dotenv from "dotenv";
 
-import User from "../models/user.model";
-import ApiKey from "../models/apiKey.model";
+import User from "../../models/user.model";
+import ApiKey from "../../models/apiKey.model";
 
-import { renderTemplate } from "../utils/emailTemplate.util";
-import { validateSignupInput } from "../utils/validators";
-import { ERRORS, SUCCESS } from "../utils/messages.util";
+import { renderTemplate } from "../../core/utils/emailTemplate.util";
+import { validateSignupInput } from "../../core/utils/validators";
+import { ERRORS, SUCCESS } from "../../core/utils/messages.util";
 
 dotenv.config();
 

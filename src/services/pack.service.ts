@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import Pack from '../models/pack.model';
 import PackAccess from '../models/packAccess.model';
 import User from '../models/user.model';
-import { PackErrors } from '../errors';
+import { PackErrors } from '../core/errors';
 
 export class PackService {
   static async createPack(data: {
