@@ -6,10 +6,10 @@ import {
   sendSuccess,
   sendBadRequestError,
   sendUnauthorizedError,
-} from "../utils/responseHandler";
-import { ERRORS } from "../utils/messages.util";
-import { AppError } from "../shared/errors/AppError";
-import { asyncHandler } from "../shared/utils/asyncHandler";
+} from "../core/utils/responseHandler";
+import { ERRORS } from "../core/utils/messages.util";
+import { AppError } from "../core/errors/AppError";
+import { asyncHandler } from "../core/utils/asyncHandler";
 
 const getTokenFromHeader = (req: Request): string | null => {
   const authHeader = req.headers["authorization"];

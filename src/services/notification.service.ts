@@ -1,4 +1,4 @@
-import admin from '../config/firebase';
+import admin from '../core/config/firebase';
 import Notification from '../models/notification.model';
 import Pack from '../models/pack.model';
 import User from '../models/user.model';

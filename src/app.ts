@@ -14,15 +14,15 @@ import rateLimit from "express-rate-limit";
 
 
 import userRoutes from "./routes/user.route";
-import authRoutes from "./routes/auth.route";
+import authRoutes from "./modules/auth/auth.route";
 import userTypeRoutes from "./routes/userType.route";
 import packRoutes from "./routes/pack.route";
 import notificationRoutes from "./routes/notification.route";
 import activityRoutes from "./routes/activity.route";
 
 
-import { APP } from "./utils/messages.util";
-import { errorMiddleware } from "./middleware/error.middleware";
+import { APP } from "./core/utils/messages.util";
+import { errorMiddleware } from "./core/middleware/error.middleware";
 
 // =============================
 // ENV

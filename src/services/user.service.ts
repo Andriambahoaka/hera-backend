@@ -7,15 +7,15 @@ import mongoose from "mongoose";
 import User, { IUser } from "../models/user.model";
 import UserType from "../models/userType.model";
 import PackAccess from "../models/packAccess.model";
-import cloudinary from "../config/cloudinary";
+import cloudinary from "../core/config/cloudinary";
 import { UploadApiResponse, UploadApiErrorResponse } from "cloudinary";
 
-import { AppError } from "../shared/errors/AppError";
+import { AppError } from "../core/errors/AppError";
 
 import {
   ERRORS,
   SUCCESS
-} from "../utils/messages.util";
+} from "../core/utils/messages.util";
 
 export class UserService {
 // Helper to upload a buffer to Cloudinary

@@ -3,9 +3,9 @@ import express from "express";
 import multer from "multer";
 
 import {UserController} from "../controllers";
-import apiKeyAuth from "../middleware/apiKeyAuth";
-import mobileKeyAuth from "../middleware/mobileKeyAuth";
-import { requireAuth } from "../middleware/auth.middleware";
+import apiKeyAuth from "../core/middleware/apiKeyAuth";
+import mobileKeyAuth from "../core/middleware/mobileKeyAuth";
+import { requireAuth } from "../core/middleware/auth.middleware";
 
 
 const router = express.Router();
