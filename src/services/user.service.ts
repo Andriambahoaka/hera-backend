@@ -16,6 +16,7 @@ import {
   ERRORS,
   SUCCESS
 } from "../core/utils/messages.util";
+import { USER_ERRORS } from "../modules/user/user.errors";
 
 export class UserService {
 // Helper to upload a buffer to Cloudinary
@@ -139,10 +140,10 @@ export class UserService {
 
   static async updatePassword(userId: string, oldPassword: string, newPassword: string) {
     const user = await User.findById(userId);
-    if (!user) throw new AppError(ERRORS.USER_NOT_FOUND, 404);
+    if (!user) throw new AppError(USER_ERRORS.USER_NOT_FOUND);
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) throw new AppError(ERRORS.OLD_PASSWORD_INCORRECT, 400);
+    if (!isMatch) throw new AppError(USER_ERRORS.OLD_PASSWORD_INCORRECT);
 
     user.password = await bcrypt.hash(newPassword, 10);
     user.firstLogin = false;
