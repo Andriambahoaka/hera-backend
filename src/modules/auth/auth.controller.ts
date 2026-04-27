@@ -6,7 +6,7 @@ import {
   forgotPasswordService,
   generateApiKeyService,
   refreshApiKeyService,
-} from "../services/auth.service";
+} from "./auth.service";
 
 import {
   sendInternalError,
@@ -15,9 +15,9 @@ import {
   sendBadRequestError,
   sendConflictError,
   sendNotFoundError,
-} from "../utils/responseHandler";
+} from "../../core/utils/responseHandler";
 
-import { ERRORS } from "../utils/messages.util";
+import { ERRORS } from "../../core/utils/messages.util";
 import { send } from "process";
 
 // =============================
