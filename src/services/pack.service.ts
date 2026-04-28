@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Pack from '../models/pack.model';
 import PackAccess from '../models/packAccess.model';
-import User from '../models/user.model';
+import User from '../modules/user/user.model';
 import { PackErrors } from '../core/errors';
 
 export class PackService {

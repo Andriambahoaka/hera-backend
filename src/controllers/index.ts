@@ -1,1 +1,1 @@
-export * as UserController from './user.controller';
+export * as UserController from '../modules/user/user.controller';

@@ -13,7 +13,7 @@ import compression from "compression";
 import rateLimit from "express-rate-limit";
 
 
-import userRoutes from "./routes/user.route";
+import userRoutes from "./modules/user/user.route";
 import authRoutes from "./modules/auth/auth.route";
 import userTypeRoutes from "./routes/userType.route";
 import packRoutes from "./routes/pack.route";
