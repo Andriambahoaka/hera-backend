@@ -6,7 +6,7 @@ export function renderTemplate(
   variables: Record<string, string>,
   ext: string = "html"
 ): string {
-  const filePath = path.join(__dirname, `../templates/${templateName}.${ext}`);
+  const filePath = path.join(__dirname, `templates/${templateName}.${ext}`);
   let template = fs.readFileSync(filePath, "utf8");
 
   // Replace placeholders like {{name}}, {{email}}, {{tempPassword}}

@@ -10,6 +10,8 @@ import {
 import { ERRORS } from "../core/utils/messages.util";
 import { AppError } from "../core/errors/AppError";
 import { asyncHandler } from "../core/utils/asyncHandler";
+import { USER_ERRORS } from "../modules/user/user.errors";
+import { COMMON_ERRORS } from "../core/errors/common.error";
 
 const getTokenFromHeader = (req: Request): string | null => {
   const authHeader = req.headers["authorization"];
@@ -98,12 +100,12 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response) =
   const { oldPassword, newPassword } = req.body;
 
   if (!oldPassword || !newPassword) {
-    throw new AppError(ERRORS.OLD_NEW_PASSWORD_REQUIRED, 400);
+    throw new AppError(USER_ERRORS.OLD_NEW_PASSWORD_REQUIRED);
   }
   const userId = req.auth?.userId;
 
   if (!userId) {
-    throw new AppError("UNAUTHORIZED", 401);
+    throw new AppError(COMMON_ERRORS.UNAUTHORIZED);
   }
 
   const result = await UserService.updatePassword(userId, oldPassword, newPassword);

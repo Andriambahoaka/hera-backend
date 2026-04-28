@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as packCtrl from '../controllers/pack.controller';
-import apiKeyAuth from '../middleware/apiKeyAuth';
+import apiKeyAuth from '../core/middleware/apiKeyAuth';
 
 const router = Router();
 

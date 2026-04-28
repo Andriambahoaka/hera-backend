@@ -1,0 +1,36 @@
+import mongoose, { Model, Document } from "mongoose";
+import {IUser} from "../../models/user.model";
+import { SignupDto } from "./dto/signup.dto";
+import { AppError } from "../../core/errors/AppError";
+import { AUTH_ERRORS } from "./auth.errors";
+import { HTTP_STATUS } from "../../core/constants/httpStatus";
+import { USER_TYPE } from "../user/enums/userType.enum";
+
+
+export async function validateSignupInput(
+  data: SignupDto,
+): Promise<void> {
+  const { name, email, userType, ownerId } = data;
+
+  if (!name || !email || !userType) {
+    throw new AppError(AUTH_ERRORS.MISSING_REQUIRED_FIELDS);
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new AppError(AUTH_ERRORS.INVALID_EMAIL_FORMAT);
+  }
+
+  const validUserTypes = [USER_TYPE.OWNER, USER_TYPE.ADMIN, USER_TYPE.MEMBER];
+  if (!validUserTypes.includes(userType)) {
+    throw new AppError(AUTH_ERRORS.INVALID_USER_TYPE);
+  }
+
+    if ((userType === USER_TYPE.ADMIN || userType === USER_TYPE.MEMBER) && !ownerId) {
+    throw new AppError(AUTH_ERRORS.OWNER_ID_REQUIRED);
+  }
+
+  if (userType === USER_TYPE.OWNER && ownerId) {
+      throw new AppError(AUTH_ERRORS.OWNER_ID_NOT_ALLOWED);
+  }
+}
