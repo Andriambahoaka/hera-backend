@@ -5,6 +5,7 @@ import {
   loginService,
   forgotPasswordService,
   refreshTokenService,
+  resetPasswordService,
 } from "./auth.service";
 
 import { sendSuccess, } from "../../core/utils/responseHandler";
@@ -13,6 +14,9 @@ import { validateSignupInput } from "./auth.validator";
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { AppError } from "../../core/errors/AppError";
 import { AUTH_ERRORS } from "./auth.errors";
+import { UserService } from "../user/user.service";
+import { USER_ERRORS } from "../user/user.errors";
+import { getTokenFromHeader } from "./auth.utils";
 
 // =============================
 // AUTH CONTROLLERS
@@ -32,6 +36,19 @@ export const signup = asyncHandler(async (req: Request, res: Response) => {
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const result = await loginService(email, password);
+  return sendSuccess(res, result);
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const token = getTokenFromHeader(req);
+
+  if (!token) {
+    throw new AppError(USER_ERRORS.RESET_PASSWORD_TOKEN_MISSING);
+  }
+
+  const { newPassword } = req.body;
+
+  const result = await resetPasswordService(token, newPassword);
   return sendSuccess(res, result);
 });
 

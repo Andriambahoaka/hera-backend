@@ -1,5 +1,5 @@
 import mongoose, { Model, Document } from "mongoose";
-import {IUser} from "../../models/user.model";
+import { IUser } from "../user/user.model";
 import { SignupDto } from "./dto/signup.dto";
 import { AppError } from "../../core/errors/AppError";
 import { AUTH_ERRORS } from "./auth.errors";
@@ -26,11 +26,11 @@ export async function validateSignupInput(
     throw new AppError(AUTH_ERRORS.INVALID_USER_TYPE);
   }
 
-    if ((userType === USER_TYPE.ADMIN || userType === USER_TYPE.MEMBER) && !ownerId) {
+  if ((userType === USER_TYPE.ADMIN || userType === USER_TYPE.MEMBER) && !ownerId) {
     throw new AppError(AUTH_ERRORS.OWNER_ID_REQUIRED);
   }
 
   if (userType === USER_TYPE.OWNER && ownerId) {
-      throw new AppError(AUTH_ERRORS.OWNER_ID_NOT_ALLOWED);
+    throw new AppError(AUTH_ERRORS.OWNER_ID_NOT_ALLOWED);
   }
 }

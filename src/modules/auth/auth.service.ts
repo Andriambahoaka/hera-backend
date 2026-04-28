@@ -1,12 +1,11 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { JsonWebTokenError, SignOptions, TokenExpiredError } from "jsonwebtoken";
 import mongoose from "mongoose";
 
 import dotenv from "dotenv";
 
-import User from "../../models/user.model";
-import ApiKey from "../../infrastructure/apiKey/apiKey.model";
+import User from "../user/user.model";
 
 import { SUCCESS } from "../../core/utils/messages.util";
 import { AppError } from "../../core/errors/AppError";
@@ -109,6 +108,35 @@ export const loginService = async (email: string, password: string) => {
   };
 };
 
+export const resetPasswordService = async (token: string, newPassword: string) =>{
+  let decoded: any;
+
+  try {
+    decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "RANDOM_TOKEN_SECRET"
+    );
+  } catch (err) {
+    if (err instanceof TokenExpiredError) {
+      throw new AppError(USER_ERRORS.RESET_PASSWORD_TOKEN_EXPIRED);
+    }
+
+    if (err instanceof JsonWebTokenError) {
+      throw new AppError(USER_ERRORS.RESET_PASSWORD_TOKEN_INVALID);
+    }
+
+    throw err;
+  }
+
+  const hash = await bcrypt.hash(newPassword, 10);
+
+  await User.findByIdAndUpdate(decoded.userId, {
+    password: hash,
+  });
+
+  return { message: SUCCESS.PASSWORD_UPDATED };
+}
+
 export const forgotPasswordService = async (email: string) => {
   const user = await User.findOne({ email });
   if (!user) {
@@ -134,8 +162,8 @@ export const refreshTokenService = async (refreshToken: string) => {
       refreshToken,
       JWT_SECRET
     );
-  } catch (err:any) {
-  
+  } catch (err: any) {
+
     console.error("Refresh token verification failed:", err.message);
     throw new AppError(AUTH_ERRORS.INVALID_REFRESH_TOKEN);
   }

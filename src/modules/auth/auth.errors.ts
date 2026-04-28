@@ -82,4 +82,11 @@ export const AUTH_ERRORS = {
     status: HTTP_STATUS.UNAUTHORIZED,
     message: 'Refresh key has expired',
   },
+
+  INVALID_AUTH_HEADER: {
+    code: 'INVALID_AUTH_HEADER',
+    status: HTTP_STATUS.UNAUTHORIZED,
+    message: 'Missing or malformed authorization header',
+  },
+
 };
