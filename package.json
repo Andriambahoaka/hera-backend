@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/app.js",
   "scripts": {
-    "build": "tsc && cpx \"src/templates/**/*\" dist/templates",
+    "build": "tsc && cpx \"src/infrastructure/email/templates/**/*\" dist/infrastructure/email/templates && cpx \"src/public/**/*\" dist/public",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },

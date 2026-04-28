@@ -2,16 +2,20 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
 import mongoose from "mongoose";
-import nodemailer from "nodemailer";
-import axios from "axios";
+
 import dotenv from "dotenv";
 
 import User from "../../models/user.model";
-import ApiKey from "../../models/apiKey.model";
+import ApiKey from "../../infrastructure/apiKey/apiKey.model";
 
-import { renderTemplate } from "../../core/utils/emailTemplate.util";
-import { validateSignupInput } from "../../core/utils/validators";
-import { ERRORS, SUCCESS } from "../../core/utils/messages.util";
+import { SUCCESS } from "../../core/utils/messages.util";
+import { AppError } from "../../core/errors/AppError";
+
+import { AUTH_ERRORS } from "./auth.errors";
+import * as emailService from "../../infrastructure/email/email.service";
+import { SignupDto } from "./dto/signup.dto";
+import { USER_TYPE } from "../user/enums/userType.enum";
+import { USER_ERRORS } from "../user/user.errors";
 
 dotenv.config();
 
@@ -19,32 +23,14 @@ dotenv.config();
 // ENV & CONSTANTS
 // =============================
 const {
-  BREVO_EMAIL_SENDER,
-  BREVO_SMTP_USERNAME,
-  BREVO_SMTP_PASSWORD,
-  BREVO_API_KEY,
   JWT_SECRET = "",
   RESET_PASSWORD_SECRET = "",
-  APP_DOMAIN = "",
 } = process.env;
 
-const TOKEN_EXPIRY = "24h";
+const ACCESS_TOKEN_EXPIRY = "24h";
+const REFRESH_TOKEN_EXPIRY = "30d";
 const RESET_EXPIRY = "1h";
 
-// =============================
-// MAILER
-// =============================
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  tls: { rejectUnauthorized: false },
-  auth: {
-    user: BREVO_SMTP_USERNAME,
-    pass: BREVO_SMTP_PASSWORD,
-  },
-  connectionTimeout: 10000,
-});
 
 // =============================
 // HELPERS
@@ -63,59 +49,31 @@ const generateTempPassword = (length = 12): string => {
   return crypto.randomBytes(length).toString("base64").slice(0, length);
 };
 
-const sendWelcomeEmail = async (
-  name: string,
-  email: string,
-  tempPassword: string
-): Promise<void> => {
-  const html = renderTemplate(
-    "welcomeEmail",
-    { name, email, tempPassword },
-    "html"
-  );
-  const text = renderTemplate(
-    "welcomeEmail",
-    { name, email, tempPassword },
-    "txt"
-  );
-
-  await axios.post(
-    "https://api.brevo.com/v3/smtp/email",
-    {
-      sender: { email: BREVO_EMAIL_SENDER },
-      to: [{ email, name }],
-      subject: SUCCESS.WELCOME_EMAIL_SUBJECT,
-      htmlContent: html,
-      textContent: text,
-    },
-    {
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    }
-  );
-};
-
 // =============================
 // SERVICES
 // =============================
-export const signupService = async (data: any) => {
+export const signupService = async (data: SignupDto) => {
   const { name, email, password, phoneNumber, userType, ownerId } = data;
-
-  const validationError = await validateSignupInput(data, User);
-  if (validationError) {
-    throw new Error(validationError);
-  }
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new Error(ERRORS.USER_EXISTS);
+    throw new AppError(AUTH_ERRORS.USER_EXISTS);
   }
 
   const tempPassword = password || generateTempPassword();
   const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+  if ((userType === USER_TYPE.ADMIN || userType === USER_TYPE.MEMBER) && ownerId) {
+
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      throw new AppError(AUTH_ERRORS.INVALID_OWNER_ID);
+    }
+
+    const ownerUser = await User.findById(ownerId);
+    if (!ownerUser) {
+      throw new AppError(AUTH_ERRORS.OWNER_NOT_FOUND);
+    }
+  }
 
   const user = new User({
     name,
@@ -127,7 +85,7 @@ export const signupService = async (data: any) => {
   });
 
   const savedUser = await user.save();
-  await sendWelcomeEmail(name, email, tempPassword);
+  await emailService.sendWelcomeEmail(name, email, tempPassword);
 
   return {
     message: SUCCESS.USER_CREATED,
@@ -137,82 +95,71 @@ export const signupService = async (data: any) => {
 
 export const loginService = async (email: string, password: string) => {
   const user = await User.findOne({ email });
-  if (!user) throw new Error(ERRORS.USER_NOT_FOUND);
+  if (!user) throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS);
 
   const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) throw new Error(ERRORS.CREDENTIALS_INCORRECT);
+  if (!isValid) throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS);
 
-  const token = generateToken(user._id, JWT_SECRET, TOKEN_EXPIRY);
+  const accessToken = generateToken(user._id, JWT_SECRET, ACCESS_TOKEN_EXPIRY);
+  const refreshToken = generateToken(user._id, JWT_SECRET, REFRESH_TOKEN_EXPIRY);
 
   return {
-    token,
-    user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      userType: user.userType,
-      ownerId: user.ownerId,
-      firstLogin: user.firstLogin,
-      imageUrl: user.imageUrl,
-    },
+    accessToken,
+    refreshToken,
   };
 };
 
 export const forgotPasswordService = async (email: string) => {
   const user = await User.findOne({ email });
-  if (!user) throw new Error(ERRORS.USER_NOT_FOUND);
+  if (!user) {
+    return { message: SUCCESS.RESET_EMAIL_SENT }
+  }
 
   const token = generateToken(user._id, RESET_PASSWORD_SECRET, RESET_EXPIRY);
-  const resetLink = `${APP_DOMAIN}/deeplink?to=update-password&token=${token}`;
 
-  const html = renderTemplate(
-    "resetPasswordEmail",
-    { name: user.name || "Utilisateur", email, resetLink },
-    "html"
-  );
-  const text = renderTemplate(
-    "resetPasswordEmail",
-    { name: user.name || "Utilisateur", email, resetLink },
-    "txt"
-  );
-
-  await transporter.sendMail({
-    from: BREVO_EMAIL_SENDER,
+  await emailService.sendResetPasswordEmail({
     to: email,
-    subject: SUCCESS.RESET_EMAIL_SUBJECT,
-    html,
-    text,
+    name: user.name,
+    token,
   });
 
   return { message: SUCCESS.RESET_EMAIL_SENT };
 };
 
-export const generateApiKeyService = async () => {
-  const apiKey = crypto.randomBytes(64).toString("hex");
-  const refreshKey = crypto.randomBytes(64).toString("hex");
+export const refreshTokenService = async (refreshToken: string) => {
+  let decoded: any;
 
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  try {
+    decoded = jwt.verify(
+      refreshToken,
+      JWT_SECRET
+    );
+  } catch (err:any) {
+  
+    console.error("Refresh token verification failed:", err.message);
+    throw new AppError(AUTH_ERRORS.INVALID_REFRESH_TOKEN);
+  }
 
-  const newKey = new ApiKey({ key: apiKey, refreshKey, expiresAt });
-  await newKey.save();
+  const user = await User.findById(decoded.userId);
+  if (!user) {
+    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+  }
 
-  return { apiKey, refreshKey, expiresAt };
-};
+  const newAccessToken = generateToken(
+    user._id,
+    JWT_SECRET,
+    ACCESS_TOKEN_EXPIRY
+  );
 
-export const refreshApiKeyService = async (refreshKey: string) => {
-  const record = await ApiKey.findOne({ refreshKey });
-  if (!record) throw new Error("refreshKey invalide");
-
-  record.key = crypto.randomBytes(64).toString("hex");
-  record.refreshKey = crypto.randomBytes(64).toString("hex");
-  record.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-  await record.save();
+  const newRefreshToken = generateToken(
+    user._id,
+    JWT_SECRET,
+    REFRESH_TOKEN_EXPIRY
+  );
 
   return {
-    apiKey: record.key,
-    refreshKey: record.refreshKey,
-    expiresAt: record.expiresAt,
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
   };
 };
+

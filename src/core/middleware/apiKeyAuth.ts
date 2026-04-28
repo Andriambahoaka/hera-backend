@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import ApiKey from '../models/apiKey.model';
+import ApiKey from '../../infrastructure/apiKey/apiKey.model';
 import { sendUnauthorizedError, sendForbiddenError,sendInternalError } from '../utils/responseHandler';
 
 const apiKeyMiddleware = async (

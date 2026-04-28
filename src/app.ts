@@ -19,6 +19,7 @@ import userTypeRoutes from "./routes/userType.route";
 import packRoutes from "./routes/pack.route";
 import notificationRoutes from "./routes/notification.route";
 import activityRoutes from "./routes/activity.route";
+import apiKeysRoutes from "./infrastructure/apiKey/apiKey.route";
 
 
 import { APP } from "./core/utils/messages.util";
@@ -103,6 +104,7 @@ app.use("/api/auth", authLimiter);
 // API Routes
 // =============================
 app.use("/api/auth", authRoutes);
+app.use("/api/api-keys", apiKeysRoutes);
 app.use("/api/userType", userTypeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/packs", packRoutes);

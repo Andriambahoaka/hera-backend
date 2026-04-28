@@ -5,7 +5,7 @@ import User from '../models/user.model';
 import {
   getMessageTitleFromMsgType,
   getMessageBodyFromMsgType,
-} from '../utils/notificationMessage.util';
+} from '../core/utils/notificationMessage.util';
 
 export class NotificationService {
   static async createAndSendNotification(payload: any) {
