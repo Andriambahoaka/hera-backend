@@ -17,7 +17,7 @@ const accessSchema = new Schema<IAccess>(
     id: { type: Number, required: true },
     isSelected: { type: Boolean, required: true },
   },
-  { _id: false } // important for subdocuments
+  { _id: false } 
 );
 
 const packAccessSchema = new Schema<IPackAccess>(

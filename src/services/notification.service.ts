@@ -72,7 +72,7 @@ export class NotificationService {
 
     for (const notification of notifications) {
       const createdAt = new Date(notification.createdAt!);
-      const dateOnly = new Date(
+      const dateOnly = new Date( 
         createdAt.getFullYear(),
         createdAt.getMonth(),
         createdAt.getDate()
