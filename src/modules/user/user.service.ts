@@ -3,7 +3,7 @@ import streamifier from "streamifier";
 
 import User, { IUser } from "./user.model";
 import UserType from "./userType.model";
-import PackAccess from "../../models/packAccess.model";
+import PackAccess from "../pack/packAccess.model";
 import cloudinary from "../../core/config/cloudinary";
 
 import { AppError } from "../../core/errors/AppError";
