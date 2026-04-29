@@ -1,10 +1,16 @@
 import mongoose from 'mongoose';
-import Pack from '../models/pack.model';
-import PackAccess from '../models/packAccess.model';
-import User from '../modules/user/user.model';
-import { PackErrors } from '../core/errors';
+import Pack from './pack.model';
+import PackAccess from './packAccess.model';
+import User from '../user/user.model';
+
+import { AppError } from "../../core/errors/AppError";
+import { PACK_ERRORS } from "../pack/pack.errors";
 
 export class PackService {
+
+  // =============================
+  // CREATE
+  // =============================
   static async createPack(data: {
     ownerId: string;
     deviceId: string;
@@ -14,21 +20,21 @@ export class PackService {
     const { ownerId, deviceId, deviceName, devicePassword } = data;
 
     if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-      throw new PackErrors.InvalidOwnerIdError();
+      throw new AppError(PACK_ERRORS.INVALID_OWNER_ID);
     }
 
     const owner = await User.findById(ownerId);
     if (!owner) {
-      throw new PackErrors.OwnerNotFoundError();
+      throw new AppError(PACK_ERRORS.OWNER_NOT_FOUND);
     }
 
     if (owner.userType === 2 || owner.userType === 3) {
-      throw new PackErrors.InvalidOwnerTypeError();
+      throw new AppError(PACK_ERRORS.INVALID_OWNER_TYPE);
     }
 
     const existingPack = await Pack.findOne({ deviceId });
     if (existingPack) {
-      throw new PackErrors.DeviceAlreadyExistsError();
+      throw new AppError(PACK_ERRORS.DEVICE_ALREADY_EXISTS);
     }
 
     const pack = new Pack({
@@ -41,6 +47,10 @@ export class PackService {
     return pack.save();
   }
 
+  // =============================
+  // UPDATE
+  // =============================
+
   static async updateDeviceNames(
     updates: { deviceId: string; deviceName: string }[]
   ) {
@@ -52,27 +62,39 @@ export class PackService {
   }
 
   static async updateUrgencyNumber(deviceId: string, urgencyNumber?: string) {
-    return Pack.findOneAndUpdate(
+    const pack = await Pack.findOneAndUpdate(
       { deviceId },
-      { urgencyNumber: urgencyNumber ?? '17' },
+      { urgencyNumber: urgencyNumber ?? "17" },
       { new: true }
     );
-  }
 
-  static async findByDeviceId(deviceId: string) {
-    return Pack.findOne({ deviceId });
+    if (!pack) {
+      throw new AppError(PACK_ERRORS.PACK_NOT_FOUND);
+    }
+
+    return pack;
   }
 
   static async updatePack(
     deviceId: string,
     fields: { urgencyNumber?: string; deviceName?: string }
   ) {
-    return Pack.findOneAndUpdate(
+    const pack = await Pack.findOneAndUpdate(
       { deviceId },
       { $set: fields },
       { new: true }
     );
+
+    if (!pack) {
+      throw new AppError(PACK_ERRORS.PACK_NOT_FOUND);
+    }
+
+    return pack;
   }
+
+  // =============================
+  // READ
+  // =============================
 
   static async findAll() {
     return Pack.find();
@@ -82,15 +104,34 @@ export class PackService {
     return Pack.find({ ownerId });
   }
 
+  static async findByDeviceId(deviceId: string) {
+    const pack = await Pack.findOne({ deviceId });
+
+    if (!pack) {
+      throw new AppError(PACK_ERRORS.PACK_NOT_FOUND);
+    }
+
+    return pack;
+  }
+
+  static async findAllPackAccessByUser(userId: string) {
+    return PackAccess.find({ userId })
+      .populate("packId")
+      .lean();
+  }
+
+  // =============================
+  // PACK ACCESS
+  // =============================
+
   static async addOrUpdatePackAccess(accessList: any[]) {
     const results = [];
 
     for (const item of accessList) {
       const { userId, packId, hasAccess, access } = item;
 
-      if (!userId || !packId || typeof hasAccess !== 'boolean') {
-        results.push({ status: 'error', packId });
-        continue;
+      if (!userId || !packId || typeof hasAccess !== "boolean") {
+        throw new AppError(PACK_ERRORS.INVALID_PACK_ACCESS_PAYLOAD);
       }
 
       let packAccess = await PackAccess.findOne({ userId, packId });
@@ -99,19 +140,13 @@ export class PackService {
         packAccess.hasAccess = hasAccess;
         packAccess.access = access;
         await packAccess.save();
-        results.push({ status: 'updated', packId });
+        results.push({ status: "updated", packId });
       } else {
         await PackAccess.create({ userId, packId, hasAccess, access });
-        results.push({ status: 'created', packId });
+        results.push({ status: "created", packId });
       }
     }
 
     return results;
-  }
-
-  static async findAllPackAccessByUser(userId: string) {
-    return PackAccess.find({ userId })
-      .populate('packId')
-      .lean();
   }
 }
