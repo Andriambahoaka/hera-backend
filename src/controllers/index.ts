@@ -1,1 +1,0 @@
-export * as UserController from '../modules/user/user.controller';

@@ -3,9 +3,6 @@ import { asyncHandler } from "../../core/utils/asyncHandler";
 import { sendSuccess } from "../../core/utils/responseHandler";
 import { ActivityService } from "./activity.service";
 
-// =============================
-// ACTIVITY CONTROLLERS
-// =============================
 
 export const addActivity = asyncHandler(async (req: Request, res: Response) => {
   const result = await ActivityService.addActivity(req.body);
