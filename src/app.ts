@@ -15,10 +15,10 @@ import rateLimit from "express-rate-limit";
 
 import userRoutes from "./modules/user/user.route";
 import authRoutes from "./modules/auth/auth.route";
-import userTypeRoutes from "./routes/userType.route";
+import userTypeRoutes from "./modules/user/userType.route";
 import packRoutes from "./modules/pack/pack.route";
 import notificationRoutes from "./routes/notification.route";
-import activityRoutes from "./routes/activity.route";
+import activityRoutes from "./modules/activity/activity.route";
 import apiKeysRoutes from "./infrastructure/apiKey/apiKey.route";
 
 
