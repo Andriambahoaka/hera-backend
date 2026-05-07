@@ -88,5 +88,15 @@ export const AUTH_ERRORS = {
     status: HTTP_STATUS.UNAUTHORIZED,
     message: 'Missing or malformed authorization header',
   },
+  INVALID_API_KEY: {
+    code: 'INVALID_API_KEY',
+    status: HTTP_STATUS.UNAUTHORIZED,
+    message: 'Invalid API key',
+  },
+  API_KEY_EXPIRED: {
+    code: 'API_KEY_EXPIRED',
+    status: HTTP_STATUS.UNAUTHORIZED,
+    message: 'API key has expired',
+  },
 
 };

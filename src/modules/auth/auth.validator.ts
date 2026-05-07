@@ -1,9 +1,6 @@
-import mongoose, { Model, Document } from "mongoose";
-import { IUser } from "../user/user.model";
 import { SignupDto } from "./dto/signup.dto";
 import { AppError } from "../../core/errors/AppError";
 import { AUTH_ERRORS } from "./auth.errors";
-import { HTTP_STATUS } from "../../core/constants/httpStatus";
 import { USER_TYPE } from "../user/enums/userType.enum";
 
 

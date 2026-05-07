@@ -13,6 +13,12 @@ export const USER_ERRORS = {
     message: "Old password and new password are required",
   },
 
+  NEW_PASSWORD_REQUIRED: {
+    code: "NEW_PASSWORD_REQUIRED",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "New password is required",
+  },
+
   OLD_PASSWORD_INCORRECT: {
     code: "OLD_PASSWORD_INCORRECT",
     status: HTTP_STATUS.UNAUTHORIZED,

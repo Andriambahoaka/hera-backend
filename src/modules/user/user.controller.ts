@@ -87,6 +87,24 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response) =
   return sendSuccess(res, result);
 });
 
+export const createPassword = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.auth?.userId;
+  console.log("User ID for createPassword:", userId);
+
+  if (!userId) {
+    throw new AppError(COMMON_ERRORS.UNAUTHORIZED);
+  }
+
+  const {newPassword } = req.body;
+
+  if (!newPassword) {
+    throw new AppError(USER_ERRORS.NEW_PASSWORD_REQUIRED);
+  }
+
+  const result = await UserService.createPassword(userId, newPassword);
+  return sendSuccess(res, result);
+});
+
 
 export const deleteUserById = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.params.id as string;

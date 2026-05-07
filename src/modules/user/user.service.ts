@@ -148,6 +148,20 @@ export class UserService {
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
+
+    await user.save();
+
+    return { message: SUCCESS.PASSWORD_UPDATED };
+  }
+
+  static async createPassword(userId: string,newPassword: string) {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
     user.firstLogin = false;
 
     await user.save();

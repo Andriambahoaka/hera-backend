@@ -92,19 +92,21 @@ export const signupService = async (data: SignupDto) => {
   };
 };
 
-export const loginService = async (email: string, password: string) => {
+export const loginService = async (email: string, passwordInput: string) => {
   const user = await User.findOne({ email });
   if (!user) throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS);
 
-  const isValid = await bcrypt.compare(password, user.password);
+  const isValid = await bcrypt.compare(passwordInput, user.password);
   if (!isValid) throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS);
 
   const accessToken = generateToken(user._id, JWT_SECRET, ACCESS_TOKEN_EXPIRY);
   const refreshToken = generateToken(user._id, JWT_SECRET, REFRESH_TOKEN_EXPIRY);
+  const { password, devicesToken, imagePublicId, ...safeUser } = user.toObject();
 
   return {
     accessToken,
     refreshToken,
+    user: safeUser
   };
 };
 
