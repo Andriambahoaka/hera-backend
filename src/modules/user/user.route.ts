@@ -3,8 +3,8 @@ import express from "express";
 import multer from "multer";
 
 import * as UserController from "./user.controller";
-import apiKeyAuth from "../../core/middleware/apiKeyAuth";
-import mobileKeyAuth from "../../core/middleware/mobileKeyAuth";
+import apiKeyAuth from "../../core/middleware/apikey.middleware";
+import mobileKeyAuth from "../../core/middleware/mobileKey.middleware";
 import { requireAuth } from "../auth/auth.middleware";
 
 
@@ -14,6 +14,7 @@ const upload = multer();
 router.get('/me', requireAuth, UserController.getMe);
 
 // Password 
+router.post('/create-password', requireAuth, UserController.createPassword);
 router.put('/update-password', requireAuth, UserController.updatePassword);
 
 // Device tokens
