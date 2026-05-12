@@ -20,6 +20,7 @@ import packRoutes from "./modules/pack/pack.route";
 import notificationRoutes from "./modules/notification/notification.route";
 import activityRoutes from "./modules/activity/activity.route";
 import apiKeysRoutes from "./infrastructure/apiKey/apiKey.route";
+import dolynkRoutes from "./modules/dolynk-auth/dolynk-auth.routes";
 
 
 import { APP } from "./core/utils/messages.util";
@@ -110,7 +111,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/packs", packRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/activities", activityRoutes);
-
+app.use("/api/dolynk", dolynkRoutes);
 app.use(errorMiddleware);
 
 // =============================
