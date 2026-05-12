@@ -5,7 +5,7 @@ import Pack from "../pack/pack.model";
 import Notification from "./notification.model";
 import User from "../user/user.model";
 
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { NOTIFICATION_ERRORS } from "./notification.errors";
 
 import { getNotificationContent} from "./notification.util";

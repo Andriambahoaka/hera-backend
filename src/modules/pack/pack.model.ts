@@ -4,7 +4,7 @@ export interface IPack extends Document {
   ownerId: Types.ObjectId;
   deviceId: string;
   deviceName: string;
-  devicePassword: string;
+  devCode: string;
   urgencyNumber: string;
 }
 
@@ -24,7 +24,7 @@ const packSchema = new Schema<IPack>(
       type: String,
       default: '',
     },
-    devicePassword: {
+    devCode: {
       type: String,
       required: true,
     },

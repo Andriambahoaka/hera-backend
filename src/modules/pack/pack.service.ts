@@ -3,8 +3,9 @@ import Pack from './pack.model';
 import PackAccess from './packAccess.model';
 import User from '../user/user.model';
 
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { PACK_ERRORS } from "../pack/pack.errors";
+import { DolynkClient } from '../../shared/integrations/dolynk/dolynk.client';
 
 export class PackService {
 
@@ -15,9 +16,9 @@ export class PackService {
     ownerId: string;
     deviceId: string;
     deviceName: string;
-    devicePassword: string;
+    devCode: string;
   }) {
-    const { ownerId, deviceId, deviceName, devicePassword } = data;
+    const { ownerId, deviceId, deviceName, devCode } = data;
 
     if (!mongoose.Types.ObjectId.isValid(ownerId)) {
       throw new AppError(PACK_ERRORS.INVALID_OWNER_ID);
@@ -37,11 +38,13 @@ export class PackService {
       throw new AppError(PACK_ERRORS.DEVICE_ALREADY_EXISTS);
     }
 
+    await DolynkClient.addDevice(deviceId, devCode);
+
     const pack = new Pack({
       ownerId,
       deviceId,
       deviceName,
-      devicePassword,
+      devCode,
     });
 
     return pack.save();

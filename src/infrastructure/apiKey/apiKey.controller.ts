@@ -8,7 +8,7 @@ import {
 import { sendSuccess } from "../../core/utils/responseHandler";
 
 import { asyncHandler } from "../../core/utils/asyncHandler";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { AUTH_ERRORS } from "../../modules/auth/auth.errors";
 
 // =============================

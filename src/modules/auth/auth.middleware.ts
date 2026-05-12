@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { COMMON_ERRORS } from "../../core/errors/common.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import {extractBearerToken}  from "./auth.utils";
