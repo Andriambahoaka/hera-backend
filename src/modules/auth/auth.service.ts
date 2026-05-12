@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 import User from "../user/user.model";
 
 import { SUCCESS } from "../../core/utils/messages.util";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 
 import { AUTH_ERRORS } from "./auth.errors";
 import * as emailService from "../../infrastructure/email/email.service";
@@ -166,7 +166,6 @@ export const refreshTokenService = async (refreshToken: string) => {
     );
   } catch (err: any) {
 
-    console.error("Refresh token verification failed:", err.message);
     throw new AppError(AUTH_ERRORS.INVALID_REFRESH_TOKEN);
   }
 

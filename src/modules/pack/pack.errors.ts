@@ -36,4 +36,43 @@ export const PACK_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "Invalid pack access payload",
   },
+  MISSING_REQUIRED_FIELDS: {
+    code: "MISSING_REQUIRED_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "ownerId, deviceId, deviceName and devCode are required",
+
+  },
+
+  DEVICE_PASSWORD_INCORRECT: {
+    code: "DEVICE_PASSWORD_INCORRECT",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Device password is incorrect",
+  },
+
+  DEVICE_OFFLINE: {
+    code: "DEVICE_OFFLINE",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Device is offline",
+  },
+
+  INVALID_DEVICE_PRODUCT: {
+    code: "INVALID_DEVICE_PRODUCT",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Device does not belong to this product",
+  },
+  DEVICE_NOT_EXIST: {
+    code: "DEVICE_NOT_EXIST",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Device does not exist",
+  },
+  DEVICE_ADD_FAILED: {
+    code: "DEVICE_ADD_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to add device",
+  },
+  DOLYNK_AUTH_FAILED: {
+  code: "DOLYNK_AUTH_FAILED",
+  status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+  message: "Failed to authenticate with Dolynk service",
+},
 };

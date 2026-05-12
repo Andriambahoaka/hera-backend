@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { AppError } from "../errors/AppError";
+import { AppError } from "../errors/app.error";
 import { HTTP_STATUS } from "../constants/httpStatus";
 
 export const mobileKeyAuth = (req: Request, res: Response, next: NextFunction): void => {

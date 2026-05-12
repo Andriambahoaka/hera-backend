@@ -1,5 +1,5 @@
 import { SignupDto } from "./dto/signup.dto";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import { USER_TYPE } from "../user/enums/userType.enum";
 

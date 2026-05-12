@@ -2,7 +2,7 @@ import crypto from "crypto";
 import ApiKey  from "./apiKey.model";
 import { AUTH_ERRORS } from "../../modules/auth/auth.errors";
 import { COMMON_ERRORS } from "../../core/errors/common.error";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 
 export const generateRandomToken = (size = 64) =>
   crypto.randomBytes(size).toString("hex");

@@ -2,9 +2,27 @@
 import { PackService } from './pack.service';
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { sendSuccess } from "../../core/utils/responseHandler";
+import { AppError } from '../../core/errors/app.error';
+import { PACK_ERRORS } from './pack.errors';
 
 export const addPack = asyncHandler(async (req, res) => {
-  const pack = await PackService.createPack(req.body);
+  const {
+    ownerId,
+    deviceId,
+    deviceName,
+    devCode,
+  } = req.body;
+
+  if (!ownerId || !deviceId || !deviceName || !devCode) {
+    throw new AppError(PACK_ERRORS.MISSING_REQUIRED_FIELDS);
+  }
+
+  const pack = await PackService.createPack({
+    ownerId,
+    deviceId,
+    deviceName,
+    devCode,
+  });
   return sendSuccess(res, pack);
 });
 

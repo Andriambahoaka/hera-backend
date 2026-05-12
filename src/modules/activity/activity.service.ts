@@ -1,5 +1,5 @@
 import Activity from "./activity.model";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { ACTIVITY_ERRORS } from "./activity.errors";
 
 export class ActivityService {

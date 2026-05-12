@@ -3,7 +3,7 @@ import ApiKey from '../../infrastructure/apiKey/apiKey.model';
 import { sendUnauthorizedError, sendForbiddenError, sendInternalError } from '../utils/responseHandler';
 import { extractBearerToken } from '../../modules/auth/auth.utils';
 import { AUTH_ERRORS } from '../../modules/auth/auth.errors';
-import { AppError } from '../errors/AppError';
+import { AppError } from '../errors/app.error';
 import { asyncHandler } from '../utils/asyncHandler';
 import { hashToken } from '../../infrastructure/apiKey/apiKey.service';
 

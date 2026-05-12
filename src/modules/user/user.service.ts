@@ -6,7 +6,7 @@ import UserType from "./userType.model";
 import PackAccess from "../pack/packAccess.model";
 import cloudinary from "../../core/config/cloudinary";
 
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { USER_ERRORS } from "./user.errors";
 import { SUCCESS } from "../../core/utils/messages.util";
 

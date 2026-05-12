@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { UserService } from "./user.service";
 import { sendSuccess } from "../../core/utils/responseHandler";
 import { asyncHandler } from "../../core/utils/asyncHandler";
-import { AppError } from "../../core/errors/AppError";
+import { AppError } from "../../core/errors/app.error";
 import { USER_ERRORS } from "./user.errors";
 import { COMMON_ERRORS } from "../../core/errors/common.error";
 import mongoose from "mongoose";
