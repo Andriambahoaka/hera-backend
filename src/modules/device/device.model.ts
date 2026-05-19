@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface IPack extends Document {
+export interface IDevice extends Document {
   ownerId: Types.ObjectId;
   deviceId: string;
   deviceName: string;
@@ -8,7 +8,7 @@ export interface IPack extends Document {
   urgencyNumber: string;
 }
 
-const packSchema = new Schema<IPack>(
+const deviceSchema = new Schema<IDevice>(
   {
     ownerId: {
       type: Schema.Types.ObjectId,
@@ -36,5 +36,5 @@ const packSchema = new Schema<IPack>(
   { timestamps: true }
 );
 
-export default mongoose.model<IPack>('Pack', packSchema);
+export default mongoose.model<IDevice>('Device', deviceSchema);
 

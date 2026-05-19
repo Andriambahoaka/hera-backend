@@ -1,42 +1,45 @@
 import mongoose from 'mongoose';
-import Pack from './pack.model';
-import PackAccess from './packAccess.model';
+import Pack from './device.model';
+import PackAccess from './deviceAccess.model';
 import User from '../user/user.model';
 
 import { AppError } from "../../core/errors/app.error";
-import { PACK_ERRORS } from "../pack/pack.errors";
+import { DEVICE_ERRORS } from "./device.errors";
 import { DolynkClient } from '../../shared/integrations/dolynk/dolynk.client';
+import { DolynkCrypto } from '../../shared/integrations/dolynk/dolynk.crypto';
 
-export class PackService {
+export class DeviceService {
 
   // =============================
   // CREATE
   // =============================
-  static async createPack(data: {
+  static async add(data: {
     ownerId: string;
     deviceId: string;
     deviceName: string;
     devCode: string;
   }) {
-    const { ownerId, deviceId, deviceName, devCode } = data;
+    let { ownerId, deviceId, deviceName, devCode } = data;
 
     if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-      throw new AppError(PACK_ERRORS.INVALID_OWNER_ID);
+      throw new AppError(DEVICE_ERRORS.INVALID_OWNER_ID);
     }
 
     const owner = await User.findById(ownerId);
     if (!owner) {
-      throw new AppError(PACK_ERRORS.OWNER_NOT_FOUND);
+      throw new AppError(DEVICE_ERRORS.OWNER_NOT_FOUND);
     }
 
     if (owner.userType === 2 || owner.userType === 3) {
-      throw new AppError(PACK_ERRORS.INVALID_OWNER_TYPE);
+      throw new AppError(DEVICE_ERRORS.INVALID_OWNER_TYPE);
     }
 
-    const existingPack = await Pack.findOne({ deviceId });
-    if (existingPack) {
-      throw new AppError(PACK_ERRORS.DEVICE_ALREADY_EXISTS);
+    const existingDevice = await Pack.findOne({ deviceId });
+    if (existingDevice) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_ALREADY_EXISTS);
     }
+
+    devCode = DolynkCrypto.encodeDevCode(devCode);
 
     await DolynkClient.addDevice(deviceId, devCode);
 
@@ -72,27 +75,27 @@ export class PackService {
     );
 
     if (!pack) {
-      throw new AppError(PACK_ERRORS.PACK_NOT_FOUND);
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
     }
 
     return pack;
   }
 
-  static async updatePack(
+  static async update(
     deviceId: string,
     fields: { urgencyNumber?: string; deviceName?: string }
   ) {
-    const pack = await Pack.findOneAndUpdate(
+    const device = await Pack.findOneAndUpdate(
       { deviceId },
       { $set: fields },
       { new: true }
     );
 
-    if (!pack) {
-      throw new AppError(PACK_ERRORS.PACK_NOT_FOUND);
+    if (!device) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
     }
 
-    return pack;
+    return device;
   }
 
   // =============================
@@ -108,16 +111,16 @@ export class PackService {
   }
 
   static async findByDeviceId(deviceId: string) {
-    const pack = await Pack.findOne({ deviceId });
+    const device = await Pack.findOne({ deviceId });
 
-    if (!pack) {
-      throw new AppError(PACK_ERRORS.PACK_NOT_FOUND);
+    if (!device) {
+      throw new AppError( DEVICE_ERRORS.DEVICE_NOT_FOUND);
     }
 
-    return pack;
+    return device;
   }
 
-  static async findAllPackAccessByUser(userId: string) {
+  static async findAllAccessByUser(userId: string) {
     return PackAccess.find({ userId })
       .populate("packId")
       .lean();
@@ -127,14 +130,14 @@ export class PackService {
   // PACK ACCESS
   // =============================
 
-  static async addOrUpdatePackAccess(accessList: any[]) {
+  static async addOrUpdateAccess(accessList: any[]) {
     const results = [];
 
     for (const item of accessList) {
       const { userId, packId, hasAccess, access } = item;
 
       if (!userId || !packId || typeof hasAccess !== "boolean") {
-        throw new AppError(PACK_ERRORS.INVALID_PACK_ACCESS_PAYLOAD);
+        throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
       }
 
       let packAccess = await PackAccess.findOne({ userId, packId });
@@ -151,5 +154,13 @@ export class PackService {
     }
 
     return results;
+  }
+
+  static async setAreaArmMode(deviceId: string, armingMode: string) {
+    return await DolynkClient.setAreaArmMode(deviceId, armingMode);
+  }
+
+  static async getAreaArmMode(deviceId: string) {
+    return await DolynkClient.getAreaArmMode(deviceId);
   }
 }

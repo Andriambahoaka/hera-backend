@@ -1,12 +1,6 @@
 import { HTTP_STATUS } from "../../core/constants/httpStatus";
 
 export const NOTIFICATION_ERRORS = {
-  PACK_NOT_FOUND: {
-    code: "PACK_NOT_FOUND",
-    status: HTTP_STATUS.NOT_FOUND,
-    message: "Pack not found",
-  },
-
   USER_OR_TOKEN_NOT_FOUND: {
     code: "USER_OR_TOKEN_NOT_FOUND",
     status: HTTP_STATUS.NOT_FOUND,

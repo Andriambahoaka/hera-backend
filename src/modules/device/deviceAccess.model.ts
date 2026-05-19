@@ -5,9 +5,9 @@ export interface IAccess {
   isSelected: boolean;
 }
 
-export interface IPackAccess extends Document {
+export interface IDeviceAccess extends Document {
   userId: Types.ObjectId;
-  packId: Types.ObjectId;
+  deviceId: Types.ObjectId;
   hasAccess: boolean;
   access: IAccess[];
 }
@@ -20,15 +20,15 @@ const accessSchema = new Schema<IAccess>(
   { _id: false } 
 );
 
-const packAccessSchema = new Schema<IPackAccess>(
+const deviceAccessSchema = new Schema<IDeviceAccess>(
   {
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    packId: {
+    deviceId: {
       type: Schema.Types.ObjectId,
-      ref: 'Pack',
+      ref: 'Device',
     },
     hasAccess: {
       type: Boolean,
@@ -42,7 +42,7 @@ const packAccessSchema = new Schema<IPackAccess>(
   { timestamps: true }
 );
 
-export default mongoose.model<IPackAccess>('PackAccess', packAccessSchema);
+export default mongoose.model<IDeviceAccess>('DeviceAccess', deviceAccessSchema);
 
 
 

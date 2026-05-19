@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from "../../core/constants/httpStatus";
 
-export const PACK_ERRORS = {
+export const DEVICE_ERRORS = {
   INVALID_OWNER_ID: {
     code: "INVALID_OWNER_ID",
     status: HTTP_STATUS.BAD_REQUEST,
@@ -16,7 +16,7 @@ export const PACK_ERRORS = {
   INVALID_OWNER_TYPE: {
     code: "INVALID_OWNER_TYPE",
     status: HTTP_STATUS.FORBIDDEN,
-    message: "User is not allowed to own a pack",
+    message: "User is not allowed to own a device",
   },
 
   DEVICE_ALREADY_EXISTS: {
@@ -25,22 +25,31 @@ export const PACK_ERRORS = {
     message: "Device already exists",
   },
 
-  PACK_NOT_FOUND: {
-    code: "PACK_NOT_FOUND",
+  DEVICE_NOT_FOUND: {
+    code: "DEVICE_NOT_FOUND",
     status: HTTP_STATUS.NOT_FOUND,
-    message: "Pack not found",
+    message: "Device not found",
   },
 
-  INVALID_PACK_ACCESS_PAYLOAD: {
-    code: "INVALID_PACK_ACCESS_PAYLOAD",
+  INVALID_DEVICE_ACCESS_PAYLOAD: {
+    code: "INVALID_DEVICE_ACCESS_PAYLOAD",
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Invalid pack access payload",
+    message: "Invalid device access payload",
   },
   MISSING_REQUIRED_FIELDS: {
     code: "MISSING_REQUIRED_FIELDS",
     status: HTTP_STATUS.BAD_REQUEST,
     message: "ownerId, deviceId, deviceName and devCode are required",
-
+  },
+    MISSING_ARMING_REQUIRED_FIELDS: {
+    code: "MISSING_ARMING_REQUIRED_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "deviceId and armingMode are required",
+  },
+      MISSING_DEVICE_ID_FIELD: {
+    code: "MISSING_DEVICE_ID_FIELD",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "deviceId is required",
   },
 
   DEVICE_PASSWORD_INCORRECT: {
@@ -69,6 +78,16 @@ export const PACK_ERRORS = {
     code: "DEVICE_ADD_FAILED",
     status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     message: "Failed to add device",
+  },
+  DEVICE_SET_AREA_ARM_FAILED:{
+    code: "DEVICE_SET_AREA_ARM_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to set area arm mode for device",
+  },
+  DEVICE_GET_AREA_ARM_FAILED:{
+    code: "DEVICE_GET_AREA_ARM_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to get area arm mode for device",
   },
   DOLYNK_AUTH_FAILED: {
   code: "DOLYNK_AUTH_FAILED",
