@@ -2,7 +2,7 @@ import axios from "axios";
 import { DOLYNK_CONFIG } from "../../config/dolynk.config";
 import { DolynkHeaders } from "./dolynk.headers";
 
-import { PACK_ERRORS } from "../../../modules/pack/pack.errors";
+import { DEVICE_ERRORS } from "../../../modules/device/device.errors";
 import { AppError } from "../../../core/errors/app.error";
 
 let cachedToken: string | null = null;
@@ -32,7 +32,7 @@ export class DolynkAuthService {
       const data = response.data;
 
       if (!data.success || !data.data?.appAccessToken) {
-        throw new AppError(PACK_ERRORS.DOLYNK_AUTH_FAILED);
+        throw new AppError(DEVICE_ERRORS.DOLYNK_AUTH_FAILED);
       }
 
       const token: string = data.data.appAccessToken;
@@ -45,7 +45,7 @@ export class DolynkAuthService {
 
       return token;
     } catch (error) {
-      throw new AppError(PACK_ERRORS.DOLYNK_AUTH_FAILED);
+      throw new AppError(DEVICE_ERRORS.DOLYNK_AUTH_FAILED);
     }
   }
 }

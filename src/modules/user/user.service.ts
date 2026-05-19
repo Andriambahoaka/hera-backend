@@ -3,7 +3,7 @@ import streamifier from "streamifier";
 
 import User, { IUser } from "./user.model";
 import UserType from "./userType.model";
-import PackAccess from "../pack/packAccess.model";
+import PackAccess from "../device/deviceAccess.model";
 import cloudinary from "../../core/config/cloudinary";
 
 import { AppError } from "../../core/errors/app.error";
@@ -107,9 +107,9 @@ export class UserService {
 
         if (!acc[uid]) acc[uid] = [];
 
-        const { packId, ...rest } = pa;
+        const { deviceId, ...rest } = pa;
 
-        acc[uid].push({ ...rest, pack: packId });
+        acc[uid].push({ ...rest, pack: deviceId });
 
         return acc;
       },

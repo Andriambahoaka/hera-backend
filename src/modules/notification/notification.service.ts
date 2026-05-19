@@ -1,7 +1,7 @@
 
 
 import admin from "firebase-admin";
-import Pack from "../pack/pack.model";
+import Device from "../device/device.model";
 import Notification from "./notification.model";
 import User from "../user/user.model";
 
@@ -10,33 +10,34 @@ import { NOTIFICATION_ERRORS } from "./notification.errors";
 
 import { getNotificationContent} from "./notification.util";
 import { CreateNotificationDto} from "./notification.types";
+import { DEVICE_ERRORS } from "../device/device.errors";
 
 export class NotificationService {
 
   static async createAndSendNotification(payload: CreateNotificationDto) {
     const { deviceId, userName, ...notificationData } = payload;
 
-    const pack = await Pack.findOne({ deviceId }).select("_id deviceName ownerId");
-    if (!pack) {
-      throw new AppError(NOTIFICATION_ERRORS.PACK_NOT_FOUND);
+    const device = await Device.findOne({ deviceId }).select("_id deviceName ownerId");
+    if (!device) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
     }
 
     const notification = await Notification.create({
       ...notificationData,
       deviceId,
       pack: {
-        _id: pack._id,
-        deviceName: pack.deviceName,
-        ownerId: pack.ownerId,
+        _id: device._id,
+        deviceName: device.deviceName,
+        ownerId: device.ownerId,
       },
     });
 
-    const user = await User.findById(pack.ownerId);
+    const user = await User.findById(device.ownerId);
     if (!user || !user.devicesToken || user.devicesToken.length === 0) {
       throw new AppError(NOTIFICATION_ERRORS.USER_OR_TOKEN_NOT_FOUND);
     }
     
-   const { title, body } = getNotificationContent(notification.msgType ?? "", pack.deviceName, userName);
+   const { title, body } = getNotificationContent(notification.msgType ?? "", device.deviceName, userName);
 
     const message = {
       notification: { title, body },
@@ -44,8 +45,8 @@ export class NotificationService {
         id: notification._id.toString(),
         msgType: notification.msgType ?? "",
         deviceId: notification.deviceId ?? "",
-        deviceName: pack.deviceName,
-        ownerId: pack.ownerId.toString(),
+        deviceName: device.deviceName,
+        ownerId: device.ownerId.toString(),
         createdAt: notification.createdAt!.toISOString(),
       },
       tokens: user.devicesToken,
