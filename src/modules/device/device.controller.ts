@@ -4,6 +4,7 @@ import { asyncHandler } from "../../core/utils/asyncHandler";
 import { sendSuccess } from "../../core/utils/responseHandler";
 import { AppError } from '../../core/errors/app.error';
 import { DEVICE_ERRORS } from './device.errors';
+import {COMMON_ERRORS} from '../../core/errors/common.error';
 
 export const add = asyncHandler(async (req, res) => {
   const {
@@ -67,9 +68,12 @@ export const addOrUpdateAccess = asyncHandler(async (req, res) => {
   return sendSuccess(res, results);
 });
 
-export const findAllAccessByUser = asyncHandler(async (req, res) => {
-  const userId = req.params.userId as string;
-  const accessList = await DeviceService.findAllAccessByUser(userId);
+export const findAllAccess = asyncHandler(async (req, res) => {
+  const userId = req.auth?.userId;
+  console.log("Finding all access for userId:", userId);
+  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
+
+  const accessList = await DeviceService.findAllAccess(userId);
   return sendSuccess(res, accessList);
 });
 

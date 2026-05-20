@@ -174,6 +174,7 @@ export const refreshTokenService = async (refreshToken: string) => {
     throw new AppError(USER_ERRORS.USER_NOT_FOUND);
   }
 
+
   const newAccessToken = generateToken(
     user._id,
     JWT_SECRET,

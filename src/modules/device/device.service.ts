@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Pack from './device.model';
+import Device from './device.model';
 import PackAccess from './deviceAccess.model';
 import User from '../user/user.model';
 
@@ -7,6 +7,10 @@ import { AppError } from "../../core/errors/app.error";
 import { DEVICE_ERRORS } from "./device.errors";
 import { DolynkClient } from '../../shared/integrations/dolynk/dolynk.client';
 import { DolynkCrypto } from '../../shared/integrations/dolynk/dolynk.crypto';
+import { USER_TYPE } from '../user/enums/userType.enum';
+import { fromDevice } from './utils/deviceAccessFactory';
+import { COMMON_ERRORS } from '../../core/errors/common.error';
+import { USER_ERRORS } from '../user/user.errors';
 
 export class DeviceService {
 
@@ -34,16 +38,16 @@ export class DeviceService {
       throw new AppError(DEVICE_ERRORS.INVALID_OWNER_TYPE);
     }
 
-    const existingDevice = await Pack.findOne({ deviceId });
+    const existingDevice = await Device.findOne({ deviceId });
     if (existingDevice) {
       throw new AppError(DEVICE_ERRORS.DEVICE_ALREADY_EXISTS);
     }
 
     devCode = DolynkCrypto.encodeDevCode(devCode);
 
-    await DolynkClient.addDevice(deviceId, devCode);
+    //await DolynkClient.addDevice(deviceId, devCode);
 
-    const pack = new Pack({
+    const pack = new Device({
       ownerId,
       deviceId,
       deviceName,
@@ -62,13 +66,13 @@ export class DeviceService {
   ) {
     return Promise.all(
       updates.map(({ deviceId, deviceName }) =>
-        Pack.updateOne({ deviceId }, { $set: { deviceName } })
+        Device.updateOne({ deviceId }, { $set: { deviceName } })
       )
     );
   }
 
   static async updateUrgencyNumber(deviceId: string, urgencyNumber?: string) {
-    const pack = await Pack.findOneAndUpdate(
+    const pack = await Device.findOneAndUpdate(
       { deviceId },
       { urgencyNumber: urgencyNumber ?? "17" },
       { new: true }
@@ -85,7 +89,7 @@ export class DeviceService {
     deviceId: string,
     fields: { urgencyNumber?: string; deviceName?: string }
   ) {
-    const device = await Pack.findOneAndUpdate(
+    const device = await Device.findOneAndUpdate(
       { deviceId },
       { $set: fields },
       { new: true }
@@ -103,28 +107,51 @@ export class DeviceService {
   // =============================
 
   static async findAll() {
-    return Pack.find();
+    return Device.find();
   }
 
   static async findAllByOwner(ownerId: string) {
-    return Pack.find({ ownerId });
+    return Device.find({ ownerId });
   }
 
   static async findByDeviceId(deviceId: string) {
-    const device = await Pack.findOne({ deviceId });
+    const device = await Device.findOne({ deviceId });
 
     if (!device) {
-      throw new AppError( DEVICE_ERRORS.DEVICE_NOT_FOUND);
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
     }
 
     return device;
   }
 
-  static async findAllAccessByUser(userId: string) {
+static async findAllAccess(userId: string) {
+  const user = await User.findById(userId).select("ownerId userType").lean();
+  if (!user) {
+    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+  }
+
+  if (user.userType === USER_TYPE.MEMBER) {
+    console.log("MEMBER", userId);
     return PackAccess.find({ userId })
-      .populate("packId")
+      .populate("deviceId")
       .lean();
   }
+
+  if (user.userType === USER_TYPE.OWNER) {
+    console.log("OWNER", userId);
+    const devices = await Device.find({ ownerId: userId }).lean();
+    return devices.map(device => fromDevice(device, userId));
+  }
+
+  if (user.userType === USER_TYPE.ADMIN) {
+    const devices = await Device.find({ ownerId: user.ownerId }).lean();
+    return devices.map(device => fromDevice(device, userId));
+  }
+
+  // Optional: fallback if userType is unexpected
+  return [];
+}
+
 
   // =============================
   // PACK ACCESS
@@ -134,22 +161,22 @@ export class DeviceService {
     const results = [];
 
     for (const item of accessList) {
-      const { userId, packId, hasAccess, access } = item;
+      const { userId, deviceId, hasAccess, access } = item;
 
-      if (!userId || !packId || typeof hasAccess !== "boolean") {
+      if (!userId || !deviceId || typeof hasAccess !== "boolean") {
         throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
       }
 
-      let packAccess = await PackAccess.findOne({ userId, packId });
+      let packAccess = await PackAccess.findOne({ userId, deviceId });
 
       if (packAccess) {
         packAccess.hasAccess = hasAccess;
         packAccess.access = access;
         await packAccess.save();
-        results.push({ status: "updated", packId });
+        results.push({ status: "updated", deviceId });
       } else {
-        await PackAccess.create({ userId, packId, hasAccess, access });
-        results.push({ status: "created", packId });
+        await PackAccess.create({ userId, deviceId, hasAccess, access });
+        results.push({ status: "created", deviceId });
       }
     }
 

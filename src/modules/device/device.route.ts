@@ -7,10 +7,13 @@ const router = Router();
 
 router.post('/', apiKeyAuth, deviceController.add);
 router.get('/', apiKeyAuth, deviceController.findAll);
+
+router.post('/access', deviceController.addOrUpdateAccess);
+router.get('/access', requireAuth,deviceController.findAllAccess);
+
 router.get('/owner/:ownerId', deviceController.findAllByOwner);
 router.get('/:deviceId', deviceController.findByDeviceId);
-router.post('/access', deviceController.addOrUpdateAccess);
-router.get('/access/:userId', deviceController.findAllAccessByUser);
+
 router.put('/urgency-number', deviceController.editUrgencyNumber);
 router.put('/', deviceController.update);
 router.put('/names', deviceController.updateDeviceNames);
