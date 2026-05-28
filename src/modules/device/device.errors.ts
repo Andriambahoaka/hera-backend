@@ -41,15 +41,20 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "ownerId, deviceId, deviceName and devCode are required",
   },
-    MISSING_ARMING_REQUIRED_FIELDS: {
+  MISSING_ARMING_REQUIRED_FIELDS: {
     code: "MISSING_ARMING_REQUIRED_FIELDS",
     status: HTTP_STATUS.BAD_REQUEST,
     message: "deviceId and isArmed are required",
   },
-      MISSING_DEVICE_ID_FIELD: {
+  MISSING_DEVICE_ID_FIELD: {
     code: "MISSING_DEVICE_ID_FIELD",
     status: HTTP_STATUS.BAD_REQUEST,
     message: "deviceId is required",
+  },
+  MISSING_PIRCAM_REQUIRED_FIELDS: {
+    code: "MISSING_PIRCAM_REQUIRED_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "deviceId, accessoryId, and channel are required",
   },
 
   DEVICE_PASSWORD_INCORRECT: {
@@ -79,25 +84,29 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     message: "Failed to add device",
   },
-  DEVICE_SET_AREA_ARM_FAILED:{
+  DEVICE_SET_AREA_ARM_FAILED: {
     code: "DEVICE_SET_AREA_ARM_FAILED",
     status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     message: "Failed to set area arm mode for device",
   },
-  DEVICE_GET_AREA_ARM_FAILED:{
+  DEVICE_GET_AREA_ARM_FAILED: {
     code: "DEVICE_GET_AREA_ARM_FAILED",
     status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     message: "Failed to get area arm mode for device",
   },
   DOLYNK_AUTH_FAILED: {
-  code: "DOLYNK_AUTH_FAILED",
-  status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-  message: "Failed to authenticate with Dolynk service",
-},
+    code: "DOLYNK_AUTH_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to authenticate with Dolynk service",
+  },
   DEVICE_GET_ACCESSORIES_INFO_FAILED: {
-  code: "DEVICE_GET_ACCESSORIES_INFO_FAILED",
-  status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-  message: "Failed to get accessories info for device",
-},
-
+    code: "DEVICE_GET_ACCESSORIES_INFO_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to get accessories info for device",
+  },
+  DEVICE_GET_PIR_CAM_SNAP_URL_FAILED: {
+    code: "DEVICE_GET_PIR_CAM_SNAP_URL_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to get PIR camera snapshot URL for device",
+  }
 };

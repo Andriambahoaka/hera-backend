@@ -209,4 +209,10 @@ static async getAreaArmMode(deviceId: string) {
 static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
   return await DolynkClient.getAccessoriesInfo(deviceId,accessoriesId);
 }
+
+static async getPirCamSnapUrl(deviceId: string,accessoryId: string,channel: number)  {
+  const response = await  DolynkClient.getPirCamSnapUrl(deviceId,accessoryId,channel);
+  const picUrl = response.data.picUrl;
+  return { picUrl };
+}
 }

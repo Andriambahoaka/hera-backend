@@ -13,3 +13,7 @@ export interface AreaArmMode {
 export interface GetAreaArmModeData {
   armModes: AreaArmMode[];
 }
+
+export interface GetPicCamSnapUrlData {
+  picUrl: string;
+}
