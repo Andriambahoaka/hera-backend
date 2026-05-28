@@ -114,3 +114,13 @@ export const getAccessoriesInfo = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, result);
 });
+
+export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
+  const { deviceId, accessoryId, channel } = req.body;
+  if (!deviceId || !accessoryId || !channel) {
+    throw new AppError(DEVICE_ERRORS.MISSING_PIRCAM_REQUIRED_FIELDS);
+  }
+  const result = await DeviceService.getPirCamSnapUrl(deviceId, accessoryId, channel);
+
+  return sendSuccess(res, result);
+});

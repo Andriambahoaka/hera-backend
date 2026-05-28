@@ -21,5 +21,6 @@ router.put('/names', deviceController.updateDeviceNames);
 router.post('/set-area-arm', requireAuth,deviceController.setAreaArmMode);
 router.post('/get-area-arm', deviceController.getAreaArmMode);
  router.post('/get-accessories-info', deviceController.getAccessoriesInfo);
+ router.post('/get-screenshot-url', deviceController.getPirCamSnapUrl);
 
 export default router;

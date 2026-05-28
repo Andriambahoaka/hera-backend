@@ -3,7 +3,7 @@ import { DEVICE_ERRORS } from "../../../modules/device/device.errors";
 import Device from "../../../modules/device/device.model";
 
 import { DolynkApi } from "./dolynk.api";
-import {   DolynkResponse,GetAreaArmModeData } from "./dolynk.types";
+import {   DolynkResponse,GetAreaArmModeData, GetPicCamSnapUrlData } from "./dolynk.types";
 
 export class DolynkClient {
 static async addDevice(deviceId: string, deviceCode: string) {
@@ -77,5 +77,14 @@ static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
   );
 }
 
-
+static async getPirCamSnapUrl(deviceId: string,accessoryId: string,channel: number): Promise<DolynkResponse<GetPicCamSnapUrlData>> {
+  return DolynkApi.postRequest(
+    "alarm/getPirCamSnapUrl",
+    { deviceId, accessoryId, channel },
+    {
+      IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
+      default: new AppError(DEVICE_ERRORS.DEVICE_GET_PIR_CAM_SNAP_URL_FAILED)
+    }
+  );
+}
 }
