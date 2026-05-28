@@ -70,7 +70,6 @@ export const addOrUpdateAccess = asyncHandler(async (req, res) => {
 
 export const findAllAccess = asyncHandler(async (req, res) => {
   const userId = req.auth?.userId;
-  console.log("Finding all access for userId:", userId);
   if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
 
   const accessList = await DeviceService.findAllAccess(userId);
@@ -79,12 +78,12 @@ export const findAllAccess = asyncHandler(async (req, res) => {
 
 
 export const setAreaArmMode = asyncHandler(async (req, res) => {
-  const { deviceId, armingMode } = req.body;
-  if (!deviceId || !armingMode) {
+  const { deviceId, isArmed } = req.body;
+  if (!deviceId || typeof isArmed !== 'boolean') {
     throw new AppError(DEVICE_ERRORS.MISSING_ARMING_REQUIRED_FIELDS);
   }
 
-  const result = await DeviceService.setAreaArmMode(deviceId, armingMode);
+  const result = await DeviceService.setAreaArmMode(deviceId, isArmed);
 
   return sendSuccess(res, result);
 });
@@ -96,6 +95,22 @@ export const getAreaArmMode = asyncHandler(async (req, res) => {
   }
 
   const result = await DeviceService.getAreaArmMode(deviceId);
+
+  return sendSuccess(res, result);
+});
+
+export const getAccessoriesInfo = asyncHandler(async (req, res) => {
+  const { deviceId, accessoryId} = req.body;
+  if (!deviceId) {
+    throw new AppError(DEVICE_ERRORS.MISSING_DEVICE_ID_FIELD);
+  }
+ const accessoriesId: string[] = [];
+
+  if (accessoryId) {
+    accessoriesId.push(accessoryId);
+  }
+
+  const result = await DeviceService.getAccessoriesInfo(deviceId,accessoriesId);
 
   return sendSuccess(res, result);
 });

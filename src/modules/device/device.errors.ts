@@ -44,7 +44,7 @@ export const DEVICE_ERRORS = {
     MISSING_ARMING_REQUIRED_FIELDS: {
     code: "MISSING_ARMING_REQUIRED_FIELDS",
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "deviceId and armingMode are required",
+    message: "deviceId and isArmed are required",
   },
       MISSING_DEVICE_ID_FIELD: {
     code: "MISSING_DEVICE_ID_FIELD",
@@ -60,7 +60,7 @@ export const DEVICE_ERRORS = {
 
   DEVICE_OFFLINE: {
     code: "DEVICE_OFFLINE",
-    status: HTTP_STATUS.BAD_REQUEST,
+    status: HTTP_STATUS.CONFLICT,
     message: "Device is offline",
   },
 
@@ -94,4 +94,10 @@ export const DEVICE_ERRORS = {
   status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
   message: "Failed to authenticate with Dolynk service",
 },
+  DEVICE_GET_ACCESSORIES_INFO_FAILED: {
+  code: "DEVICE_GET_ACCESSORIES_INFO_FAILED",
+  status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+  message: "Failed to get accessories info for device",
+},
+
 };

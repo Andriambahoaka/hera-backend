@@ -3,7 +3,7 @@ import { IDevice } from "../device.model";
 export function fromDevice(device: IDevice, userId: string) {
   return {
     userId,
-    deviceId: device._id,
+    device: device,
     hasAccess: true,
     access: [], 
   };
