@@ -139,16 +139,16 @@ static async findAllAccess(userId: string) {
 
   if (user.userType === USER_TYPE.OWNER) {
     console.log("OWNER", userId);
-    const devices = await Device.find({ ownerId: userId }).lean();
+    const devices = await Device.find({ ownerId: userId })
+    .lean();
     return devices.map(device => fromDevice(device, userId));
   }
 
   if (user.userType === USER_TYPE.ADMIN) {
-    const devices = await Device.find({ ownerId: user.ownerId }).lean();
+    const devices = await Device.find({ ownerId: user.ownerId })
+    .lean();
     return devices.map(device => fromDevice(device, userId));
   }
-
-  // Optional: fallback if userType is unexpected
   return [];
 }
 
@@ -183,11 +183,30 @@ static async findAllAccess(userId: string) {
     return results;
   }
 
-  static async setAreaArmMode(deviceId: string, armingMode: string) {
-    return await DolynkClient.setAreaArmMode(deviceId, armingMode);
+  static async setAreaArmMode(deviceId: string, isArmed: boolean) {
+    return await DolynkClient.setAreaArmMode(deviceId, isArmed);
   }
 
-  static async getAreaArmMode(deviceId: string) {
-    return await DolynkClient.getAreaArmMode(deviceId);
+
+static async getAreaArmMode(deviceId: string) {
+  const response = await DolynkClient.getAreaArmMode(deviceId);
+
+  const armModes = response.data.armModes;
+
+  if (!Array.isArray(armModes) || armModes.length === 0) {
+    throw new AppError(DEVICE_ERRORS.DEVICE_GET_AREA_ARM_FAILED);
   }
+
+  const isArmed = armModes.some(
+    (area) => area.mode === "T"
+  );
+
+  return {
+    isArmed,
+  };
+}
+
+static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
+  return await DolynkClient.getAccessoriesInfo(deviceId,accessoriesId);
+}
 }
