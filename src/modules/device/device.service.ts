@@ -45,7 +45,7 @@ export class DeviceService {
 
     devCode = DolynkCrypto.encodeDevCode(devCode);
 
-    //await DolynkClient.addDevice(deviceId, devCode);
+    await DolynkClient.addDevice(deviceId, devCode);
 
     const pack = new Device({
       ownerId,
