@@ -20,6 +20,7 @@ static async addDevice(deviceId: string, deviceCode: string) {
       IDV001: new AppError(DEVICE_ERRORS.DEVICE_NOT_EXIST),
       IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
       IDV006: new AppError(DEVICE_ERRORS.DEVICE_PASSWORD_INCORRECT),
+      IDV0034: new AppError(DEVICE_ERRORS.INVALID_CREDENTIALS),
       PRM0132: new AppError(DEVICE_ERRORS.INVALID_DEVICE_PRODUCT),
       default: new AppError(DEVICE_ERRORS.DEVICE_ADD_FAILED)
     }

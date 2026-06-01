@@ -62,6 +62,11 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "Device password is incorrect",
   },
+  INVALID_CREDENTIALS: {
+    code: "INVALID_CREDENTIALS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Invalid device ID or device password (devCode).",
+  },
 
   DEVICE_OFFLINE: {
     code: "DEVICE_OFFLINE",
