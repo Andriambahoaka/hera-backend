@@ -18,11 +18,17 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.FORBIDDEN,
     message: "User is not allowed to own a device",
   },
-
+  
   DEVICE_ALREADY_EXISTS: {
     code: "DEVICE_ALREADY_EXISTS",
     status: HTTP_STATUS.CONFLICT,
     message: "Device already exists",
+  },
+
+  NAME_ALREADY_EXISTS: {
+    code: "NAME_ALREADY_EXISTS",
+    status: HTTP_STATUS.CONFLICT,
+    message: "Device name already exists",
   },
 
   DEVICE_NOT_FOUND: {

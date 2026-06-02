@@ -43,6 +43,11 @@ export class DeviceService {
       throw new AppError(DEVICE_ERRORS.DEVICE_ALREADY_EXISTS);
     }
 
+    const existingName = await Device.findOne({ deviceName, ownerId });
+    if (existingName) {
+      throw new AppError(DEVICE_ERRORS.NAME_ALREADY_EXISTS);
+    }
+
     devCode = DolynkCrypto.encodeDevCode(devCode);
 
     await DolynkClient.addDevice(deviceId, devCode);
