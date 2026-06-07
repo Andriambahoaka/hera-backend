@@ -4,7 +4,8 @@ import { asyncHandler } from "../../core/utils/asyncHandler";
 import { sendSuccess } from "../../core/utils/responseHandler";
 import { AppError } from '../../core/errors/app.error';
 import { DEVICE_ERRORS } from './device.errors';
-import {COMMON_ERRORS} from '../../core/errors/common.error';
+import { COMMON_ERRORS } from '../../core/errors/common.error';
+import { Request } from "express";
 
 export const add = asyncHandler(async (req, res) => {
   const {
@@ -48,8 +49,8 @@ export const findByDeviceId = asyncHandler(async (req, res) => {
 
 export const update = asyncHandler(async (req, res) => {
   const { deviceId, ...fields } = req.body;
-  const pack = await DeviceService.update(deviceId, fields);
-  return sendSuccess(res, pack);
+  const device = await DeviceService.update(deviceId, fields);
+  return sendSuccess(res, device);
 });
 
 export const findAll = asyncHandler(async (_req, res) => {
@@ -99,25 +100,55 @@ export const getAreaArmMode = asyncHandler(async (req, res) => {
   return sendSuccess(res, result);
 });
 
-export const getAccessoriesInfo = asyncHandler(async (req, res) => {
-  const { deviceId, accessoryId} = req.body;
+type AccessoryRequest = {
+  deviceId: string;
+  accessoriesId: string[];
+};
+
+const getAccessoryRequestData = (req: Request): AccessoryRequest => {
+  const { deviceId, accessoryId } = req.body;
+
   if (!deviceId) {
     throw new AppError(DEVICE_ERRORS.MISSING_DEVICE_ID_FIELD);
   }
- const accessoriesId: string[] = [];
 
-  if (accessoryId) {
-    accessoriesId.push(accessoryId);
-  }
+  return {
+    deviceId,
+    accessoriesId: accessoryId ? [accessoryId] : [],
+  };
+};
 
-  const result = await DeviceService.getAccessoriesInfo(deviceId,accessoriesId);
+export const getAccessoriesInfo = asyncHandler(async (req, res) => {
+  const { deviceId, accessoriesId } = getAccessoryRequestData(req);
+
+  const result = await DeviceService.getAccessoriesInfo(
+    deviceId,
+    accessoriesId,
+  );
 
   return sendSuccess(res, result);
 });
 
+export const getAccessoryStatus = asyncHandler(async (req, res) => {
+  const { deviceId, accessoriesId } = getAccessoryRequestData(req);
+
+  if (accessoriesId.length === 0) {
+    throw new AppError(DEVICE_ERRORS.MISSING_ACCESSORY_ID_FIELD);
+  }
+
+  const result = await DeviceService.getAccessoryStatus(
+    deviceId,
+    accessoriesId,
+  );
+
+  return sendSuccess(res, result);
+});
+
+
+
 export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
   const { deviceId, accessoryId, channel } = req.body;
-  if (!deviceId || !accessoryId || !channel) {
+  if (!deviceId || !accessoryId || channel == null) {
     throw new AppError(DEVICE_ERRORS.MISSING_PIRCAM_REQUIRED_FIELDS);
   }
   const result = await DeviceService.getPirCamSnapUrl(deviceId, accessoryId, channel);

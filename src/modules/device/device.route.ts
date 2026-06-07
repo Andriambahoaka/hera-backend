@@ -9,7 +9,7 @@ router.post('/', apiKeyAuth, deviceController.add);
 router.get('/', apiKeyAuth, deviceController.findAll);
 
 router.post('/access', deviceController.addOrUpdateAccess);
-router.get('/access', requireAuth,deviceController.findAllAccess);
+router.get('/access', requireAuth, deviceController.findAllAccess);
 
 router.get('/owner/:ownerId', deviceController.findAllByOwner);
 router.get('/:deviceId', deviceController.findByDeviceId);
@@ -18,9 +18,10 @@ router.put('/urgency-number', deviceController.editUrgencyNumber);
 router.put('/', deviceController.update);
 router.put('/names', deviceController.updateDeviceNames);
 
-router.post('/set-area-arm', requireAuth,deviceController.setAreaArmMode);
+router.post('/set-area-arm', requireAuth, deviceController.setAreaArmMode);
 router.post('/get-area-arm', deviceController.getAreaArmMode);
- router.post('/get-accessories-info', deviceController.getAccessoriesInfo);
- router.post('/get-screenshot-url', deviceController.getPirCamSnapUrl);
+router.post('/get-accessories-info', deviceController.getAccessoriesInfo);
+router.post('/get-accessory-status', deviceController.getAccessoryStatus);
+router.post('/get-screenshot-url', deviceController.getPirCamSnapUrl);
 
 export default router;

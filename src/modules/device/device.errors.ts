@@ -120,4 +120,10 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     message: "Failed to get PIR camera snapshot URL for device",
   }
+,
+  MISSING_ACCESSORY_ID_FIELD: {
+    code: "MISSING_ACCESSORY_ID_FIELD",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "accessoryId field is required",
+  }
 };
