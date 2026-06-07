@@ -14,6 +14,14 @@ export interface GetAreaArmModeData {
   armModes: AreaArmMode[];
 }
 
+export interface AccessoryInfo {
+  accessoryInfos : [];
+}
+
+export interface AccessoryStatus {
+  accessoryStatus : AreaArmMode[];
+}
+
 export interface GetPicCamSnapUrlData {
   picUrl: string;
 }

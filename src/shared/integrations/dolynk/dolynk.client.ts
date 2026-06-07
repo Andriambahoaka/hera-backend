@@ -1,9 +1,10 @@
 import { AppError } from "../../../core/errors/app.error";
+import { COMMON_ERRORS } from "../../../core/errors/common.error";
 import { DEVICE_ERRORS } from "../../../modules/device/device.errors";
 import Device from "../../../modules/device/device.model";
 
 import { DolynkApi } from "./dolynk.api";
-import {   DolynkResponse,GetAreaArmModeData, GetPicCamSnapUrlData } from "./dolynk.types";
+import {   AccessoryInfo, AccessoryStatus, DolynkResponse,GetAreaArmModeData, GetPicCamSnapUrlData } from "./dolynk.types";
 
 export class DolynkClient {
 static async addDevice(deviceId: string, deviceCode: string) {
@@ -31,7 +32,10 @@ static async setAreaArmMode(deviceId: string, isArmed: boolean) {
   const device = await Device.findOne({ deviceId }, { devCode: 1 });
   const encodedDevCode = device?.devCode;
   const areaIds = Array.from({ length: 32 }, (_, i) => i + 1);
+  console.log(isArmed);
   const armingMode = isArmed ? "T" : "D";
+  console.log(armingMode);
+
 
   const payload = {
     deviceId,
@@ -67,13 +71,23 @@ static async getAreaArmMode(deviceId: string) : Promise<DolynkResponse<GetAreaAr
   );
 }
 
-static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
+static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]): Promise<DolynkResponse<AccessoryInfo>> {
   return DolynkApi.postRequest(
     "alarm/getAccessoryInfo",
     { deviceId, accessoriesId },
     {
       IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
       default: new AppError(DEVICE_ERRORS.DEVICE_GET_ACCESSORIES_INFO_FAILED)
+    }
+  );
+}
+
+static async getAccessoryStatus(deviceId: string, accessoriesId: string[]): Promise<DolynkResponse<AccessoryStatus>> {
+  return DolynkApi.postRequest(
+    "alarm/getAccessoryStatus",
+    { deviceId, accessoriesId },
+    {
+      default: new AppError(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
     }
   );
 }

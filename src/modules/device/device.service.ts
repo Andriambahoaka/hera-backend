@@ -9,7 +9,6 @@ import { DolynkClient } from '../../shared/integrations/dolynk/dolynk.client';
 import { DolynkCrypto } from '../../shared/integrations/dolynk/dolynk.crypto';
 import { USER_TYPE } from '../user/enums/userType.enum';
 import { fromDevice } from './utils/deviceAccessFactory';
-import { COMMON_ERRORS } from '../../core/errors/common.error';
 import { USER_ERRORS } from '../user/user.errors';
 
 export class DeviceService {
@@ -131,6 +130,7 @@ export class DeviceService {
 
 static async findAllAccess(userId: string) {
   const user = await User.findById(userId).select("ownerId userType").lean();
+  console.log("User found:", user);
   if (!user) {
     throw new AppError(USER_ERRORS.USER_NOT_FOUND);
   }
@@ -212,7 +212,19 @@ static async getAreaArmMode(deviceId: string) {
 }
 
 static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
-  return await DolynkClient.getAccessoriesInfo(deviceId,accessoriesId);
+  const response  = await DolynkClient.getAccessoriesInfo(deviceId,accessoriesId);
+  return response.data.accessoryInfos;
+}
+
+static async getAccessoryStatus(deviceId: string, accessoriesId: string[]) {
+  const { data } = await DolynkClient.getAccessoryStatus(
+    deviceId,
+    accessoriesId,
+  );
+
+  const status = data?.accessoryStatus?.[0];
+
+  return status;
 }
 
 static async getPirCamSnapUrl(deviceId: string,accessoryId: string,channel: number)  {
