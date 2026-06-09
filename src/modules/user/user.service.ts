@@ -10,7 +10,16 @@ import { AppError } from "../../core/errors/app.error";
 import { USER_ERRORS } from "./user.errors";
 import { SUCCESS } from "../../core/utils/messages.util";
 
+import mongoose from "mongoose";
+
 import jwt, { TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
+import { AUTH_ERRORS } from "../auth/auth.errors";
+import { CreateUserDto } from "./dto/user.dto";
+import { USER_TYPE } from "./enums/userType.enum";
+
+import { generateTempPassword } from "../../shared/utils/password.util";
+import * as emailService from "../../infrastructure/email/email.service";
+import { DeviceService } from "../device/device.service";
 
 export class UserService {
   // =============================
@@ -57,6 +66,58 @@ export class UserService {
     return user;
   }
 
+  static async createUser(data: CreateUserDto) {
+    const existingUser = await User.findOne({ email: data.email });
+    
+    if (existingUser) throw new AppError(AUTH_ERRORS.USER_EXISTS);
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    if (data.ownerId) {
+      if (!mongoose.Types.ObjectId.isValid(data.ownerId)) {
+        throw new AppError(AUTH_ERRORS.INVALID_OWNER_ID);
+      }
+
+      const ownerUser = await User.findById(data.ownerId);
+      if (!ownerUser) throw new AppError(AUTH_ERRORS.OWNER_NOT_FOUND);
+    }
+
+    const user = await User.create({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      phoneNumber: data.phoneNumber || null,
+      userType: data.userType,
+      ownerId: data.ownerId || null,
+    });
+
+    return user;
+  }
+
+  static async addMember(data: CreateUserDto) {
+  const tempPassword = generateTempPassword();
+
+  const user = await UserService.createUser({
+    ...data,
+    password: tempPassword,
+    userType: USER_TYPE.MEMBER,
+  });
+
+  await DeviceService.addOrUpdateAccess(data.accessList);
+
+  await emailService.sendMemberInviteEmail(
+    data.ownerName!,
+    user.name,
+    user.email,
+    tempPassword
+  );
+
+  return {
+    message: SUCCESS.MEMBER_CREATED,
+    userId: user._id,
+  };
+  }
+
   static async uploadImageFile(id: string, fileBuffer: Buffer) {
     const user = await this.findUserOrFail(id);
 
@@ -88,39 +149,24 @@ export class UserService {
     };
   }
 
-  static async findAllByOwner(ownerId: string) {
-    const users = await User.find({
-      $or: [{ _id: ownerId }, { ownerId }],
-    }).lean();
+static async findAllByOwner(userId: string) {
+  const user = await User.findById(userId)
+    .select("_id ownerId")
+    .lean();
 
-    const userIds = users.map((u) => u._id);
-
-    const allPackAccess = await PackAccess.find({
-      userId: { $in: userIds },
-    })
-      .populate("packId")
-      .lean();
-
-    const accessByUserId = allPackAccess.reduce<Record<string, any[]>>(
-      (acc, pa) => {
-        const uid = pa.userId.toString();
-
-        if (!acc[uid]) acc[uid] = [];
-
-        const { deviceId, ...rest } = pa;
-
-        acc[uid].push({ ...rest, pack: deviceId });
-
-        return acc;
-      },
-      {}
-    );
-
-    return users.map((u) => ({
-      ...u,
-      packAccessList: accessByUserId[u._id.toString()] || [],
-    }));
+  if (!user) {
+    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
   }
+
+  const ownerId = user.ownerId ?? user._id.toString();
+
+  return User.find({
+    $or: [
+      { _id: ownerId },
+      { ownerId },
+    ],
+  }).lean();
+}
 
   static async updateUserById(id: string, updateFields: Partial<IUser>) {
     const user = await this.findUserOrFail(id);
@@ -154,7 +200,7 @@ export class UserService {
     return { message: SUCCESS.PASSWORD_UPDATED };
   }
 
-  static async createPassword(userId: string,newPassword: string) {
+  static async createPassword(userId: string, newPassword: string) {
     const user = await User.findById(userId);
 
     if (!user) {
@@ -238,15 +284,15 @@ export class UserService {
   }
 
   static async deleteDeviceToken(userId: string, deviceToken: string) {
-  const result = await User.updateOne(
-    { _id: userId },
-    { $pull: { devicesToken: deviceToken } }
-  );
+    const result = await User.updateOne(
+      { _id: userId },
+      { $pull: { devicesToken: deviceToken } }
+    );
 
-  if (result.modifiedCount === 0) {
-    throw new AppError(USER_ERRORS.DEVICE_TOKEN_NOT_FOUND);
+    if (result.modifiedCount === 0) {
+      throw new AppError(USER_ERRORS.DEVICE_TOKEN_NOT_FOUND);
+    }
+
+    return { message: SUCCESS.TOKEN_DELETED };
   }
-
-  return { message: SUCCESS.TOKEN_DELETED };
-}
 }

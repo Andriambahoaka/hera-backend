@@ -31,30 +31,35 @@ const transporter = nodemailer.createTransport({
 });
 
 
-export const sendWelcomeEmail = async (
-  name: string,
-  email: string,
-  tempPassword: string
-): Promise<void> => {
- console.log("Sending welcome email to:", APP_DOMAIN);
+// email.service.ts
 
-  const html = renderTemplate(
-    "welcomeEmail",
-    { name, email, tempPassword, APP_URL: APP_DOMAIN },
-    "html"
-  );
-  const text = renderTemplate(
-    "welcomeEmail",
-    { name, email, tempPassword, APP_URL: APP_DOMAIN },
-    "txt"
-  );
+interface SendEmailParams {
+  subject: string;
+  email: string;
+  name: string;
+  data: Record<string, unknown>;
+}
+
+const sendEmail = async ({
+  subject,
+  email,
+  name,
+  data,
+}: SendEmailParams): Promise<void> => {
+  const templateData = {
+    ...data,
+    APP_URL: APP_DOMAIN,
+  };
+
+  const html = renderTemplate("accountCreated", templateData, "html");
+  const text = renderTemplate("accountCreated", templateData, "txt");
 
   await axios.post(
     "https://api.brevo.com/v3/smtp/email",
     {
       sender: { email: BREVO_EMAIL_SENDER },
       to: [{ email, name }],
-      subject: SUCCESS.WELCOME_EMAIL_SUBJECT,
+      subject,
       htmlContent: html,
       textContent: text,
     },
@@ -66,6 +71,43 @@ export const sendWelcomeEmail = async (
       },
     }
   );
+};
+
+
+export const sendWelcomeEmail = async (
+  name: string,
+  email: string,
+  tempPassword: string
+) => {
+  await sendEmail({
+    subject: SUCCESS.WELCOME_EMAIL_SUBJECT,
+    email,
+    name,
+    data: {
+      name,
+      email,
+      tempPassword,
+    },
+  });
+};
+
+export const sendMemberInviteEmail = async (
+  ownerName: string,
+  name: string,
+  email: string,
+  tempPassword: string
+) => {
+  await sendEmail({
+    subject: SUCCESS.MEMBER_INVITE_SUBJECT,
+    email,
+    name,
+    data: {
+      ownerName,
+      name,
+      email,
+      tempPassword,
+    },
+  });
 };
 
 

@@ -7,19 +7,23 @@ import { AppError } from "../../core/errors/app.error";
 import { USER_ERRORS } from "./user.errors";
 import { COMMON_ERRORS } from "../../core/errors/common.error";
 import mongoose from "mongoose";
-import { getTokenFromHeader } from "../auth/auth.utils";
-import { resetPasswordService } from "../auth/auth.service";
-
-
-// =============================
-// CONTROLLERS
-// =============================
+import { validateSignupInput } from "../auth/auth.validator";
 
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.auth?.userId;
   if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
 
   const result = await UserService.getMe(userId);
+  return sendSuccess(res, result);
+});
+
+export const addMember = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.auth?.userId;
+  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
+  
+  await validateSignupInput(req.body, true);
+
+  const result = await UserService.addMember(req.body);
   return sendSuccess(res, result);
 });
 
@@ -48,9 +52,10 @@ export const findAll = asyncHandler(async (_: Request, res: Response) => {
 });
 
 export const findAllByOwner = asyncHandler(async (req: Request, res: Response) => {
-  const ownerId = req.params.ownerId as string;
-  if (!ownerId) { throw new AppError(USER_ERRORS.OWNER_ID_REQUIRED); }
-  const result = await UserService.findAllByOwner(ownerId);
+  const userId = req.auth?.userId;
+  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
+
+  const result = await UserService.findAllByOwner(userId);
   return sendSuccess(res, result);
 });
 
@@ -68,7 +73,6 @@ export const updateUserById = asyncHandler(async (req: Request, res: Response) =
 
   return sendSuccess(res, result);
 });
-
 
 export const updatePassword = asyncHandler(async (req: Request, res: Response) => {
   const { oldPassword, newPassword } = req.body;
@@ -95,7 +99,7 @@ export const createPassword = asyncHandler(async (req: Request, res: Response) =
     throw new AppError(COMMON_ERRORS.UNAUTHORIZED);
   }
 
-  const {newPassword } = req.body;
+  const { newPassword } = req.body;
 
   if (!newPassword) {
     throw new AppError(USER_ERRORS.NEW_PASSWORD_REQUIRED);
@@ -104,7 +108,6 @@ export const createPassword = asyncHandler(async (req: Request, res: Response) =
   const result = await UserService.createPassword(userId, newPassword);
   return sendSuccess(res, result);
 });
-
 
 export const deleteUserById = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.params.id as string;
@@ -131,7 +134,6 @@ export const findAllOwners = asyncHandler(async (_: Request, res: Response) => {
   return sendSuccess(res, result);
 });
 
-
 export const addDeviceToken = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.auth?.userId;
   if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
@@ -144,7 +146,6 @@ export const addDeviceToken = asyncHandler(async (req: Request, res: Response) =
   const result = await UserService.addDeviceToken(userId, deviceToken);
   return sendSuccess(res, result);
 });
-
 
 export const deleteDeviceToken = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.auth?.userId;

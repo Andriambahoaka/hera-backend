@@ -88,4 +88,9 @@ export const USER_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "Reset password token is invalid",
   },
+  MEMBER_ACCESS_EMPTY: {
+    code: "MEMBER_ACCESS_EMPTY",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Member user type must have a non-empty access list",
+  },
 };
