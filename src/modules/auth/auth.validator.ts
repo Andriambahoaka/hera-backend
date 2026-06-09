@@ -2,10 +2,13 @@ import { SignupDto } from "./dto/signup.dto";
 import { AppError } from "../../core/errors/app.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import { USER_TYPE } from "../user/enums/userType.enum";
+import { CreateUserDto } from "../user/dto/user.dto";
+import { USER_ERRORS } from "../user/user.errors";
 
 
 export async function validateSignupInput(
-  data: SignupDto,
+  data: CreateUserDto,
+  isMemberSignup: boolean = false
 ): Promise<void> {
   const { name, email, userType, ownerId } = data;
 
@@ -29,5 +32,9 @@ export async function validateSignupInput(
 
   if (userType === USER_TYPE.OWNER && ownerId) {
     throw new AppError(AUTH_ERRORS.OWNER_ID_NOT_ALLOWED);
+  }
+
+  if (isMemberSignup && data.accessList.length === 0) {
+    throw new AppError(USER_ERRORS.MEMBER_ACCESS_EMPTY);
   }
 }

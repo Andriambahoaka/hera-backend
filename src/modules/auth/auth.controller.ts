@@ -14,7 +14,6 @@ import { validateSignupInput } from "./auth.validator";
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { AppError } from "../../core/errors/app.error";
 import { AUTH_ERRORS } from "./auth.errors";
-import { UserService } from "../user/user.service";
 import { USER_ERRORS } from "../user/user.errors";
 import { getTokenFromHeader } from "./auth.utils";
 

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Device from './device.model';
-import PackAccess from './deviceAccess.model';
+import DeviceAccess from './deviceAccess.model';
 import User from '../user/user.model';
 
 import { AppError } from "../../core/errors/app.error";
@@ -137,14 +137,12 @@ static async findAllAccess(userId: string) {
   }
 
   if (user.userType === USER_TYPE.MEMBER) {
-    console.log("MEMBER", userId);
-    return PackAccess.find({ userId })
+    return DeviceAccess.find({ userId })
       .populate("deviceId")
       .lean();
   }
 
   if (user.userType === USER_TYPE.OWNER) {
-    console.log("OWNER", userId);
     const devices = await Device.find({ ownerId: userId })
     .lean();
     return devices.map(device => fromDevice(device, userId));
@@ -173,15 +171,15 @@ static async findAllAccess(userId: string) {
         throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
       }
 
-      let packAccess = await PackAccess.findOne({ userId, deviceId });
+      let deviceAccess = await DeviceAccess.findOne({ userId, deviceId });
 
-      if (packAccess) {
-        packAccess.hasAccess = hasAccess;
-        packAccess.access = access;
-        await packAccess.save();
+      if (deviceAccess) {
+        deviceAccess.hasAccess = hasAccess;
+        deviceAccess.access = access;
+        await deviceAccess.save();
         results.push({ status: "updated", deviceId });
       } else {
-        await PackAccess.create({ userId, deviceId, hasAccess, access });
+        await DeviceAccess.create({ userId, deviceId, hasAccess, access });
         results.push({ status: "created", deviceId });
       }
     }

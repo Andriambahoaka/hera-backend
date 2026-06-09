@@ -1,4 +1,4 @@
-import crypto from "crypto";
+
 import bcrypt from "bcrypt";
 import jwt, { JsonWebTokenError, SignOptions, TokenExpiredError } from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -13,8 +13,10 @@ import { AppError } from "../../core/errors/app.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import * as emailService from "../../infrastructure/email/email.service";
 import { SignupDto } from "./dto/signup.dto";
-import { USER_TYPE } from "../user/enums/userType.enum";
 import { USER_ERRORS } from "../user/user.errors";
+import { UserService } from "../user/user.service";
+import {generateTempPassword} from "../../shared/utils/password.util";
+import { CreateUserDto } from "../user/dto/user.dto";
 
 dotenv.config();
 
@@ -44,53 +46,31 @@ const generateToken = (
   return jwt.sign({ userId: userId.toString() }, secret, options);
 };
 
-const generateTempPassword = (length = 12): string => {
-  return crypto.randomBytes(length).toString("base64").slice(0, length);
-};
+
 
 // =============================
 // SERVICES
 // =============================
-export const signupService = async (data: SignupDto) => {
-  const { name, email, password, phoneNumber, userType, ownerId } = data;
+export const signupService = async (data: CreateUserDto) => {
+  const tempPassword = generateTempPassword();
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new AppError(AUTH_ERRORS.USER_EXISTS);
-  }
-
-  const tempPassword = password || generateTempPassword();
-  const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-  if ((userType === USER_TYPE.ADMIN || userType === USER_TYPE.MEMBER) && ownerId) {
-
-    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-      throw new AppError(AUTH_ERRORS.INVALID_OWNER_ID);
-    }
-
-    const ownerUser = await User.findById(ownerId);
-    if (!ownerUser) {
-      throw new AppError(AUTH_ERRORS.OWNER_NOT_FOUND);
-    }
-  }
-
-  const user = new User({
-    name,
-    email,
-    password: hashedPassword,
-    phoneNumber: phoneNumber || null,
-    userType,
-    ownerId,
+  const user = await UserService.createUser({
+    ...data,
+    password: tempPassword,
   });
 
-  const savedUser = await user.save();
-  await emailService.sendWelcomeEmail(name, email, tempPassword);
+  await emailService.sendWelcomeEmail(
+    user.name,
+    user.email,
+    tempPassword
+  );
 
   return {
     message: SUCCESS.USER_CREATED,
-    userId: savedUser._id,
+    userId: user._id,
   };
 };
+
 
 export const loginService = async (email: string, passwordInput: string) => {
   const user = await User.findOne({ email });
