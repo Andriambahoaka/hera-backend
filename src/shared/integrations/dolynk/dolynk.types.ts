@@ -25,3 +25,7 @@ export interface AccessoryStatus {
 export interface GetPicCamSnapUrlData {
   picUrl: string;
 }
+
+export interface ImageInfo{
+  snapshotNumber : number;
+}

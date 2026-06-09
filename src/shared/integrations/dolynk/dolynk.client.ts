@@ -2,9 +2,10 @@ import { AppError } from "../../../core/errors/app.error";
 import { COMMON_ERRORS } from "../../../core/errors/common.error";
 import { DEVICE_ERRORS } from "../../../modules/device/device.errors";
 import Device from "../../../modules/device/device.model";
+import { ACCESSORY_ENDPOINTS, ALARM_SEGMENT, DEVICE_SEGMENT } from "./constants/dolynk.endpoints";
 
 import { DolynkApi } from "./dolynk.api";
-import {   AccessoryInfo, AccessoryStatus, DolynkResponse,GetAreaArmModeData, GetPicCamSnapUrlData } from "./dolynk.types";
+import {   AccessoryInfo, AccessoryStatus, DolynkResponse,GetAreaArmModeData, GetPicCamSnapUrlData, ImageInfo } from "./dolynk.types";
 
 export class DolynkClient {
 static async addDevice(deviceId: string, deviceCode: string) {
@@ -15,7 +16,7 @@ static async addDevice(deviceId: string, deviceCode: string) {
   };
 
   return DolynkApi.postRequest(
-    "addDevice",
+    `/${DEVICE_SEGMENT}/addDevice`,
     payload,
     {
       IDV001: new AppError(DEVICE_ERRORS.DEVICE_NOT_EXIST),
@@ -51,7 +52,7 @@ static async setAreaArmMode(deviceId: string, isArmed: boolean) {
   };
 
   return DolynkApi.postRequest(
-    "alarm/setAreaArmMode",
+    `/${ALARM_SEGMENT}/setAreaArmMode`,
     payload,
     {
       IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
@@ -62,7 +63,7 @@ static async setAreaArmMode(deviceId: string, isArmed: boolean) {
 
 static async getAreaArmMode(deviceId: string) : Promise<DolynkResponse<GetAreaArmModeData>> {
   return DolynkApi.postRequest(
-    "alarm/getAreaArmMode",
+    `/${ALARM_SEGMENT}/getAreaArmMode`,
     { deviceId },
     {
       IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
@@ -73,7 +74,7 @@ static async getAreaArmMode(deviceId: string) : Promise<DolynkResponse<GetAreaAr
 
 static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]): Promise<DolynkResponse<AccessoryInfo>> {
   return DolynkApi.postRequest(
-    "alarm/getAccessoryInfo",
+    `/${ALARM_SEGMENT}/getAccessoryInfo`,
     { deviceId, accessoriesId },
     {
       IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
@@ -84,7 +85,7 @@ static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]): Prom
 
 static async getAccessoryStatus(deviceId: string, accessoriesId: string[]): Promise<DolynkResponse<AccessoryStatus>> {
   return DolynkApi.postRequest(
-    "alarm/getAccessoryStatus",
+    `/${ALARM_SEGMENT}/getAccessoryStatus`,
     { deviceId, accessoriesId },
     {
       default: new AppError(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
@@ -94,12 +95,55 @@ static async getAccessoryStatus(deviceId: string, accessoriesId: string[]): Prom
 
 static async getPirCamSnapUrl(deviceId: string,accessoryId: string,channel: number): Promise<DolynkResponse<GetPicCamSnapUrlData>> {
   return DolynkApi.postRequest(
-    "alarm/getPirCamSnapUrl",
+    `/${ALARM_SEGMENT}/getPirCamSnapUrl`,
     { deviceId, accessoryId, channel },
     {
       IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
       default: new AppError(DEVICE_ERRORS.DEVICE_GET_PIR_CAM_SNAP_URL_FAILED)
     }
+  );
+}
+
+static async setAccessory(
+  deviceId: string,
+  id  : string,
+  name: string | null,
+  type: string,
+  sensitivity: number | null,
+  volume: number | null,
+  entryDelay: number | null,
+  imageInfo: ImageInfo | null = null,
+) {
+  
+ const accessoryPath = ACCESSORY_ENDPOINTS[type as keyof typeof ACCESSORY_ENDPOINTS];
+
+  if (!accessoryPath) {
+    throw new AppError(DEVICE_ERRORS.ACCESSORY_NOT_SUPPORTED);
+  }
+
+  const accessoryInfos = Object.fromEntries(
+    Object.entries({
+      id,
+      name,
+      sensentivity: sensitivity,
+      volume,
+      entryDelay,
+      imageInfo,
+    }).filter(([, value]) => value != null),
+  );
+
+  return DolynkApi.postRequest(
+    accessoryPath,
+    {
+      deviceId,
+      accessoryId: id,
+      accessoryInfos,
+    },
+    {
+      PRM001: new AppError(DEVICE_ERRORS.ACCESSORY_NOT_SUPPORTED),
+      IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
+      default: new AppError(COMMON_ERRORS.INTERNAL_SERVER_ERROR),
+    },
   );
 }
 }

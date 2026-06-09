@@ -62,6 +62,11 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "deviceId, accessoryId, and channel are required",
   },
+  MISSING_SET_ACCESSORY_REQUIRED_FIELDS: {
+    code: "MISSING_SET_ACCESSORY_REQUIRED_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "deviceId, accessoryId and type are required",
+  },
 
   DEVICE_PASSWORD_INCORRECT: {
     code: "DEVICE_PASSWORD_INCORRECT",
@@ -125,5 +130,10 @@ export const DEVICE_ERRORS = {
     code: "MISSING_ACCESSORY_ID_FIELD",
     status: HTTP_STATUS.BAD_REQUEST,
     message: "accessoryId field is required",
-  }
+  },
+  ACCESSORY_NOT_SUPPORTED: {
+    code: "ACCESSORY_NOT_SUPPORTED",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "The accessory type is not supported'",
+  },
 };

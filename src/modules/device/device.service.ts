@@ -10,6 +10,7 @@ import { DolynkCrypto } from '../../shared/integrations/dolynk/dolynk.crypto';
 import { USER_TYPE } from '../user/enums/userType.enum';
 import { fromDevice } from './utils/deviceAccessFactory';
 import { USER_ERRORS } from '../user/user.errors';
+import { ImageInfo } from '../../shared/integrations/dolynk/dolynk.types';
 
 export class DeviceService {
 
@@ -232,4 +233,9 @@ static async getPirCamSnapUrl(deviceId: string,accessoryId: string,channel: numb
   const picUrl = response.data.picUrl;
   return { picUrl };
 }
+
+static async setAccessory(deviceId: string,id: string,name: string|null,type: string,sensitivity: number|null,volume: number|null,entryDelay: number|null,imageInfo: ImageInfo|null = null)  {
+  return DolynkClient.setAccessory(deviceId,id,name,type,sensitivity,volume,entryDelay,imageInfo);
+}
+
 }
