@@ -11,12 +11,13 @@ export class DolynkApi {
   ): Promise<T> {
     const appAccessToken = await DolynkAuthService.getAccessToken();
     const body = JSON.stringify(payload);
+    console.log(body);
 
     const headers = DolynkHeaders.generate(body, appAccessToken);
 
     try {
       const response = await axios.post(
-        `${DOLYNK_CONFIG.BASE_URL}/open-api/api-iot/device/${endpoint}`,
+        `${DOLYNK_CONFIG.BASE_URL}/open-api/${endpoint}`,
         payload,
         { headers }
       );

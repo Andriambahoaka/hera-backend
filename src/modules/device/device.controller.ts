@@ -155,3 +155,16 @@ export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, result);
 });
+
+export const setAccessory = asyncHandler(async (req, res) => {
+  const { deviceId,id, name, type, sensitivity, volume, entryDelay, imageInfo} = req.body;
+  console.log("Received setAccessory request with body:", req.body);
+  if (!deviceId  || !type || !id) {
+    throw new AppError(DEVICE_ERRORS.MISSING_SET_ACCESSORY_REQUIRED_FIELDS);
+  }
+
+  const result = await DeviceService.setAccessory(deviceId, id, name, type, sensitivity, volume, entryDelay, imageInfo);
+
+  return sendSuccess(res, result);
+});
+
