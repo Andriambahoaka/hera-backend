@@ -19,6 +19,7 @@ import { USER_TYPE } from "./enums/userType.enum";
 import { generateTempPassword } from "../../shared/utils/password.util";
 import * as emailService from "../../infrastructure/email/email.service";
 import { DeviceService } from "../device/device.service";
+import { COMMON_ERRORS } from "../../core/errors/common.error";
 
 export class UserService {
   // =============================
@@ -42,6 +43,10 @@ export class UserService {
   // HELPERS
   // =============================
   static async findUserOrFail(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError(USER_ERRORS.INVALID_USER_ID);
+    }
+
     const user = await User.findById(id);
 
     if (!user) {
@@ -102,7 +107,7 @@ export class UserService {
       userType: USER_TYPE.MEMBER,
     });
 
-    await DeviceService.addOrUpdateAccess(data.accessList, user._id);
+    await DeviceService.addOrUpdateAccess(user._id, data.accessList,);
 
     await emailService.sendWelcomeEmail(
       user.name,

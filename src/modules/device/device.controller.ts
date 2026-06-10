@@ -4,8 +4,8 @@ import { asyncHandler } from "../../core/utils/asyncHandler";
 import { sendSuccess } from "../../core/utils/responseHandler";
 import { AppError } from '../../core/errors/app.error';
 import { DEVICE_ERRORS } from './device.errors';
-import { COMMON_ERRORS } from '../../core/errors/common.error';
 import { Request } from "express";
+import { USER_ERRORS } from '../user/user.errors';
 
 export const add = asyncHandler(async (req, res) => {
   const {
@@ -65,21 +65,22 @@ export const findAllByOwner = asyncHandler(async (req, res) => {
 });
 
 export const addOrUpdateAccess = asyncHandler(async (req, res) => {
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
+  const { userId ,accessList } = req.body;
+  if (!userId ||!accessList) {
+    throw new AppError(USER_ERRORS.MISSING_USER_ID_OR_ACCESS_LIST);
+  }
 
-  const results = await DeviceService.addOrUpdateAccess(req.body, userId);
+  if (!Array.isArray(accessList)) {
+    throw new AppError(DEVICE_ERRORS.INVALID_ACCESS_LIST);
+  }
+  const results = await DeviceService.addOrUpdateAccess(userId, accessList);
   return sendSuccess(res, results);
 });
 
 export const findAllAccess = asyncHandler(async (req, res) => {
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
-
-  const accessList = await DeviceService.findAllAccess(userId);
+  const accessList = await DeviceService.findAllAccess(req.auth!.userId);
   return sendSuccess(res, accessList);
 });
-
 
 export const setAreaArmMode = asyncHandler(async (req, res) => {
   const { deviceId, isArmed } = req.body;
@@ -161,7 +162,6 @@ export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
 
 export const setAccessory = asyncHandler(async (req, res) => {
   const { deviceId,id, name, type, sensitivity, volume, entryDelay, imageInfo} = req.body;
-  console.log("Received setAccessory request with body:", req.body);
   if (!deviceId  || !type || !id) {
     throw new AppError(DEVICE_ERRORS.MISSING_SET_ACCESSORY_REQUIRED_FIELDS);
   }

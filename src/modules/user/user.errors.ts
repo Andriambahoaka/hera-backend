@@ -54,6 +54,12 @@ export const USER_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "User ID is required",
   },
+
+  MISSING_USER_ID_OR_ACCESS_LIST: {
+    code: "MISSING_USER_ID_OR_ACCESS_LIST",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Both userId and accessList are required",
+  },
   INVALID_USER_ID: {
     code: "INVALID_USER_ID",
     status: HTTP_STATUS.BAD_REQUEST,

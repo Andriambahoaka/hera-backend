@@ -136,4 +136,10 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "The accessory type is not supported'",
   },
+
+  INVALID_ACCESS_LIST: {
+    code: "INVALID_ACCESS_LIST",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Access list must be an array",
+  },
 };

@@ -11,7 +11,6 @@ export class DolynkApi {
   ): Promise<T> {
     const appAccessToken = await DolynkAuthService.getAccessToken();
     const body = JSON.stringify(payload);
-    console.log(body);
 
     const headers = DolynkHeaders.generate(body, appAccessToken);
 
@@ -23,7 +22,6 @@ export class DolynkApi {
       );
 
       const data = response.data;
-      console.log(`${endpoint} Response:`, data);
 
       if (data.success === true) {
         return data;

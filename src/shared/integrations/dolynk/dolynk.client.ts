@@ -33,11 +33,7 @@ static async setAreaArmMode(deviceId: string, isArmed: boolean) {
   const device = await Device.findOne({ deviceId }, { devCode: 1 });
   const encodedDevCode = device?.devCode;
   const areaIds = Array.from({ length: 32 }, (_, i) => i + 1);
-  console.log(isArmed);
   const armingMode = isArmed ? "T" : "D";
-  console.log(armingMode);
-
-
   const payload = {
     deviceId,
     devCode: encodedDevCode,
