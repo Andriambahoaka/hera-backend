@@ -116,7 +116,16 @@ export class DeviceService {
     return Device.find();
   }
 
-  static async findAllByOwner(ownerId: string) {
+  static async findAllByOwner(userId: string) {
+    const user = await User.findById(userId)
+      .select("_id ownerId")
+      .lean();
+
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    const ownerId = user.ownerId ?? user._id.toString();
     return Device.find({ ownerId });
   }
 
@@ -130,38 +139,38 @@ export class DeviceService {
     return device;
   }
 
-static async findAllAccess(userId: string) {
-  const user = await User.findById(userId).select("ownerId userType").lean();
-  if (!user) {
-    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
-  }
+  static async findAllAccess(userId: string) {
+    const user = await User.findById(userId).select("ownerId userType").lean();
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
 
-  if (user.userType === USER_TYPE.MEMBER) {
-    return DeviceAccess.find({ userId })
-      .populate("deviceId")
-      .lean();
-  }
+    if (user.userType === USER_TYPE.MEMBER) {
+      return DeviceAccess.find({ userId })
+        .populate("deviceId")
+        .lean();
+    }
 
-  if (user.userType === USER_TYPE.OWNER) {
-    const devices = await Device.find({ ownerId: userId })
-    .lean();
-    return devices.map(device => fromDevice(device, userId));
-  }
+    if (user.userType === USER_TYPE.OWNER) {
+      const devices = await Device.find({ ownerId: userId })
+        .lean();
+      return devices.map(device => fromDevice(device, userId));
+    }
 
-  if (user.userType === USER_TYPE.ADMIN) {
-    const devices = await Device.find({ ownerId: user.ownerId })
-    .lean();
-    return devices.map(device => fromDevice(device, userId));
+    if (user.userType === USER_TYPE.ADMIN) {
+      const devices = await Device.find({ ownerId: user.ownerId })
+        .lean();
+      return devices.map(device => fromDevice(device, userId));
+    }
+    return [];
   }
-  return [];
-}
 
 
   // =============================
   // PACK ACCESS
   // =============================
 
-  static async addOrUpdateAccess(userId: string,accessList: any[]) {
+  static async addOrUpdateAccess(userId: string, accessList: any[]) {
     await UserService.findUserOrFail(userId);
     const results = [];
 
@@ -193,48 +202,48 @@ static async findAllAccess(userId: string) {
   }
 
 
-static async getAreaArmMode(deviceId: string) {
-  const response = await DolynkClient.getAreaArmMode(deviceId);
+  static async getAreaArmMode(deviceId: string) {
+    const response = await DolynkClient.getAreaArmMode(deviceId);
 
-  const armModes = response.data.armModes;
+    const armModes = response.data.armModes;
 
-  if (!Array.isArray(armModes) || armModes.length === 0) {
-    throw new AppError(DEVICE_ERRORS.DEVICE_GET_AREA_ARM_FAILED);
+    if (!Array.isArray(armModes) || armModes.length === 0) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_GET_AREA_ARM_FAILED);
+    }
+
+    const isArmed = armModes.some(
+      (area) => area.mode === "T"
+    );
+
+    return {
+      isArmed,
+    };
   }
 
-  const isArmed = armModes.some(
-    (area) => area.mode === "T"
-  );
+  static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
+    const response = await DolynkClient.getAccessoriesInfo(deviceId, accessoriesId);
+    return response.data.accessoryInfos;
+  }
 
-  return {
-    isArmed,
-  };
-}
+  static async getAccessoryStatus(deviceId: string, accessoriesId: string[]) {
+    const { data } = await DolynkClient.getAccessoryStatus(
+      deviceId,
+      accessoriesId,
+    );
 
-static async getAccessoriesInfo(deviceId: string, accessoriesId: string[]) {
-  const response  = await DolynkClient.getAccessoriesInfo(deviceId,accessoriesId);
-  return response.data.accessoryInfos;
-}
+    const status = data?.accessoryStatus?.[0];
 
-static async getAccessoryStatus(deviceId: string, accessoriesId: string[]) {
-  const { data } = await DolynkClient.getAccessoryStatus(
-    deviceId,
-    accessoriesId,
-  );
+    return status;
+  }
 
-  const status = data?.accessoryStatus?.[0];
+  static async getPirCamSnapUrl(deviceId: string, accessoryId: string, channel: number) {
+    const response = await DolynkClient.getPirCamSnapUrl(deviceId, accessoryId, channel);
+    const picUrl = response.data.picUrl;
+    return { picUrl };
+  }
 
-  return status;
-}
-
-static async getPirCamSnapUrl(deviceId: string,accessoryId: string,channel: number)  {
-  const response = await  DolynkClient.getPirCamSnapUrl(deviceId,accessoryId,channel);
-  const picUrl = response.data.picUrl;
-  return { picUrl };
-}
-
-static async setAccessory(deviceId: string,id: string,name: string|null,type: string,sensitivity: number|null,volume: number|null,entryDelay: number|null,imageInfo: ImageInfo|null = null)  {
-  return DolynkClient.setAccessory(deviceId,id,name,type,sensitivity,volume,entryDelay,imageInfo);
-}
+  static async setAccessory(deviceId: string, id: string, name: string | null, type: string, sensitivity: number | null, volume: number | null, entryDelay: number | null, imageInfo: ImageInfo | null = null) {
+    return DolynkClient.setAccessory(deviceId, id, name, type, sensitivity, volume, entryDelay, imageInfo);
+  }
 
 }
