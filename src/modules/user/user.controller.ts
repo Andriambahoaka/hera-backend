@@ -10,20 +10,18 @@ import mongoose from "mongoose";
 import { validateSignupInput } from "../auth/auth.validator";
 
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
-
-  const result = await UserService.getMe(userId);
+  const result = await UserService.getMe(req.auth!.userId);
   return sendSuccess(res, result);
 });
 
 export const addMember = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
-  
   await validateSignupInput(req.body, true);
-
   const result = await UserService.addMember(req.body);
+  return sendSuccess(res, result);
+});
+
+export const findAllMembers = asyncHandler(async (req: Request, res: Response) => {
+  const result = await UserService.findAllMembers(req.auth!.userId);
   return sendSuccess(res, result);
 });
 
@@ -51,13 +49,7 @@ export const findAll = asyncHandler(async (_: Request, res: Response) => {
   return sendSuccess(res, result);
 });
 
-export const findAllByOwner = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
 
-  const result = await UserService.findAllByOwner(userId);
-  return sendSuccess(res, result);
-});
 
 export const updateUserById = asyncHandler(async (req: Request, res: Response) => {
   const { name, phoneNumber, userType } = req.body;
@@ -81,31 +73,18 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response) =
     throw new AppError(USER_ERRORS.OLD_NEW_PASSWORD_REQUIRED);
   }
 
-  const userId = req.auth?.userId;
-
-  if (!userId) {
-    throw new AppError(COMMON_ERRORS.UNAUTHORIZED);
-  }
-
-  const result = await UserService.updatePassword(userId, oldPassword, newPassword);
+  const result = await UserService.updatePassword(req.auth!.userId, oldPassword, newPassword);
   return sendSuccess(res, result);
 });
 
 export const createPassword = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  console.log("User ID for createPassword:", userId);
-
-  if (!userId) {
-    throw new AppError(COMMON_ERRORS.UNAUTHORIZED);
-  }
-
   const { newPassword } = req.body;
 
   if (!newPassword) {
     throw new AppError(USER_ERRORS.NEW_PASSWORD_REQUIRED);
   }
 
-  const result = await UserService.createPassword(userId, newPassword);
+  const result = await UserService.createPassword(req.auth!.userId, newPassword);
   return sendSuccess(res, result);
 });
 
@@ -135,30 +114,22 @@ export const findAllOwners = asyncHandler(async (_: Request, res: Response) => {
 });
 
 export const addDeviceToken = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
-
   const { deviceToken } = req.body;
   if (!deviceToken) {
     throw new AppError(USER_ERRORS.DEVICE_TOKEN_REQUIRED);
   }
 
-  const result = await UserService.addDeviceToken(userId, deviceToken);
+  const result = await UserService.addDeviceToken(req.auth!.userId, deviceToken);
   return sendSuccess(res, result);
 });
 
 export const deleteDeviceToken = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  if (!userId) {
-    throw new AppError(COMMON_ERRORS.UNAUTHORIZED);
-  }
-
   const { deviceToken } = req.body;
 
   if (!deviceToken) {
     throw new AppError(USER_ERRORS.DEVICE_TOKEN_REQUIRED);
   }
-
-  const result = await UserService.deleteDeviceToken(userId, deviceToken);
+  
+  const result = await UserService.deleteDeviceToken(req.auth!.userId, deviceToken);
   return sendSuccess(res, result);
 });

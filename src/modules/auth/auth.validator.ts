@@ -34,7 +34,7 @@ export async function validateSignupInput(
     throw new AppError(AUTH_ERRORS.OWNER_ID_NOT_ALLOWED);
   }
 
-  if (isMemberSignup && data.accessList.length === 0) {
+  if (isMemberSignup && (data.accessList === undefined || data.accessList.length === 0)) {
     throw new AppError(USER_ERRORS.MEMBER_ACCESS_EMPTY);
   }
 }

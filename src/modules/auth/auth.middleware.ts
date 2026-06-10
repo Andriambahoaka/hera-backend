@@ -5,14 +5,12 @@ import { COMMON_ERRORS } from "../../core/errors/common.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import { extractBearerToken } from "./auth.utils";
 
-
 const verifyToken = (token: string): JwtPayload => {
   const secret = process.env.JWT_SECRET;
 
   if (!secret) {
     throw new AppError(COMMON_ERRORS.INTERNAL_SERVER_ERROR);
   }
-  console.log("JWT_SECRET:", secret);
 
   return jwt.verify(token, secret) as JwtPayload;
 };
@@ -28,18 +26,17 @@ export const requireAuth = (
   if (!token) {
     throw new AppError(AUTH_ERRORS.INVALID_AUTH_HEADER);
   }
-
-  let decoded;
   try {
-    decoded = verifyToken(token);
+    const decoded = verifyToken(token);
+
+    if (!decoded || typeof decoded !== "object" || !decoded.userId) {
+      throw new AppError(AUTH_ERRORS.UNAUTHORIZED);
+    }
+
+    req.auth = { userId: decoded.userId };
+    next();
+
   } catch (err) {
-    throw new AppError(AUTH_ERRORS.INVALID_AUTH_HEADER);
+    throw new AppError(AUTH_ERRORS.UNAUTHORIZED);
   }
-
-  if (!decoded || typeof decoded !== "object" || !decoded.userId) {
-    throw new AppError(AUTH_ERRORS.INVALID_AUTH_HEADER);
-  }
-
-  req.auth = { userId: decoded.userId };
-  next();
 };

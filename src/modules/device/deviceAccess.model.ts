@@ -7,7 +7,7 @@ export interface IAccess {
 
 export interface IDeviceAccess extends Document {
   userId: Types.ObjectId;
-  deviceId: Types.ObjectId;
+  deviceId: String;
   hasAccess: boolean;
   access: IAccess[];
 }
@@ -27,7 +27,7 @@ const deviceAccessSchema = new Schema<IDeviceAccess>(
       ref: 'User',
     },
     deviceId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Device',
     },
     hasAccess: {

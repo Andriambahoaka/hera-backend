@@ -1,20 +1,11 @@
 <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
   <div style="text-align: center;">
-    <img src="{{APP_URL}}/public/logo.png" alt="Hera App Logo" style="max-width: 150px; margin-bottom: 20px;" />
+    <img src="{{APP_DOMAIN}}/public/logo.png" alt="Hera App Logo" style="max-width: 150px; margin-bottom: 20px;" />
   </div>
 
   <p>Bonjour <strong>{{name}}</strong>,</p>
 
-  {{#if ownerName}}
-  <p>
-    <strong>{{ownerName}}</strong> vous a ajouté en tant que membre de son pack
-    sur Hera App.
-  </p>
-  {{/if}}
-
-  {{#unless ownerName}}
   <p>Votre compte a bien été créé sur notre plateforme.</p>
-  {{/unless}}
 
   <p><strong>Voici vos informations de connexion temporaires :</strong></p>
   <ul>
@@ -23,8 +14,7 @@
   </ul>
 
   <p style="color: #d9534f;">
-    <strong>⚠️ Important :</strong> Pour des raisons de sécurité, veuillez vous connecter dès que possible et modifier
-    ce mot de passe depuis votre espace personnel.
+    <strong>⚠️ Important :</strong> Pour des raisons de sécurité, veuillez vous connecter dès que possible et modifier ce mot de passe depuis votre espace personnel.
   </p>
 
   <p>Si vous n’êtes pas à l’origine de cette inscription, veuillez nous contacter immédiatement.</p>

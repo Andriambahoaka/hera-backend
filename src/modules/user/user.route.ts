@@ -24,11 +24,11 @@ router.delete('/device-token', requireAuth, UserController.deleteDeviceToken);
 // User image upload
 router.post('/:id/image', requireAuth, upload.single('image'), UserController.uploadImageFile);
 
-// User management
+// Member management
 router.post('/add-member', requireAuth, UserController.addMember);
+router.get('/members', requireAuth, UserController.findAllMembers);
 
 router.get('/', mobileKeyAuth, UserController.findAll);
-router.get('/owner', requireAuth, UserController.findAllByOwner);
 router.get('/owners', apiKeyAuth, UserController.findAllOwners);
 router.put('/:id', mobileKeyAuth, UserController.updateUserById);
 router.delete('/:id', mobileKeyAuth, UserController.deleteUserById);

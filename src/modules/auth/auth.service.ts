@@ -12,10 +12,9 @@ import { AppError } from "../../core/errors/app.error";
 
 import { AUTH_ERRORS } from "./auth.errors";
 import * as emailService from "../../infrastructure/email/email.service";
-import { SignupDto } from "./dto/signup.dto";
 import { USER_ERRORS } from "../user/user.errors";
 import { UserService } from "../user/user.service";
-import {generateTempPassword} from "../../shared/utils/password.util";
+import { generateTempPassword } from "../../shared/utils/password.util";
 import { CreateUserDto } from "../user/dto/user.dto";
 
 dotenv.config();
@@ -59,6 +58,7 @@ export const signupService = async (data: CreateUserDto) => {
     password: tempPassword,
   });
 
+
   await emailService.sendWelcomeEmail(
     user.name,
     user.email,
@@ -66,8 +66,8 @@ export const signupService = async (data: CreateUserDto) => {
   );
 
   return {
+    code: "USER_CREATED",
     message: SUCCESS.USER_CREATED,
-    userId: user._id,
   };
 };
 
@@ -90,7 +90,7 @@ export const loginService = async (email: string, passwordInput: string) => {
   };
 };
 
-export const resetPasswordService = async (token: string, newPassword: string) =>{
+export const resetPasswordService = async (token: string, newPassword: string) => {
   let decoded: any;
 
   try {
