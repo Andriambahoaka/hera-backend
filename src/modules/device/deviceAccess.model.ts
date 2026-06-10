@@ -27,8 +27,7 @@ const deviceAccessSchema = new Schema<IDeviceAccess>(
       ref: 'User',
     },
     deviceId: {
-      type: String,
-      ref: 'Device',
+      type: String
     },
     hasAccess: {
       type: Boolean,

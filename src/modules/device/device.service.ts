@@ -11,6 +11,7 @@ import { USER_TYPE } from '../user/enums/userType.enum';
 import { fromDevice } from './utils/deviceAccessFactory';
 import { USER_ERRORS } from '../user/user.errors';
 import { ImageInfo } from '../../shared/integrations/dolynk/dolynk.types';
+import { UserService } from '../user/user.service';
 
 export class DeviceService {
 
@@ -131,7 +132,6 @@ export class DeviceService {
 
 static async findAllAccess(userId: string) {
   const user = await User.findById(userId).select("ownerId userType").lean();
-  console.log("User found:", user);
   if (!user) {
     throw new AppError(USER_ERRORS.USER_NOT_FOUND);
   }
@@ -161,7 +161,8 @@ static async findAllAccess(userId: string) {
   // PACK ACCESS
   // =============================
 
-  static async addOrUpdateAccess(accessList: any[],userId: string) {
+  static async addOrUpdateAccess(userId: string,accessList: any[]) {
+    await UserService.findUserOrFail(userId);
     const results = [];
 
     for (const item of accessList) {
