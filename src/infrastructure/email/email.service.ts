@@ -31,85 +31,25 @@ const transporter = nodemailer.createTransport({
 });
 
 
-// email.service.ts
-
-interface SendEmailParams {
-  subject: string;
-  email: string;
-  name: string;
-  data: Record<string, unknown>;
-}
-
-const sendEmail = async ({
-  subject,
-  email,
-  name,
-  data,
-}: SendEmailParams): Promise<void> => {
-  const templateData = {
-    ...data,
-    APP_URL: APP_DOMAIN,
-  };
-
-  const html = renderTemplate("accountCreated", templateData, "html");
-  const text = renderTemplate("accountCreated", templateData, "txt");
-
-  await axios.post(
-    "https://api.brevo.com/v3/smtp/email",
-    {
-      sender: { email: BREVO_EMAIL_SENDER },
-      to: [{ email, name }],
-      subject,
-      htmlContent: html,
-      textContent: text,
-    },
-    {
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    }
-  );
-};
-
-
 export const sendWelcomeEmail = async (
   name: string,
   email: string,
   tempPassword: string
 ) => {
-  await sendEmail({
+  const data = { name, email, tempPassword, APP_DOMAIN };
+  const templateName = "welcomeEmail";
+  const html = renderTemplate(templateName, data, "html");
+  const text = renderTemplate(templateName, data, "txt");
+
+  await transporter.sendMail({
+    from: BREVO_EMAIL_SENDER,
+    to: email,
     subject: SUCCESS.WELCOME_EMAIL_SUBJECT,
-    email,
-    name,
-    data: {
-      name,
-      email,
-      tempPassword,
-    },
+    html,
+    text,
   });
-};
 
-export const sendMemberInviteEmail = async (
-  ownerName: string,
-  name: string,
-  email: string,
-  tempPassword: string
-) => {
-  await sendEmail({
-    subject: SUCCESS.MEMBER_INVITE_SUBJECT,
-    email,
-    name,
-    data: {
-      ownerName,
-      name,
-      email,
-      tempPassword,
-    },
-  });
 };
-
 
 export const sendResetPasswordEmail = async ({
   to,
@@ -121,23 +61,15 @@ export const sendResetPasswordEmail = async ({
   token: string;
 }) => {
   const resetLink = `${APP_DOMAIN}/deeplink?to=update-password&token=${token}`;
-
-  const html = renderTemplate(
-    "resetPasswordEmail",
-    { name: name || "Utilisateur", to, resetLink },
-    "html"
-  );
-
-  const text = renderTemplate(
-    "resetPasswordEmail",
-    { name: name || "Utilisateur", to, resetLink },
-    "txt"
-  );
+  const data = { name: name || "Utilisateur", to, resetLink };
+  const templateName = "resetPasswordEmail";
+  const html = renderTemplate(templateName, data, "html");
+  const text = renderTemplate(templateName, data, "txt");
 
   await transporter.sendMail({
     from: BREVO_EMAIL_SENDER,
     to,
-    subject: "Réinitialisation de votre mot de passe – [HERA]",
+    subject: SUCCESS.RESET_EMAIL_SUBJECT,
     html,
     text,
   });

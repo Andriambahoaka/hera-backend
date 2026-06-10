@@ -65,7 +65,10 @@ export const findAllByOwner = asyncHandler(async (req, res) => {
 });
 
 export const addOrUpdateAccess = asyncHandler(async (req, res) => {
-  const results = await DeviceService.addOrUpdateAccess(req.body);
+  const userId = req.auth?.userId;
+  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
+
+  const results = await DeviceService.addOrUpdateAccess(req.body, userId);
   return sendSuccess(res, results);
 });
 

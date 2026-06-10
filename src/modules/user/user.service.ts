@@ -3,7 +3,7 @@ import streamifier from "streamifier";
 
 import User, { IUser } from "./user.model";
 import UserType from "./userType.model";
-import PackAccess from "../device/deviceAccess.model";
+import DeviceAccess from "../device/deviceAccess.model";
 import cloudinary from "../../core/config/cloudinary";
 
 import { AppError } from "../../core/errors/app.error";
@@ -12,7 +12,6 @@ import { SUCCESS } from "../../core/utils/messages.util";
 
 import mongoose from "mongoose";
 
-import jwt, { TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import { AUTH_ERRORS } from "../auth/auth.errors";
 import { CreateUserDto } from "./dto/user.dto";
 import { USER_TYPE } from "./enums/userType.enum";
@@ -68,7 +67,7 @@ export class UserService {
 
   static async createUser(data: CreateUserDto) {
     const existingUser = await User.findOne({ email: data.email });
-    
+
     if (existingUser) throw new AppError(AUTH_ERRORS.USER_EXISTS);
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -95,27 +94,25 @@ export class UserService {
   }
 
   static async addMember(data: CreateUserDto) {
-  const tempPassword = generateTempPassword();
+    const tempPassword = generateTempPassword();
 
-  const user = await UserService.createUser({
-    ...data,
-    password: tempPassword,
-    userType: USER_TYPE.MEMBER,
-  });
+    const user = await UserService.createUser({
+      ...data,
+      password: tempPassword,
+      userType: USER_TYPE.MEMBER,
+    });
 
-  await DeviceService.addOrUpdateAccess(data.accessList);
+    await DeviceService.addOrUpdateAccess(data.accessList, user._id);
 
-  await emailService.sendMemberInviteEmail(
-    data.ownerName!,
-    user.name,
-    user.email,
-    tempPassword
-  );
+    await emailService.sendWelcomeEmail(
+      user.name,
+      user.email,
+      tempPassword
+    );
 
-  return {
-    message: SUCCESS.MEMBER_CREATED,
-    userId: user._id,
-  };
+    return {
+      message: SUCCESS.MEMBER_CREATED,
+    };
   }
 
   static async uploadImageFile(id: string, fileBuffer: Buffer) {
@@ -138,8 +135,6 @@ export class UserService {
     };
   }
 
-
-
   static async findAllUsers() {
     const users = await User.find().select("-password -firstLogin -devicesToken -imagePublicId");
 
@@ -149,24 +144,24 @@ export class UserService {
     };
   }
 
-static async findAllByOwner(userId: string) {
-  const user = await User.findById(userId)
-    .select("_id ownerId")
-    .lean();
+  static async findAllMembers(userId: string) {
+    const user = await User.findById(userId)
+      .select("_id ownerId")
+      .lean();
 
-  if (!user) {
-    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    const ownerId = user.ownerId ?? user._id.toString();
+
+    return User.find({
+      $or: [
+        { _id: ownerId },
+        { ownerId },
+      ],
+    }).lean();
   }
-
-  const ownerId = user.ownerId ?? user._id.toString();
-
-  return User.find({
-    $or: [
-      { _id: ownerId },
-      { ownerId },
-    ],
-  }).lean();
-}
 
   static async updateUserById(id: string, updateFields: Partial<IUser>) {
     const user = await this.findUserOrFail(id);
@@ -215,12 +210,10 @@ static async findAllByOwner(userId: string) {
     return { message: SUCCESS.PASSWORD_UPDATED };
   }
 
-
-
   static async deleteUserById(id: string) {
     await this.findUserOrFail(id);
 
-    await PackAccess.deleteMany({ userId: id });
+    await DeviceAccess.deleteMany({ userId: id });
     await User.findByIdAndDelete(id);
 
     return { message: SUCCESS.USER_DELETED };

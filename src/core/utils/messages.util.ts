@@ -43,14 +43,14 @@ export const SUCCESS = {
   USERS_BY_OWNER_FETCHED: "Users par owner récupérés avec succès",
   USER_TYPE_CREATED: "UserType créé avec succès",
   USER_CREATED: "User successfully created.",
-    MEMBER_CREATED: "Member successfully created.",
+  MEMBER_CREATED: "Member successfully created.",
 
   LOGIN_SUCCESS: "Connexion réussie.",
   LOGOUT_SUCCESS: "Déconnexion réussie.",
   TOKEN_REFRESHED: "Nouveau jeton généré.",
   WELCOME_EMAIL_SUBJECT: "Hera App : Mot de passe temporaire",
   MEMBER_INVITE_SUBJECT: "Invitation à rejoindre Hera App",
-  RESET_EMAIL_SUBJECT: "Réinitialisation du mot de passe",
+  RESET_EMAIL_SUBJECT: "Réinitialisation de votre mot de passe – [HERA]",
   RESET_EMAIL_SENT: "Email de réinitialisation envoyé.",
 
   // Password

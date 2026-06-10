@@ -161,13 +161,13 @@ static async findAllAccess(userId: string) {
   // PACK ACCESS
   // =============================
 
-  static async addOrUpdateAccess(accessList: any[]) {
+  static async addOrUpdateAccess(accessList: any[],userId: string) {
     const results = [];
 
     for (const item of accessList) {
-      const { userId, deviceId, hasAccess, access } = item;
+      const { deviceId, hasAccess, access } = item;
 
-      if (!userId || !deviceId || typeof hasAccess !== "boolean") {
+      if (!deviceId || typeof hasAccess !== "boolean") {
         throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
       }
 
