@@ -8,11 +8,11 @@ const router = Router();
 router.post('/', apiKeyAuth, deviceController.add);
 router.get('/', apiKeyAuth, deviceController.findAll);
 
+router.get('/owner',requireAuth, deviceController.findAllByOwner);
+router.get('/:deviceId', deviceController.findByDeviceId);
+
 router.post('/access', deviceController.addOrUpdateAccess);
 router.get('/access', requireAuth, deviceController.findAllAccess);
-
-router.get('/owner/:ownerId', deviceController.findAllByOwner);
-router.get('/:deviceId', deviceController.findByDeviceId);
 
 router.put('/urgency-number', deviceController.editUrgencyNumber);
 router.put('/', deviceController.update);

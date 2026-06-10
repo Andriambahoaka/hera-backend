@@ -59,8 +59,7 @@ export const findAll = asyncHandler(async (_req, res) => {
 });
 
 export const findAllByOwner = asyncHandler(async (req, res) => {
-  const ownerId = req.params.ownerId as string;
-  const devices = await DeviceService.findAllByOwner(ownerId);
+  const devices = await DeviceService.findAllByOwner(req.auth!.userId);
   return sendSuccess(res, devices);
 });
 
