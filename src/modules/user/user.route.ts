@@ -22,10 +22,11 @@ router.post('/device-token', requireAuth, UserController.addDeviceToken);
 router.delete('/device-token', requireAuth, UserController.deleteDeviceToken);
 
 // User image upload
-router.post('/:id/image', requireAuth, upload.single('image'), UserController.uploadImageFile);
+router.post('/image', requireAuth, upload.single('image'), UserController.uploadImageFile);
 
 // Member management
 router.post('/add-member', requireAuth, UserController.addMember);
+router.put('/update-member', UserController.updateMember);
 router.get('/members', requireAuth, UserController.findAllMembers);
 
 router.get('/', mobileKeyAuth, UserController.findAll);

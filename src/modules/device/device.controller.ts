@@ -77,6 +77,7 @@ export const addOrUpdateAccess = asyncHandler(async (req, res) => {
 });
 
 export const findAllAccess = asyncHandler(async (req, res) => {
+  console.log("Finding all access for user:", req.auth!.userId);
   const accessList = await DeviceService.findAllAccess(req.auth!.userId);
   return sendSuccess(res, accessList);
 });

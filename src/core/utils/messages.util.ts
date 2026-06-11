@@ -44,6 +44,7 @@ export const SUCCESS = {
   USER_TYPE_CREATED: "UserType créé avec succès",
   USER_CREATED: "User successfully created.",
   MEMBER_CREATED: "Member successfully created.",
+  MEMBER_UPDATED: "Member successfully updated.",
 
   LOGIN_SUCCESS: "Connexion réussie.",
   LOGOUT_SUCCESS: "Déconnexion réussie.",

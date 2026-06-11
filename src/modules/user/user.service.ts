@@ -120,6 +120,24 @@ export class UserService {
     };
   }
 
+  static async updateMember(userId: string, fields: Partial<IUser>, accessList: any[]) {
+    const user = await User.findOneAndUpdate(
+      { _id: userId },
+      { $set: fields },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    await DeviceService.addOrUpdateAccess(userId, accessList,);
+
+    return {
+      message: SUCCESS.MEMBER_UPDATED
+    };
+  }
+
   static async uploadImageFile(id: string, fileBuffer: Buffer) {
     const user = await this.findUserOrFail(id);
 

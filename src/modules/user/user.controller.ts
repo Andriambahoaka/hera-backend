@@ -20,6 +20,12 @@ export const addMember = asyncHandler(async (req: Request, res: Response) => {
   return sendSuccess(res, result);
 });
 
+export const updateMember = asyncHandler(async (req, res) => {
+  const { userId, accessList, ...fields } = req.body;
+  const user = await UserService.updateMember(userId, fields, accessList);
+  return sendSuccess(res,user);
+});
+
 export const findAllMembers = asyncHandler(async (req: Request, res: Response) => {
   const result = await UserService.findAllMembers(req.auth!.userId);
   return sendSuccess(res, result);
@@ -48,8 +54,6 @@ export const findAll = asyncHandler(async (_: Request, res: Response) => {
   const result = await UserService.findAllUsers();
   return sendSuccess(res, result);
 });
-
-
 
 export const updateUserById = asyncHandler(async (req: Request, res: Response) => {
   const { name, phoneNumber, userType } = req.body;
