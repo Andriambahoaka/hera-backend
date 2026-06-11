@@ -140,6 +140,8 @@ export class DeviceService {
   }
 
   static async findAllAccess(userId: string) {
+
+      console.log("Finding all access for user:", userId);
     const user = await User.findById(userId).select("ownerId userType").lean();
     if (!user) {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
