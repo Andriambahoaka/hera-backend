@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Device from './device.model';
-import DeviceAccess from './deviceAccess.model';
+import DeviceAccess, { IAccess } from './deviceAccess.model';
 import User from '../user/user.model';
 
 import { AppError } from "../../core/errors/app.error";
@@ -141,7 +141,7 @@ export class DeviceService {
 
   static async findAllAccess(userId: string) {
 
-      console.log("Finding all access for user:", userId);
+    console.log("Finding all access for user:", userId);
     const user = await User.findById(userId).select("ownerId userType").lean();
     if (!user) {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
@@ -169,35 +169,35 @@ export class DeviceService {
 
 
   // =============================
-  // PACK ACCESS
+  // DEVICE ACCESS
   // =============================
 
-  static async addOrUpdateAccess(userId: string, accessList: any[]) {
+    static async addOrUpdateAccess(userId: string, deviceId: string, hasAccess: boolean, access: IAccess[]) {
     await UserService.findUserOrFail(userId);
-    const results = [];
-
-    for (const item of accessList) {
-      const { deviceId, hasAccess, access } = item;
-
-      if (!deviceId || typeof hasAccess !== "boolean") {
-        throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
-      }
-
-      let deviceAccess = await DeviceAccess.findOne({ userId, deviceId });
-
-      if (deviceAccess) {
-        deviceAccess.hasAccess = hasAccess;
-        deviceAccess.access = access;
-        await deviceAccess.save();
-        results.push({ status: "updated", deviceId });
-      } else {
-        await DeviceAccess.create({ userId, deviceId, hasAccess, access });
-        results.push({ status: "created", deviceId });
-      }
+    if (!deviceId || typeof hasAccess !== "boolean") {
+      throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
     }
 
-    return results;
+    let deviceAccess = await DeviceAccess.findOne({ userId, deviceId });
+
+    if (deviceAccess) {
+      deviceAccess.hasAccess = hasAccess;
+      deviceAccess.access = access;
+      await deviceAccess.save();
+    } else {
+      await DeviceAccess.create({ userId, deviceId, hasAccess, access });
+    }
   }
+
+  static async addOrUpdateMultipleAccess(userId: string, accessList: any[]) {
+    await UserService.findUserOrFail(userId);
+    for (const item of accessList) {
+      const { deviceId, hasAccess, access } = item;
+      DeviceService.addOrUpdateAccess(userId, deviceId, hasAccess, access);
+    }
+  }
+
+
 
   static async setAreaArmMode(deviceId: string, isArmed: boolean) {
     return await DolynkClient.setAreaArmMode(deviceId, isArmed);

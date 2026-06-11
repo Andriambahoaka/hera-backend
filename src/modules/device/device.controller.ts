@@ -64,6 +64,15 @@ export const findAllByOwner = asyncHandler(async (req, res) => {
 });
 
 export const addOrUpdateAccess = asyncHandler(async (req, res) => {
+  const { userId ,deviceId, hasAccess, access } = req.body;
+  if (!userId || !deviceId || typeof hasAccess !== "boolean" || !access) {
+    throw new AppError(USER_ERRORS.MISSING_USER_ID_OR_ACCESS_LIST);
+  }
+  const results = await DeviceService.addOrUpdateAccess(userId, deviceId, hasAccess, access);
+  return sendSuccess(res, results);
+});
+
+export const addOrUpdateMultipleAccess = asyncHandler(async (req, res) => {
   const { userId ,accessList } = req.body;
   if (!userId ||!accessList) {
     throw new AppError(USER_ERRORS.MISSING_USER_ID_OR_ACCESS_LIST);
@@ -72,7 +81,7 @@ export const addOrUpdateAccess = asyncHandler(async (req, res) => {
   if (!Array.isArray(accessList)) {
     throw new AppError(DEVICE_ERRORS.INVALID_ACCESS_LIST);
   }
-  const results = await DeviceService.addOrUpdateAccess(userId, accessList);
+  const results = await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
   return sendSuccess(res, results);
 });
 
