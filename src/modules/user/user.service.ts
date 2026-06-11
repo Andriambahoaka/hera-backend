@@ -107,7 +107,7 @@ export class UserService {
       userType: USER_TYPE.MEMBER,
     });
 
-    await DeviceService.addOrUpdateAccess(user._id, data.accessList,);
+    await DeviceService.addOrUpdateMultipleAccess(user._id, data.accessList);
 
     await emailService.sendWelcomeEmail(
       user.name,
@@ -131,7 +131,7 @@ export class UserService {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-    await DeviceService.addOrUpdateAccess(userId, accessList,);
+    //await DeviceService.addOrUpdateAccess(userId, accessList,);
 
     return {
       message: SUCCESS.MEMBER_UPDATED
