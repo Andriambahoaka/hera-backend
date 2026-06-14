@@ -41,6 +41,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   const token = getTokenFromHeader(req);
 
+  console.log("token azo",token);
+
   if (!token) {
     throw new AppError(USER_ERRORS.RESET_PASSWORD_TOKEN_MISSING);
   }
