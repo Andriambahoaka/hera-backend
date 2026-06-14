@@ -26,13 +26,12 @@ router.post('/image', requireAuth, upload.single('image'), UserController.upload
 
 // Member management
 router.post('/add-member', requireAuth, UserController.addMember);
-router.put('/update-member', UserController.updateMember);
+router.put('/update-member', requireAuth, UserController.updateMember);
 router.get('/members', requireAuth, UserController.findAllMembers);
 
 router.get('/', mobileKeyAuth, UserController.findAll);
 router.get('/owners', apiKeyAuth, UserController.findAllOwners);
-router.put('/:id', mobileKeyAuth, UserController.updateUserById);
-router.delete('/:id', mobileKeyAuth, UserController.deleteUserById);
+router.delete('/:id',requireAuth, UserController.deleteUserById);
 router.get('/id', apiKeyAuth, UserController.getUserIdByEmail);
 
 export default router;

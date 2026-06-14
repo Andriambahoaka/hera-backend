@@ -64,11 +64,11 @@ export const findAllByOwner = asyncHandler(async (req, res) => {
 });
 
 export const addOrUpdateAccess = asyncHandler(async (req, res) => {
-  const { userId ,deviceId, hasAccess, access } = req.body;
-  if (!userId || !deviceId || typeof hasAccess !== "boolean" || !access) {
-    throw new AppError(USER_ERRORS.MISSING_USER_ID_OR_ACCESS_LIST);
+  const { userId ,deviceAccessId, access } = req.body;
+  if (!userId || !deviceAccessId || !access) {
+    throw new AppError(DEVICE_ERRORS.MISSING_ACCESS_FIELDS);
   }
-  const results = await DeviceService.addOrUpdateAccess(userId, deviceId, hasAccess, access);
+  const results = await DeviceService.addOrUpdateAccess(userId, deviceAccessId, access);
   return sendSuccess(res, results);
 });
 
@@ -85,10 +85,15 @@ export const addOrUpdateMultipleAccess = asyncHandler(async (req, res) => {
   return sendSuccess(res, results);
 });
 
-export const findAllAccess = asyncHandler(async (req, res) => {
-  console.log("Finding all access for user:", req.auth!.userId);
-  const accessList = await DeviceService.findAllAccess(req.auth!.userId);
+export const findGrantedAccess = asyncHandler(async (req, res) => {
+  const accessList = await DeviceService.findGrantedAccess(req.auth!.userId);
   return sendSuccess(res, accessList);
+});
+
+export const findAccessibleDevices = asyncHandler(async (req, res) => {
+  const userId = req.params.userId as string;
+  const devices = await DeviceService.findAccessibleDevices(userId);
+  return sendSuccess(res, devices);
 });
 
 export const setAreaArmMode = asyncHandler(async (req, res) => {
@@ -156,8 +161,6 @@ export const getAccessoryStatus = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, result);
 });
-
-
 
 export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
   const { deviceId, accessoryId, channel } = req.body;

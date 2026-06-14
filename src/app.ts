@@ -22,6 +22,8 @@ import activityRoutes from "./modules/activity/activity.route";
 import apiKeysRoutes from "./infrastructure/apiKey/apiKey.route";
 import dolynkRoutes from "./modules/dolynk-auth/dolynk-auth.routes";
 
+import admin from "./core/config/firebase";
+
 
 import { APP } from "./core/utils/messages.util";
 import { errorMiddleware } from "./core/middleware/error.middleware";

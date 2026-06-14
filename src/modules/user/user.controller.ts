@@ -21,8 +21,9 @@ export const addMember = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const updateMember = asyncHandler(async (req, res) => {
-  const { userId, accessList, ...fields } = req.body;
-  const user = await UserService.updateMember(userId, fields, accessList);
+  const { _id, accessList, ...fields } = req.body;
+  console.log("Received updateMember request with fields:", fields, "and accessList:", accessList);
+  const user = await UserService.updateMember(_id, fields, accessList);
   return sendSuccess(res,user);
 });
 
@@ -52,21 +53,6 @@ export const addUserType = asyncHandler(async (req: Request, res: Response) => {
 
 export const findAll = asyncHandler(async (_: Request, res: Response) => {
   const result = await UserService.findAllUsers();
-  return sendSuccess(res, result);
-});
-
-export const updateUserById = asyncHandler(async (req: Request, res: Response) => {
-  const { name, phoneNumber, userType } = req.body;
-  const userId = req.params.id as string;
-
-  if (!userId) { throw new AppError(USER_ERRORS.USER_ID_REQUIRED); }
-
-  const result = await UserService.updateUserById(userId, {
-    name,
-    phoneNumber,
-    userType,
-  });
-
   return sendSuccess(res, result);
 });
 

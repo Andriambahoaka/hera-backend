@@ -1,6 +1,5 @@
 
-
-import admin from "firebase-admin";
+import admin from "../../core/config/firebase";
 import Device from "../device/device.model";
 import Notification from "./notification.model";
 import User from "../user/user.model";
