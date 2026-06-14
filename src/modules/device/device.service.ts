@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import Device from './device.model';
-import DeviceAccess, { IAccess } from './deviceAccess.model';
 import User from '../user/user.model';
 
 import { AppError } from "../../core/errors/app.error";
@@ -12,6 +11,8 @@ import { fromDevice } from './utils/deviceAccessFactory';
 import { USER_ERRORS } from '../user/user.errors';
 import { ImageInfo } from '../../shared/integrations/dolynk/dolynk.types';
 import { UserService } from '../user/user.service';
+import DeviceAccess from './deviceAccess.model';
+
 
 export class DeviceService {
 
@@ -51,7 +52,7 @@ export class DeviceService {
 
     devCode = DolynkCrypto.encodeDevCode(devCode);
 
-    await DolynkClient.addDevice(deviceId, devCode);
+    // await DolynkClient.addDevice(deviceId, devCode);
 
     const pack = new Device({
       ownerId,
@@ -139,32 +140,84 @@ export class DeviceService {
     return device;
   }
 
-  static async findAllAccess(userId: string) {
+  static async findGrantedAccess(userId: string) {
+    const user = await User.findById(userId)
+      .select("ownerId userType")
+      .lean();
 
-    console.log("Finding all access for user:", userId);
-    const user = await User.findById(userId).select("ownerId userType").lean();
     if (!user) {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
     if (user.userType === USER_TYPE.MEMBER) {
-      return DeviceAccess.find({ userId })
-        .populate("deviceId")
+      const accesses = await DeviceAccess.find({ userId })
+        .populate("device")
         .lean();
+
+      return accesses.map(access => ({
+        ...access,
+        hasAccess: true,
+      }));
     }
 
     if (user.userType === USER_TYPE.OWNER) {
-      const devices = await Device.find({ ownerId: userId })
-        .lean();
-      return devices.map(device => fromDevice(device, userId));
+      const devices = await Device.find({ ownerId: userId }).lean();
+
+      return devices.map(device => ({
+        ...fromDevice(device, userId),
+        hasAccess: true,
+      }));
     }
 
     if (user.userType === USER_TYPE.ADMIN) {
-      const devices = await Device.find({ ownerId: user.ownerId })
-        .lean();
-      return devices.map(device => fromDevice(device, userId));
+      const devices = await Device.find({
+        ownerId: user.ownerId,
+      }).lean();
+
+      return devices.map(device => ({
+        ...fromDevice(device, userId),
+        hasAccess: true,
+      }));
     }
+
     return [];
+  }
+
+  static async findAccessibleDevices(userId: string) {
+    const user = await User.findById(userId)
+      .select("ownerId userType")
+      .lean();
+
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    const ownerId =
+      user.userType != USER_TYPE.OWNER
+        ? user.ownerId
+        : userId;
+
+    const [devices, deviceAccesses] = await Promise.all([
+      Device.find({ ownerId }).lean(),
+      DeviceAccess.find({ userId }).lean(),
+    ]);
+
+
+    const accessMap = new Map(
+      deviceAccesses.map(access => [
+        access.device.toString(),
+        access,
+      ]),
+    );
+
+    return devices.map(device => {
+      const access = accessMap.get(device._id.toString());
+
+      return {
+        device,
+        access: access?.access ?? [],
+      };
+    });
   }
 
 
@@ -172,31 +225,67 @@ export class DeviceService {
   // DEVICE ACCESS
   // =============================
 
-    static async addOrUpdateAccess(userId: string, deviceId: string, hasAccess: boolean, access: IAccess[]) {
+  static async addOrUpdateAccess(
+    userId: string,
+    deviceId: string,
+    access: number[],
+  ) {
     await UserService.findUserOrFail(userId);
-    if (!deviceId || typeof hasAccess !== "boolean") {
-      throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
+
+    if (!deviceId) {
+      throw new AppError(
+        DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD,
+      );
     }
 
-    let deviceAccess = await DeviceAccess.findOne({ userId, deviceId });
-
-    if (deviceAccess) {
-      deviceAccess.hasAccess = hasAccess;
-      deviceAccess.access = access;
-      await deviceAccess.save();
-    } else {
-      await DeviceAccess.create({ userId, deviceId, hasAccess, access });
+    if (!mongoose.Types.ObjectId.isValid(deviceId)) {
+      throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ID);
     }
+
+    if (!access.length) {
+      await DeviceAccess.deleteOne({
+        userId,
+        device: deviceId,
+      });
+
+      return;
+    }
+
+    await DeviceAccess.findOneAndUpdate(
+      {
+        userId,
+        device: deviceId,
+      },
+      {
+        access,
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
   }
 
-  static async addOrUpdateMultipleAccess(userId: string, accessList: any[]) {
+  static async addOrUpdateMultipleAccess(
+    userId: string,
+    accessList: any[],
+  ) {
     await UserService.findUserOrFail(userId);
-    for (const item of accessList) {
-      const { deviceId, hasAccess, access } = item;
-      DeviceService.addOrUpdateAccess(userId, deviceId, hasAccess, access);
+
+    await DeviceAccess.deleteMany({ userId });
+
+    const documents = accessList
+      .filter(item => item.access?.length)
+      .map(item => ({
+        userId,
+        device: item.deviceId,
+        access: item.access,
+      }));
+
+    if (documents.length) {
+      await DeviceAccess.insertMany(documents);
     }
   }
-
 
 
   static async setAreaArmMode(deviceId: string, isArmed: boolean) {

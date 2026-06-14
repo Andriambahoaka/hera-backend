@@ -1,24 +1,12 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface IAccess {
-  id: number;
-  isSelected: boolean;
-}
 
 export interface IDeviceAccess extends Document {
   userId: Types.ObjectId;
-  deviceId: String;
+  device: Types.ObjectId;
   hasAccess: boolean;
-  access: IAccess[];
+  access: number[];
 }
-
-const accessSchema = new Schema<IAccess>(
-  {
-    id: { type: Number, required: true },
-    isSelected: { type: Boolean, required: true },
-  },
-  { _id: false } 
-);
 
 const deviceAccessSchema = new Schema<IDeviceAccess>(
   {
@@ -26,15 +14,12 @@ const deviceAccessSchema = new Schema<IDeviceAccess>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    deviceId: {
-      type: String
-    },
-    hasAccess: {
-      type: Boolean,
-      required: true,
+    device: {
+      type: Schema.Types.ObjectId,
+      ref: 'Device',
     },
     access: {
-      type: [accessSchema],
+      type: [Number],
       default: [],
     },
   },

@@ -10,7 +10,8 @@ router.get('/', apiKeyAuth, deviceController.findAll);
 
 router.get('/owner',requireAuth, deviceController.findAllByOwner);
 
-router.get('/access', requireAuth, deviceController.findAllAccess);
+router.get('/granted-access', requireAuth, deviceController.findGrantedAccess);
+
 router.post('/access', deviceController.addOrUpdateAccess);
 
 router.put('/urgency-number', deviceController.editUrgencyNumber);
@@ -25,6 +26,8 @@ router.post('/get-accessory-status',requireAuth, deviceController.getAccessorySt
 router.put('/set-accessory', requireAuth, deviceController.setAccessory);
 
 router.post('/get-screenshot-url', requireAuth, deviceController.getPirCamSnapUrl);
+
+router.get('/access/:userId',deviceController.findAccessibleDevices);
 
 router.get('/:deviceId', deviceController.findByDeviceId);
 

@@ -142,4 +142,14 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "Access list must be an array",
   },
+  MISSING_ACCESS_FIELDS: {
+    code: "MISSING_ACCESS_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Each access item must contain deviceAccessId, hasAccess, and access fields",
+  },
+  INVALID_DEVICE_ID: {
+    code: "INVALID_DEVICE_ID",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Invalid device ID",
+  },
 };

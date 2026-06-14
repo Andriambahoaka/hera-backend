@@ -131,11 +131,12 @@ export class UserService {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-    //await DeviceService.addOrUpdateAccess(userId, accessList,);
+    if(accessList && accessList.length > 0) {
+      await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
+    }
+    console.log("Updated user:", user);
 
-    return {
-      message: SUCCESS.MEMBER_UPDATED
-    };
+    return user;
   }
 
   static async uploadImageFile(id: string, fileBuffer: Buffer) {
@@ -184,18 +185,6 @@ export class UserService {
         { ownerId },
       ],
     }).lean();
-  }
-
-  static async updateUserById(id: string, updateFields: Partial<IUser>) {
-    const user = await this.findUserOrFail(id);
-
-    Object.assign(user, updateFields);
-    await user.save();
-
-    return {
-      message: SUCCESS.USER_UPDATED,
-      userId: user._id,
-    };
   }
 
   static async updatePassword(userId: string, oldPassword: string, newPassword: string) {
