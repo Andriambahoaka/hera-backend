@@ -21,7 +21,7 @@ export const USER_ERRORS = {
 
   OLD_PASSWORD_INCORRECT: {
     code: "OLD_PASSWORD_INCORRECT",
-    status: HTTP_STATUS.UNAUTHORIZED,
+    status: HTTP_STATUS.BAD_REQUEST,
     message: "Old password is incorrect",
   },
 
