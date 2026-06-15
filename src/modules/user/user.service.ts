@@ -134,7 +134,6 @@ export class UserService {
     if(accessList && accessList.length > 0) {
       await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
     }
-    console.log("Updated user:", user);
 
     return user;
   }
@@ -188,10 +187,7 @@ export class UserService {
   }
 
   static async updatePassword(userId: string, oldPassword: string, newPassword: string) {
-    console.log("Updating password for userId:", userId);
     const user = await User.findById(userId);
-
-
 
     if (!user) {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);

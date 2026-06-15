@@ -58,7 +58,6 @@ export const signupService = async (data: CreateUserDto) => {
     password: tempPassword,
   });
 
-
   await emailService.sendWelcomeEmail(
     user.name,
     user.email,
@@ -122,11 +121,10 @@ export const resetPasswordService = async (token: string, newPassword: string) =
 export const forgotPasswordService = async (email: string) => {
   const user = await User.findOne({ email });
   if (!user) {
-    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    return { message: SUCCESS.RESET_EMAIL_SENT }
   }
-  
+
   const token = generateToken(user._id, RESET_PASSWORD_SECRET, RESET_EXPIRY);
-  console.log("token ho alefa",token);
 
   await emailService.sendResetPasswordEmail({
     to: email,

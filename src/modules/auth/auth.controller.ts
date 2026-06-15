@@ -49,6 +49,8 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
 
   const { newPassword } = req.body;
 
+    console.log("token azo",newPassword);
+
   const result = await resetPasswordService(token, newPassword);
   return sendSuccess(res, result);
 });

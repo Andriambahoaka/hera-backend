@@ -62,7 +62,7 @@ export const sendResetPasswordEmail = async ({
 }) => {
   
   const resetLink = `${APP_DOMAIN}/deeplink?to=update-password&token=${token}`;
-  const data = { name: name || "Utilisateur", to, resetLink };
+  const data = { name: name || "Utilisateur", to, resetLink ,APP_DOMAIN };
   const templateName = "resetPasswordEmail";
   const html = renderTemplate(templateName, data, "html");
   const text = renderTemplate(templateName, data, "txt");
