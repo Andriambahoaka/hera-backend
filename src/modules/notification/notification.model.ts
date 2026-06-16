@@ -1,14 +1,14 @@
 // models/Notification.ts
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IPack {
+export interface IDevice {
   _id: mongoose.Types.ObjectId;
   deviceName: string;
   ownerId: mongoose.Types.ObjectId;
 }
 
 export interface INotification extends Document {
-  pack: IPack;
+  device: IDevice;
   accessKey?: string;
   productId?: string;
   category?: string;
@@ -18,13 +18,14 @@ export interface INotification extends Document {
   utcTime?: number;
   localTime?: number;
   filePath?: string;
-  alarmType?: string; 
+  alarmType?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  userId?: Schema.Types.ObjectId;
 }
 
 const notificationSchema = new Schema<INotification>({
-  pack: {
+  device: {
     _id: { type: Schema.Types.ObjectId, required: true },
     deviceName: { type: String, required: true },
     ownerId: { type: Schema.Types.ObjectId, required: true },
@@ -39,6 +40,10 @@ const notificationSchema = new Schema<INotification>({
   localTime: { type: Number },
   filePath: { type: String },
   alarmType: { type: String },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  }
 }, {
   timestamps: true
 });

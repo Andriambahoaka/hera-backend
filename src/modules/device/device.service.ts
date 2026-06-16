@@ -12,6 +12,8 @@ import { USER_ERRORS } from '../user/user.errors';
 import { ImageInfo } from '../../shared/integrations/dolynk/dolynk.types';
 import { UserService } from '../user/user.service';
 import DeviceAccess from './deviceAccess.model';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/enums/notificationType.enum';
 
 
 export class DeviceService {
@@ -287,11 +289,17 @@ export class DeviceService {
     }
   }
 
+  static async setAreaArmMode(deviceId: string, isArmed: boolean, userId: string) {
+    const response = await DolynkClient.setAreaArmMode(deviceId, isArmed);
+    const notificationDto = {
+      deviceId,
+      msgType: isArmed ? NotificationType.ARMED : NotificationType.DISARMED,
+      userId: userId,
+    };
+    await NotificationService.createAndSend(notificationDto);
 
-  static async setAreaArmMode(deviceId: string, isArmed: boolean) {
-    return await DolynkClient.setAreaArmMode(deviceId, isArmed);
+    return response;
   }
-
 
   static async getAreaArmMode(deviceId: string) {
     const response = await DolynkClient.getAreaArmMode(deviceId);

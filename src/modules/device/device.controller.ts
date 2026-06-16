@@ -102,7 +102,7 @@ export const setAreaArmMode = asyncHandler(async (req, res) => {
     throw new AppError(DEVICE_ERRORS.MISSING_ARMING_REQUIRED_FIELDS);
   }
 
-  const result = await DeviceService.setAreaArmMode(deviceId, isArmed);
+  const result = await DeviceService.setAreaArmMode(deviceId, isArmed,req.auth!.userId);
 
   return sendSuccess(res, result);
 });

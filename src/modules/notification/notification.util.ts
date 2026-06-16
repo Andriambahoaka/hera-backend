@@ -24,29 +24,32 @@ export const getMessageBodyFromMsgType = (
   packName: string,
   userName?: string
 ): string => {
+  const endingMessage = userName != null ? `par ${userName}` : `avec succès`;
+
   switch (msgType) {
     case NotificationType.ALARM_LOCAL:
-      return `Votre détecteur vient de se déclencher et de prendre une photo à "${packName}"`;
+      return `Votre détecteur vient de se déclencher et de prendre une photo à ${packName}.`;
 
     case NotificationType.ARMED:
-      return `Votre centrale dans "${packName}" vient d'être armée par "${userName}"`;
+      return `Votre centrale dans ${packName} vient d'être armée ${endingMessage}.`;
 
     case NotificationType.DISARMED:
-      return `Votre centrale dans "${packName}" vient d'être désarmée par "${userName}"`;
+      return `Votre centrale dans ${packName} vient d'être désarmée ${endingMessage}.`;
 
     case NotificationType.ONLINE:
-      return `Votre centrale dans "${packName}" vient d'être allumée`;
+      return `Votre centrale dans ${packName} vient d'être allumée.`;
 
     case NotificationType.OFFLINE:
-      return `Votre centrale dans "${packName}" vient d'être éteinte`;
+      return `Votre centrale dans ${packName} vient d'être éteinte.`;
 
     case NotificationType.SENSOR_ABNORMAL:
-      return `Une tentative d'altération d'un accessoire a été détectée à "${packName}"`;
+      return `Une tentative d'altération d'un accessoire a été détectée à ${packName}.`;
 
     default:
-      return `Nouvelle notification reçue : "${msgType}"`;
+      return `Nouvelle notification reçue : ${msgType}`;
   }
 };
+
 export const getNotificationContent = (
   msgType: string,
   packName: string,

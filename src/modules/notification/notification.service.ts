@@ -7,14 +7,16 @@ import User from "../user/user.model";
 import { AppError } from "../../core/errors/app.error";
 import { NOTIFICATION_ERRORS } from "./notification.errors";
 
-import { getNotificationContent} from "./notification.util";
-import { CreateNotificationDto} from "./notification.types";
+import { getNotificationContent } from "./notification.util";
+import { CreateNotificationDto } from "./notification.types";
 import { DEVICE_ERRORS } from "../device/device.errors";
+import { USER_ERRORS } from "../user/user.errors";
+import { USER_TYPE } from "../user/enums/userType.enum";
 
 export class NotificationService {
+  static async createAndSend(payload: CreateNotificationDto) {
+    const { deviceId, userId, ...notificationData } = payload;
 
-  static async createAndSendNotification(payload: CreateNotificationDto) {
-    const { deviceId, userName, ...notificationData } = payload;
 
     const device = await Device.findOne({ deviceId }).select("_id deviceName ownerId");
     if (!device) {
@@ -24,48 +26,92 @@ export class NotificationService {
     const notification = await Notification.create({
       ...notificationData,
       deviceId,
-      pack: {
+      userId,
+      device: {
         _id: device._id,
         deviceName: device.deviceName,
         ownerId: device.ownerId,
       },
     });
 
-    const user = await User.findById(device.ownerId);
-    if (!user || !user.devicesToken || user.devicesToken.length === 0) {
+    const [owner, triggeringUser] = await Promise.all([
+      User.findById(device.ownerId),
+      userId ? User.findById(userId).select("name") : null,
+    ]);
+
+    if (!owner?.devicesToken?.length) {
       throw new AppError(NOTIFICATION_ERRORS.USER_OR_TOKEN_NOT_FOUND);
     }
-    
-   const { title, body } = getNotificationContent(notification.msgType ?? "", device.deviceName, userName);
 
-    const message = {
-      notification: { title, body },
+    const userName = triggeringUser?.name;
+
+    const { title, body } = getNotificationContent(notification.msgType ?? "", device.deviceName, userName);
+
+    const fcmResponse = await NotificationService.send({
+      tokens: owner.devicesToken,
+      title,
+      body,
       data: {
         id: notification._id.toString(),
         msgType: notification.msgType ?? "",
         deviceId: notification.deviceId ?? "",
         deviceName: device.deviceName,
         ownerId: device.ownerId.toString(),
-        createdAt: notification.createdAt!.toISOString(),
+        createdAt: notification.createdAt?.toISOString() ?? "",
+        ...(userId && {
+          userId,
+          name: userName ?? "",
+        }),
       },
-      tokens: user.devicesToken,
-    };
+    });
 
-    const fcmResponse = await admin.messaging().sendEachForMulticast(message);
 
     return {
       message: "Notification created and sent",
-      notification,
       fcmResponse,
     };
   }
 
-  static async findAllByOwner(ownerId: string) {
-    if (!ownerId) {
-      throw new AppError(NOTIFICATION_ERRORS.OWNER_ID_REQUIRED);
+  static async send(params: {
+    tokens: string[];
+    title: string;
+    body: string;
+    data?: Record<string, string>;
+  }) {
+    const {
+      tokens,
+      title,
+      body,
+      data,
+    } = params;
+
+    return admin.messaging().sendEachForMulticast({
+      notification: {
+        title,
+        body,
+      },
+      data,
+      tokens,
+    });
+  }
+
+  static async findAllByOwner(userId: string) {
+
+    const user = await User.findById(userId)
+      .select("ownerId userType")
+      .lean();
+
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-    const notifications = await Notification.find({ "pack.ownerId": ownerId });
+    const ownerId =
+      user.userType != USER_TYPE.OWNER
+        ? user.ownerId
+        : userId;
+
+
+    const notifications = await Notification.find({ "device.ownerId": ownerId });
 
     const today: any[] = [];
     const yesterday: any[] = [];
