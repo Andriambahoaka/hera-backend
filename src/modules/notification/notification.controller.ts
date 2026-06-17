@@ -9,6 +9,8 @@ export const postNotification = asyncHandler(async (req: Request, res: Response)
 });
 
 export const findAllByOwner = asyncHandler(async (req: Request, res: Response) => {
-  const data = await NotificationService.findAllByOwner(req.auth!.userId);
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 50);
+  const data = await NotificationService.findAllByOwner(req.auth!.userId,page,limit);
   return sendSuccess(res, data);
 });

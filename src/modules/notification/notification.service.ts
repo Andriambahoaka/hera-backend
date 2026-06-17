@@ -95,7 +95,8 @@ export class NotificationService {
     });
   }
 
-  static async findAllByOwner(userId: string) {
+  static async findAllByOwner(userId: string,page: number,
+  limit:number) {
 
     const user = await User.findById(userId)
       .select("ownerId userType")
@@ -109,9 +110,14 @@ export class NotificationService {
       user.userType != USER_TYPE.OWNER
         ? user.ownerId
         : userId;
+    const skip = (page - 1) * limit;
 
-
-    const notifications = await Notification.find({ "device.ownerId": ownerId });
+    const notifications = await Notification.find({
+      "device.ownerId": ownerId
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     const today: any[] = [];
     const yesterday: any[] = [];
@@ -144,6 +150,21 @@ export class NotificationService {
       }
     }
 
-    return { today, yesterday, last7Days };
+    const total = await Notification.countDocuments({
+      "device.ownerId": ownerId,
+    });
+
+    return {
+      notifications: {
+        today, yesterday, last7Days
+      },
+      pagination: {
+        page,
+        limit,
+        total,
+        hasMore: skip + notifications.length < total,
+      },
+    };
+
   }
 }

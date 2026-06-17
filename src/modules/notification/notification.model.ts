@@ -48,4 +48,14 @@ const notificationSchema = new Schema<INotification>({
   timestamps: true
 });
 
+const NOTIFICATION_RETENTION_DAYS = 90;
+
+notificationSchema.index(
+  { createdAt: 1 },
+  {
+    expireAfterSeconds:
+      NOTIFICATION_RETENTION_DAYS * 24 * 60 * 60,
+  }
+);
+
 export default mongoose.model<INotification>('Notification', notificationSchema);
