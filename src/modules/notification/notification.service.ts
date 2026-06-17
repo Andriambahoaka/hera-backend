@@ -95,8 +95,7 @@ export class NotificationService {
     });
   }
 
-  static async findAllByOwner(userId: string,page: number,
-  limit:number) {
+  static async findAllByOwner(userId: string,page: number,limit:number) {
 
     const user = await User.findById(userId)
       .select("ownerId userType")

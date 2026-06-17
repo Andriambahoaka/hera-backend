@@ -9,11 +9,20 @@ export const addActivity = asyncHandler(async (req: Request, res: Response) => {
   return sendSuccess(res, result);
 });
 
-export const findActivitiesByDate = asyncHandler(async (req: Request, res: Response) => {
-  const result = await ActivityService.findActivitiesByDate({
-    ownerId: req.query.ownerId as string,
-    date: req.query.date as string | undefined,
-  });
+export const findActivitiesByDate = asyncHandler(async (
+  req: Request,
+  res: Response
+) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 50);
+  const date = req.query.date as string | undefined;
+
+  const result = await ActivityService.findActivitiesByDate(
+    req.auth!.userId,
+    date,
+    page,
+    limit
+  );
 
   return sendSuccess(res, result);
 });

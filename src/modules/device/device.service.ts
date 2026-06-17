@@ -14,6 +14,8 @@ import { UserService } from '../user/user.service';
 import DeviceAccess from './deviceAccess.model';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/enums/notificationType.enum';
+import { ActivityService } from '../activity/activity.service';
+import { ActivityType } from '../activity/activity.model';
 
 
 export class DeviceService {
@@ -297,6 +299,30 @@ export class DeviceService {
       userId: userId,
     };
     await NotificationService.createAndSend(notificationDto);
+      const [user, device] = await Promise.all([
+    User.findById(userId).select("name"),
+    Device.findOne({ deviceId }).select("_id deviceName"),
+  ]);
+
+  if (user && device) {
+    await ActivityService.addActivity({
+      ownerId: device.ownerId.toString(),
+
+      type: isArmed
+        ? ActivityType.ARMED
+        : ActivityType.DISARMED,
+
+      actor: {
+        _id: user._id.toString(),
+        name: user.name,
+      },
+
+      targetDevice: {
+        _id: device._id.toString(),
+        deviceName: device.deviceName,
+      },
+    });
+  }
 
     return response;
   }

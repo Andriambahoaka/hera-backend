@@ -20,6 +20,9 @@ import { generateTempPassword } from "../../shared/utils/password.util";
 import * as emailService from "../../infrastructure/email/email.service";
 import { DeviceService } from "../device/device.service";
 import { COMMON_ERRORS } from "../../core/errors/common.error";
+import { ActivityService } from "../activity/activity.service";
+import { ActivityType } from "../activity/activity.model";
+import { getActivityActor } from "../activity/activity.helper";
 
 export class UserService {
   // =============================
@@ -98,8 +101,14 @@ export class UserService {
     return user;
   }
 
-  static async addMember(data: CreateUserDto) {
+  static async addMember(actorId: string, data: CreateUserDto) {
     const tempPassword = generateTempPassword();
+
+    const actor = await User.findById(actorId).select("name");
+
+    if (!actor) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
 
     const user = await UserService.createUser({
       ...data,
@@ -115,12 +124,47 @@ export class UserService {
       tempPassword
     );
 
+    if (!user.ownerId) {
+      throw new AppError(USER_ERRORS.OWNER_ID_REQUIRED);
+    }
+
+
+    await ActivityService.addActivity({
+      ownerId: user.ownerId.toString(),
+
+      type: ActivityType.ADD_MEMBER,
+
+      actor: {
+        _id: actor._id.toString(),
+        name: actor.name,
+      },
+
+      targetUser: {
+        _id: user._id.toString(),
+        name: user.name,
+      },
+    });
+
     return {
       message: SUCCESS.MEMBER_CREATED,
     };
   }
 
-  static async updateMember(userId: string, fields: Partial<IUser>, accessList: any[]) {
+  static async updateMember(actorId: string,userId: string, fields: Partial<IUser>, accessList: any[]) {
+
+
+    const oldUser = await User.findById(userId);
+
+    if (!oldUser) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    const accessChanged = accessList && accessList.length > 0;
+
+    const roleChanged =
+      fields.userType &&
+      fields.userType !== oldUser.userType;
+
     const user = await User.findOneAndUpdate(
       { _id: userId },
       { $set: fields },
@@ -131,12 +175,45 @@ export class UserService {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-    if(accessList && accessList.length > 0) {
+        if (!oldUser.ownerId) {
+      throw new AppError(USER_ERRORS.OWNER_ID_REQUIRED);
+    }
+
+    if (accessChanged) {
       await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
+
+      await ActivityService.addActivity({
+        ownerId: oldUser.ownerId.toString(),
+
+        type: ActivityType.UPDATE_ACCESS,
+
+        actor: await getActivityActor(actorId),
+
+        targetUser: {
+          _id: oldUser._id.toString(),
+          name: oldUser.name,
+        },
+      });
+    }
+
+    if (roleChanged) {
+      await ActivityService.addActivity({
+        ownerId: oldUser.ownerId.toString(),
+
+        type: ActivityType.UPDATE_ROLE,
+
+        actor: await getActivityActor(actorId),
+
+        targetUser: {
+          _id: oldUser._id.toString(),
+          name: oldUser.name,
+        },
+      });
     }
 
     return user;
   }
+
 
   static async uploadImageFile(id: string, fileBuffer: Buffer) {
     const user = await this.findUserOrFail(id);

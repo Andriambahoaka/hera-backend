@@ -16,14 +16,13 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
 
 export const addMember = asyncHandler(async (req: Request, res: Response) => {
   await validateSignupInput(req.body, true);
-  const result = await UserService.addMember(req.body);
+  const result = await UserService.addMember(req.auth!.userId,req.body);
   return sendSuccess(res, result);
 });
 
 export const updateMember = asyncHandler(async (req, res) => {
   const { _id, accessList, ...fields } = req.body;
-  console.log("Received updateMember request with fields:", fields, "and accessList:", accessList);
-  const user = await UserService.updateMember(_id, fields, accessList);
+  const user = await UserService.updateMember(req.auth!.userId,_id, fields, accessList);
   return sendSuccess(res,user);
 });
 
