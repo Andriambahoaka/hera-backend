@@ -89,7 +89,6 @@ if (!fs.existsSync(uploadDir)) {
 // =============================
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/.well-known", express.static(path.join(__dirname, ".well-known")));
 
 // =============================
 // Rate limiting (auth)
@@ -121,6 +120,12 @@ app.use(errorMiddleware);
 // =============================
 app.get("/healthz", (_: Request, res: Response) => {
   res.status(200).send(APP.HEALTH_OK);
+});
+
+app.get('/.well-known/assetlinks.json', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, '../public/.well-known/assetlinks.json')
+  );
 });
 
 // =============================

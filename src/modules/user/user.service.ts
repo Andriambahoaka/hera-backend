@@ -19,7 +19,6 @@ import { USER_TYPE } from "./enums/userType.enum";
 import { generateTempPassword } from "../../shared/utils/password.util";
 import * as emailService from "../../infrastructure/email/email.service";
 import { DeviceService } from "../device/device.service";
-import { COMMON_ERRORS } from "../../core/errors/common.error";
 import { ActivityService } from "../activity/activity.service";
 import { ActivityType } from "../activity/activity.model";
 import { getActivityActor } from "../activity/activity.helper";
@@ -150,7 +149,7 @@ export class UserService {
     };
   }
 
-  static async updateMember(actorId: string,userId: string, fields: Partial<IUser>, accessList: any[]) {
+  static async updateMember(actorId: string, userId: string, fields: Partial<IUser>, accessList: any[]) {
 
 
     const oldUser = await User.findById(userId);
@@ -175,11 +174,12 @@ export class UserService {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-        if (!oldUser.ownerId) {
+    if (!oldUser.ownerId) {
       throw new AppError(USER_ERRORS.OWNER_ID_REQUIRED);
     }
 
     if (accessChanged) {
+      console.log("accessChanged");
       await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
 
       await ActivityService.addActivity({
@@ -197,6 +197,7 @@ export class UserService {
     }
 
     if (roleChanged) {
+      console.log("roleChanged");
       await ActivityService.addActivity({
         ownerId: oldUser.ownerId.toString(),
 
@@ -210,10 +211,10 @@ export class UserService {
         },
       });
     }
+    console.log("updatedUser", user);
 
     return user;
   }
-
 
   static async uploadImageFile(id: string, fileBuffer: Buffer) {
     const user = await this.findUserOrFail(id);
@@ -298,11 +299,27 @@ export class UserService {
     return { message: SUCCESS.PASSWORD_UPDATED };
   }
 
-  static async deleteUserById(id: string) {
-    await this.findUserOrFail(id);
+  static async deleteUserById(actorId: string, id: string) {
+    const user = await this.findUserOrFail(id);
 
     await DeviceAccess.deleteMany({ userId: id });
     await User.findByIdAndDelete(id);
+
+    if (user) {
+      await ActivityService.addActivity({
+        ownerId: user.ownerId!.toString(),
+
+        type: ActivityType.DELETE_MEMBER,
+
+        actor: await getActivityActor(actorId),
+
+        targetUser: {
+          _id: user._id.toString(),
+          name: user.name,
+        },
+      });
+    }
+
 
     return { message: SUCCESS.USER_DELETED };
   }

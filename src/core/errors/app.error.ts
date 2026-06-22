@@ -7,5 +7,6 @@ export class AppError extends Error {
     super(error.message);
     this.code = error.code;
     this.status = error.status;
+    console.log(error.message);
   }
 }

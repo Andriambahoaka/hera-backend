@@ -15,6 +15,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const addMember = asyncHandler(async (req: Request, res: Response) => {
+  console.log(req.body);
   await validateSignupInput(req.body, true);
   const result = await UserService.addMember(req.auth!.userId,req.body);
   return sendSuccess(res, result);
@@ -22,6 +23,7 @@ export const addMember = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateMember = asyncHandler(async (req, res) => {
   const { _id, accessList, ...fields } = req.body;
+  console.log(req.body);
   const user = await UserService.updateMember(req.auth!.userId,_id, fields, accessList);
   return sendSuccess(res,user);
 });
@@ -85,7 +87,7 @@ export const deleteUserById = asyncHandler(async (req: Request, res: Response) =
     throw new AppError(USER_ERRORS.INVALID_USER_ID);
   }
 
-  const result = await UserService.deleteUserById(userId);
+  const result = await UserService.deleteUserById(req.auth!.userId,userId);
   return sendSuccess(res, result);
 });
 
