@@ -36,6 +36,11 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.NOT_FOUND,
     message: "Device not found",
   },
+    MODEL_NOT_SUPPORTED: {
+    code: "MODEL_NOT_SUPPORTED",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "The device model is not supported or the device category is incorrect",
+  },
 
   INVALID_DEVICE_ACCESS_PAYLOAD: {
     code: "INVALID_DEVICE_ACCESS_PAYLOAD",

@@ -14,6 +14,8 @@ export class DolynkApi {
 
     const headers = DolynkHeaders.generate(body, appAccessToken);
 
+        console.log(`${DOLYNK_CONFIG.BASE_URL}/open-api/${endpoint}`);
+
     try {
       const response = await axios.post(
         `${DOLYNK_CONFIG.BASE_URL}/open-api/${endpoint}`,
@@ -22,6 +24,7 @@ export class DolynkApi {
       );
 
       const data = response.data;
+      console.log(data);
 
       if (data.success === true) {
         return data;

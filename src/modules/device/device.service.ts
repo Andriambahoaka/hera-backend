@@ -40,7 +40,7 @@ export class DeviceService {
       throw new AppError(DEVICE_ERRORS.OWNER_NOT_FOUND);
     }
 
-    if (owner.userType === 2 || owner.userType === 3) {
+    if (owner.userType === USER_TYPE.MEMBER || owner.userType === USER_TYPE.OWNER) {
       throw new AppError(DEVICE_ERRORS.INVALID_OWNER_TYPE);
     }
 
@@ -56,7 +56,7 @@ export class DeviceService {
 
     devCode = DolynkCrypto.encodeDevCode(devCode);
 
-    // await DolynkClient.addDevice(deviceId, devCode);
+    await DolynkClient.addDevice(deviceId, devCode);
 
     const pack = new Device({
       ownerId,
@@ -293,36 +293,37 @@ export class DeviceService {
 
   static async setAreaArmMode(deviceId: string, isArmed: boolean, userId: string) {
     const response = await DolynkClient.setAreaArmMode(deviceId, isArmed);
-    const notificationDto = {
+
+        const notificationDto = {
       deviceId,
       msgType: isArmed ? NotificationType.ARMED : NotificationType.DISARMED,
       userId: userId,
     };
     await NotificationService.createAndSend(notificationDto);
-      const [user, device] = await Promise.all([
-    User.findById(userId).select("name"),
-    Device.findOne({ deviceId }).select("_id deviceName"),
-  ]);
+    const [user, device] = await Promise.all([
+      User.findById(userId).select("name"),
+      Device.findOne({ deviceId }).select("_id deviceName ownerId"),
+    ]);
 
-  if (user && device) {
-    await ActivityService.addActivity({
-      ownerId: device.ownerId.toString(),
+    if (user && device) {
+      await ActivityService.addActivity({
+        ownerId: device.ownerId.toString(),
 
-      type: isArmed
-        ? ActivityType.ARMED
-        : ActivityType.DISARMED,
+        type: isArmed
+          ? ActivityType.ARMED
+          : ActivityType.DISARMED,
 
-      actor: {
-        _id: user._id.toString(),
-        name: user.name,
-      },
+        actor: {
+          _id: user._id.toString(),
+          name: user.name,
+        },
 
-      targetDevice: {
-        _id: device._id.toString(),
-        deviceName: device.deviceName,
-      },
-    });
-  }
+        targetDevice: {
+          _id: device._id.toString(),
+          deviceName: device.deviceName,
+        },
+      });
+    }
 
     return response;
   }

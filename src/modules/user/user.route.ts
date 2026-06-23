@@ -19,7 +19,7 @@ router.put('/update-password', requireAuth, UserController.updatePassword);
 
 // Device tokens
 router.post('/device-token', requireAuth, UserController.addDeviceToken);
-router.delete('/device-token', requireAuth, UserController.deleteDeviceToken);
+router.post('/logout', requireAuth, UserController.logout);
 
 // User image upload
 router.post('/image', requireAuth, upload.single('image'), UserController.uploadImageFile);

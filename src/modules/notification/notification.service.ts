@@ -43,7 +43,10 @@ export class NotificationService {
       throw new AppError(NOTIFICATION_ERRORS.USER_OR_TOKEN_NOT_FOUND);
     }
 
-    const userName = triggeringUser?.name;
+const userName =
+  userId && userId.toString() !== device.ownerId.toString()
+    ? triggeringUser?.name
+    : undefined;
 
     const { title, body } = getNotificationContent(notification.msgType ?? "", device.deviceName, userName);
 

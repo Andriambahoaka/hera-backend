@@ -114,13 +114,13 @@ export const addDeviceToken = asyncHandler(async (req: Request, res: Response) =
   return sendSuccess(res, result);
 });
 
-export const deleteDeviceToken = asyncHandler(async (req: Request, res: Response) => {
+export const logout = asyncHandler(async (req: Request, res: Response) => {
   const { deviceToken } = req.body;
 
   if (!deviceToken) {
     throw new AppError(USER_ERRORS.DEVICE_TOKEN_REQUIRED);
   }
   
-  const result = await UserService.deleteDeviceToken(req.auth!.userId, deviceToken);
+  const result = await UserService.logout(req.auth!.userId, deviceToken);
   return sendSuccess(res, result);
 });

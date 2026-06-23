@@ -47,7 +47,7 @@ export const SUCCESS = {
   MEMBER_UPDATED: "Member successfully updated.",
 
   LOGIN_SUCCESS: "Connexion réussie.",
-  LOGOUT_SUCCESS: "Déconnexion réussie.",
+  LOGOUT_SUCCESS: "Logged out successfully",
   TOKEN_REFRESHED: "Nouveau jeton généré.",
   WELCOME_EMAIL_SUBJECT: "Hera App : Mot de passe temporaire",
   MEMBER_INVITE_SUBJECT: "Invitation à rejoindre Hera App",
@@ -62,8 +62,9 @@ export const SUCCESS = {
   IMAGE_UPDATED: "Image utilisateur mise à jour avec succès",
 
   // Device Token
-  TOKEN_ADDED: "Token ajouté avec succès.",
+  TOKEN_ADDED: "Token added successfully.",
   TOKEN_DELETED: "Token supprimé avec succès.",
+  
 };
 
 export const APP = {

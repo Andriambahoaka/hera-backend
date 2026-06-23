@@ -179,7 +179,6 @@ export class UserService {
     }
 
     if (accessChanged) {
-      console.log("accessChanged");
       await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
 
       await ActivityService.addActivity({
@@ -197,7 +196,6 @@ export class UserService {
     }
 
     if (roleChanged) {
-      console.log("roleChanged");
       await ActivityService.addActivity({
         ownerId: oldUser.ownerId.toString(),
 
@@ -211,7 +209,6 @@ export class UserService {
         },
       });
     }
-    console.log("updatedUser", user);
 
     return user;
   }
@@ -381,16 +378,15 @@ export class UserService {
     };
   }
 
-  static async deleteDeviceToken(userId: string, deviceToken: string) {
-    const result = await User.updateOne(
-      { _id: userId },
-      { $pull: { devicesToken: deviceToken } }
-    );
-
-    if (result.modifiedCount === 0) {
-      throw new AppError(USER_ERRORS.DEVICE_TOKEN_NOT_FOUND);
+  static async logout(userId: string, deviceToken: string) {
+    if (deviceToken) {
+      await User.findByIdAndUpdate(userId, {
+        $pull: {
+          deviceTokens: deviceToken,
+        },
+      });
     }
 
-    return { message: SUCCESS.TOKEN_DELETED };
+    return { message: SUCCESS.LOGOUT_SUCCESS };
   }
 }
