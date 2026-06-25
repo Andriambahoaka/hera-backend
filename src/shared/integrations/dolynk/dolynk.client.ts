@@ -120,16 +120,22 @@ export class DolynkClient {
       throw new AppError(DEVICE_ERRORS.ACCESSORY_NOT_SUPPORTED);
     }
 
-    const accessoryInfos = Object.fromEntries(
+    const sensitivityKey = type === "PIRCam" ? "sensentivity" : "sensitivity";
+
+
+
+    const accessoryInfo = Object.fromEntries(
       Object.entries({
         id,
         name,
-        sensentivity: sensitivity,
+        [sensitivityKey]: sensitivity,
         volume,
         entryDelay,
         imageInfo,
       }).filter(([, value]) => value != null),
     );
+
+    const accessoryInfos = type === "PIRCam" ? accessoryInfo : [accessoryInfo];
 
     return DolynkApi.postRequest(
       accessoryPath,

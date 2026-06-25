@@ -38,10 +38,7 @@ export const uploadImageFile = asyncHandler(async (req: Request, res: Response) 
     throw new AppError(USER_ERRORS.NO_IMAGE_PROVIDED);
   }
 
-  const userId = req.auth?.userId;
-  if (!userId) { throw new AppError(COMMON_ERRORS.UNAUTHORIZED); }
-
-  const result = await UserService.uploadImageFile(userId, req.file.buffer);
+  const result = await UserService.uploadImageFile(req.auth!.userId, req.file.buffer);
   return sendSuccess(res, result);
 });
 

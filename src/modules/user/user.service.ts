@@ -228,7 +228,6 @@ export class UserService {
     await user.save();
 
     return {
-      message: SUCCESS.IMAGE_UPDATED,
       imageUrl: result.secure_url,
     };
   }

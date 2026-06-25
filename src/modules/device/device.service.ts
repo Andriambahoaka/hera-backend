@@ -144,48 +144,45 @@ export class DeviceService {
     return device;
   }
 
-  static async findGrantedAccess(userId: string) {
-    const user = await User.findById(userId)
-      .select("ownerId userType")
+static async findGrantedAccess(userId: string) {
+  const user = await User.findById(userId)
+    .select("ownerId userType")
+    .lean();
+
+  if (!user) {
+    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+  }
+
+  if (user.userType === USER_TYPE.MEMBER || user.userType === USER_TYPE.ADMIN) {
+    const accesses = await DeviceAccess.find({
+      userId,
+      access: { $exists: true, $ne: [] },
+    })
+      .populate("device")
       .lean();
 
-    if (!user) {
-      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
-    }
-
-    if (user.userType === USER_TYPE.MEMBER) {
-      const accesses = await DeviceAccess.find({ userId })
-        .populate("device")
-        .lean();
-
-      return accesses.map(access => ({
-        ...access,
-        hasAccess: true,
-      }));
-    }
-
-    if (user.userType === USER_TYPE.OWNER) {
-      const devices = await Device.find({ ownerId: userId }).lean();
-
-      return devices.map(device => ({
-        ...fromDevice(device, userId),
-        hasAccess: true,
-      }));
-    }
-
-    if (user.userType === USER_TYPE.ADMIN) {
-      const devices = await Device.find({
-        ownerId: user.ownerId,
-      }).lean();
-
-      return devices.map(device => ({
-        ...fromDevice(device, userId),
-        hasAccess: true,
-      }));
-    }
-
-    return [];
+    return accesses.map(access => ({
+      ...access,
+      hasAccess: true,
+    }));
   }
+
+  const ownerId =
+    user.userType === USER_TYPE.OWNER
+      ? userId
+      : user.ownerId;
+
+  if (user.userType === USER_TYPE.OWNER) {
+    const devices = await Device.find({ ownerId }).lean();
+
+    return devices.map(device => ({
+      ...fromDevice(device, userId),
+      hasAccess: true,
+    }));
+  }
+
+  return [];
+}
 
   static async findAccessibleDevices(userId: string) {
     const user = await User.findById(userId)
