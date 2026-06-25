@@ -68,6 +68,30 @@ export class DeviceService {
     return pack.save();
   }
 
+static async addAccessory(
+  deviceId: string,
+  accessoryInfo: {
+    id: string;
+    areaId?: number;
+    name?: string;
+    model?: string;
+  }
+) {
+  if (!deviceId) {
+    throw new AppError(DEVICE_ERRORS.MISSING_DEVICE_ID_FIELD);
+  }
+
+  const device = await Device.findOne({ deviceId });
+  if (!device) {
+    throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+  }
+
+  return await DolynkClient.addAccessory(deviceId, accessoryInfo);
+
+}
+
+
+
   // =============================
   // UPDATE
   // =============================

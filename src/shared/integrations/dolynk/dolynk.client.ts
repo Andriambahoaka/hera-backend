@@ -30,6 +30,22 @@ export class DolynkClient {
     );
   }
 
+  static async addAccessory(deviceId: string, accessoryInfo: any) {
+    const payload = {
+      deviceId,
+      accessoryInfo,
+    };
+
+    return DolynkApi.postRequest(
+      `/${ALARM_SEGMENT}/setAccessoryPair`,
+      payload,
+      {
+        default: new AppError(DEVICE_ERRORS.ACCESSORY_ADD_FAILED),
+      }
+    );
+  }
+
+
   static async setAreaArmMode(deviceId: string, isArmed: boolean) {
     const device = await Device.findOne({ deviceId }, { devCode: 1 });
     const encodedDevCode = device?.devCode;

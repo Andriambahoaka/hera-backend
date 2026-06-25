@@ -52,6 +52,12 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "ownerId, deviceId, deviceName and devCode are required",
   },
+
+    MISSING_ACCESSORY_FIELDS: {
+    code: "MISSING_ACCESSORY_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "deviceId and accessoryInfo are required",
+  },
   MISSING_ARMING_REQUIRED_FIELDS: {
     code: "MISSING_ARMING_REQUIRED_FIELDS",
     status: HTTP_STATUS.BAD_REQUEST,
@@ -114,6 +120,12 @@ export const DEVICE_ERRORS = {
     code: "DEVICE_GET_AREA_ARM_FAILED",
     status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     message: "Failed to get area arm mode for device",
+  },
+
+    ACCESSORY_ADD_FAILED: {
+    code: "ACCESSORY_ADD_FAILED",
+    status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    message: "Failed to add accessory",
   },
   DOLYNK_AUTH_FAILED: {
     code: "DOLYNK_AUTH_FAILED",

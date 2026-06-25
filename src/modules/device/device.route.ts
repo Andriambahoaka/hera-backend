@@ -21,6 +21,7 @@ router.put('/names', deviceController.updateDeviceNames);
 router.post('/set-area-arm', requireAuth, deviceController.setAreaArmMode);
 router.post('/get-area-arm', requireAuth, deviceController.getAreaArmMode);
 
+router.post('/add-accessory',apiKeyAuth,deviceController.addAccessory);
 router.post('/get-accessories-info', requireAuth,deviceController.getAccessoriesInfo);
 router.post('/get-accessory-status',requireAuth, deviceController.getAccessoryStatus);
 router.put('/set-accessory', requireAuth, deviceController.setAccessory);

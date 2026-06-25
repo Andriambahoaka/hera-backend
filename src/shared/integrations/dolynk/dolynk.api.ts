@@ -3,6 +3,7 @@ import { AppError } from "../../../core/errors/app.error";
 import { DolynkAuthService } from "./dolynk.auth";
 import { DolynkHeaders } from "./dolynk.headers";
 import { DOLYNK_CONFIG } from "../../config/dolynk.config";
+import { HTTP_STATUS } from "../../../core/constants/httpStatus";
 export class DolynkApi {
   static async postRequest<T>(
     endpoint: string,
@@ -30,7 +31,11 @@ export class DolynkApi {
         return data;
       }
 
-      const mappedError = errorMap[data.code] ?? errorMap["default"];
+      const mappedError = errorMap[data.code] ?? new AppError({
+          code: data.code,
+          status: HTTP_STATUS.BAD_REQUEST,
+          message: data.msg,
+        });
       throw mappedError;
     } catch (error) {
       if (error instanceof AppError) throw error;

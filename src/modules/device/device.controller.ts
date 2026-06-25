@@ -28,6 +28,18 @@ export const add = asyncHandler(async (req, res) => {
   return sendSuccess(res, device);
 });
 
+export const addAccessory = asyncHandler(async (req, res) => {
+  const { deviceId, accessoryInfo } = req.body;
+
+  if (!deviceId || !accessoryInfo) {
+    throw new AppError(DEVICE_ERRORS.MISSING_ACCESSORY_FIELDS);
+  }
+
+  const accessory = await DeviceService.addAccessory(deviceId, accessoryInfo);
+  return sendSuccess(res, accessory);
+});
+
+
 export const updateDeviceNames = asyncHandler(async (req, res) => {
   await DeviceService.updateDeviceNames(req.body.updates);
   return sendSuccess(res, { message: "Device names updated" });
