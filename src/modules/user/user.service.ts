@@ -111,8 +111,7 @@ export class UserService {
 
     const user = await UserService.createUser({
       ...data,
-      password: tempPassword,
-      userType: USER_TYPE.MEMBER,
+      password: tempPassword
     });
 
     await DeviceService.addOrUpdateMultipleAccess(user._id, data.accessList);

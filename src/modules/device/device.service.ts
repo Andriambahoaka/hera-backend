@@ -68,27 +68,27 @@ export class DeviceService {
     return pack.save();
   }
 
-static async addAccessory(
-  deviceId: string,
-  accessoryInfo: {
-    id: string;
-    areaId?: number;
-    name?: string;
-    model?: string;
-  }
-) {
-  if (!deviceId) {
-    throw new AppError(DEVICE_ERRORS.MISSING_DEVICE_ID_FIELD);
-  }
+  static async addAccessory(
+    deviceId: string,
+    accessoryInfo: {
+      id: string;
+      areaId?: number;
+      name?: string;
+      model?: string;
+    }
+  ) {
+    if (!deviceId) {
+      throw new AppError(DEVICE_ERRORS.MISSING_DEVICE_ID_FIELD);
+    }
 
-  const device = await Device.findOne({ deviceId });
-  if (!device) {
-    throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+    const device = await Device.findOne({ deviceId });
+    if (!device) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+    }
+
+    return await DolynkClient.addAccessory(deviceId, accessoryInfo);
+
   }
-
-  return await DolynkClient.addAccessory(deviceId, accessoryInfo);
-
-}
 
   // =============================
   // UPDATE
@@ -142,45 +142,45 @@ static async addAccessory(
     return device;
   }
 
-static async findGrantedAccess(userId: string) {
-  const user = await User.findById(userId)
-    .select("ownerId userType")
-    .lean();
-
-  if (!user) {
-    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
-  }
-
-  if (user.userType === USER_TYPE.MEMBER || user.userType === USER_TYPE.ADMIN) {
-    const accesses = await DeviceAccess.find({
-      userId,
-      access: { $exists: true, $ne: [] },
-    })
-      .populate("device")
+  static async findGrantedAccess(userId: string) {
+    const user = await User.findById(userId)
+      .select("ownerId userType")
       .lean();
 
-    return accesses.map(access => ({
-      ...access,
-      hasAccess: true,
-    }));
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+    }
+
+    if (user.userType === USER_TYPE.MEMBER || user.userType === USER_TYPE.ADMIN) {
+      const accesses = await DeviceAccess.find({
+        userId,
+        access: { $exists: true, $ne: [] },
+      })
+        .populate("device")
+        .lean();
+
+      return accesses.map(access => ({
+        ...access,
+        hasAccess: true,
+      }));
+    }
+
+    const ownerId =
+      user.userType === USER_TYPE.OWNER
+        ? userId
+        : user.ownerId;
+
+    if (user.userType === USER_TYPE.OWNER) {
+      const devices = await Device.find({ ownerId }).lean();
+
+      return devices.map(device => ({
+        ...fromDevice(device, userId),
+        hasAccess: true,
+      }));
+    }
+
+    return [];
   }
-
-  const ownerId =
-    user.userType === USER_TYPE.OWNER
-      ? userId
-      : user.ownerId;
-
-  if (user.userType === USER_TYPE.OWNER) {
-    const devices = await Device.find({ ownerId }).lean();
-
-    return devices.map(device => ({
-      ...fromDevice(device, userId),
-      hasAccess: true,
-    }));
-  }
-
-  return [];
-}
 
   static async findAccessibleDevices(userId: string) {
     const user = await User.findById(userId)
@@ -289,7 +289,7 @@ static async findGrantedAccess(userId: string) {
   static async setAreaArmMode(deviceId: string, isArmed: boolean, userId: string) {
     const response = await DolynkClient.setAreaArmMode(deviceId, isArmed);
 
-        const notificationDto = {
+    const notificationDto = {
       deviceId,
       msgType: isArmed ? NotificationType.ARMED : NotificationType.DISARMED,
       userId: userId,
