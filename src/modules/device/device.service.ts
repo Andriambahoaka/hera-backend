@@ -90,35 +90,9 @@ static async addAccessory(
 
 }
 
-
-
   // =============================
   // UPDATE
   // =============================
-
-  static async updateDeviceNames(
-    updates: { deviceId: string; deviceName: string }[]
-  ) {
-    return Promise.all(
-      updates.map(({ deviceId, deviceName }) =>
-        Device.updateOne({ deviceId }, { $set: { deviceName } })
-      )
-    );
-  }
-
-  static async updateUrgencyNumber(deviceId: string, urgencyNumber?: string) {
-    const pack = await Device.findOneAndUpdate(
-      { deviceId },
-      { urgencyNumber: urgencyNumber ?? "17" },
-      { new: true }
-    );
-
-    if (!pack) {
-      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
-    }
-
-    return pack;
-  }
 
   static async update(
     deviceId: string,

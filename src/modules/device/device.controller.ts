@@ -40,18 +40,6 @@ export const addAccessory = asyncHandler(async (req, res) => {
 });
 
 
-export const updateDeviceNames = asyncHandler(async (req, res) => {
-  await DeviceService.updateDeviceNames(req.body.updates);
-  return sendSuccess(res, { message: "Device names updated" });
-});
-
-export const editUrgencyNumber = asyncHandler(async (req, res) => {
-  const pack = await DeviceService.updateUrgencyNumber(
-    req.body.deviceId,
-    req.body.urgencyNumber
-  );
-  return sendSuccess(res, pack);
-});
 
 export const findByDeviceId = asyncHandler(async (req, res) => {
   const ownerId = req.params.deviceId as string;

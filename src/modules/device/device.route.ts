@@ -14,9 +14,7 @@ router.get('/granted-access', requireAuth, deviceController.findGrantedAccess);
 
 router.post('/access', deviceController.addOrUpdateAccess);
 
-router.put('/urgency-number', deviceController.editUrgencyNumber);
 router.put('/', deviceController.update);
-router.put('/names', deviceController.updateDeviceNames);
 
 router.post('/set-area-arm', requireAuth, deviceController.setAreaArmMode);
 router.post('/get-area-arm', requireAuth, deviceController.getAreaArmMode);
