@@ -16,6 +16,7 @@ import { USER_ERRORS } from "../user/user.errors";
 import { UserService } from "../user/user.service";
 import { generateTempPassword } from "../../shared/utils/password.util";
 import { CreateUserDto } from "../user/dto/user.dto";
+import { USER_TYPE } from "../user/enums/userType.enum";
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ export const signupService = async (data: CreateUserDto) => {
 
   const user = await UserService.createUser({
     ...data,
+    userType: USER_TYPE.OWNER,
     password: tempPassword,
   });
 
@@ -65,8 +67,8 @@ export const signupService = async (data: CreateUserDto) => {
   );
 
   return {
-    code: "USER_CREATED",
-    message: SUCCESS.USER_CREATED,
+    code: "OWNER_CREATED",
+    message: SUCCESS.OWNER_CREATED,
   };
 };
 

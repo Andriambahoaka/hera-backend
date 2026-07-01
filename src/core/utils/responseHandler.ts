@@ -1,5 +1,4 @@
 import { Response } from "express";
-import { ERRORS } from "./messages.util";
 
 /**
  * Sends a generic success response.
@@ -34,7 +33,7 @@ export const sendBadRequestError = (res: Response, error: string): Response => {
  */
 export const sendUnauthorizedError = (
   res: Response,
-  error: string = ERRORS.CREDENTIALS_INCORRECT
+  error: string = "Credentials are incorrect"
 ): Response => {
   return res.status(401).json({ message: error });
 };
@@ -74,5 +73,5 @@ export const sendUnprocessableEntityError = (
  * Sends a 500 Internal Server Error response.
  */
 export const sendInternalError = (res: Response, error: unknown): Response => {
-  return res.status(500).json({ message: ERRORS.UNKNOWN_ERROR, error });
+  return res.status(500).json({ message: "An unknown error occurred", error });
 };

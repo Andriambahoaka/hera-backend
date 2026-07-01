@@ -27,73 +27,77 @@ export const AUTH_ERRORS = {
     message: 'Refresh key is missing',
   },
 
-  MISSING_REQUIRED_FIELDS: {
-    code: 'MISSING_REQUIRED_FIELDS',
+  MISSING_MEMBER_FIELDS: {
+    code: 'MISSING_MEMBER_FIELDS',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Les champs 'name', 'email' et 'userType' sont obligatoires.",
+    message: "The fields 'ownerId', 'name', 'email', and 'userType' are required.",
   },
+
+  MISSING_OWNER_FIELDS: {
+    code: 'MISSING_OWNER_FIELDS',
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "The fields 'name' and 'email' are required.",
+  },
+
   INVALID_EMAIL_FORMAT: {
     code: 'INVALID_EMAIL_FORMAT',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Le format de l'adresse e-mail est invalide.",
+    message: "The email address format is invalid.",
   },
 
   INVALID_USER_TYPE: {
     code: 'INVALID_USER_TYPE',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Le type d'utilisateur est invalide. Les valeurs possibles sont : 1 (propriétaire), 2 (administrateur) ou 3 (membre).",
-  },
-
-  OWNER_ID_REQUIRED: {
-    code: 'OWNER_ID_REQUIRED',
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "Le champ 'ownerId' est obligatoire pour les utilisateurs de type administrateur ou membre.",
+    message: "The user type is invalid. Allowed values are: 2 (administrator) or 3 (member).",
   },
 
   OWNER_ID_NOT_ALLOWED: {
     code: 'OWNER_ID_NOT_ALLOWED',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Le champ 'ownerId' doit être nul pour les utilisateurs de type propriétaire.",
+    message: "The field 'ownerId' must be null for owner-type users.",
   },
 
   INVALID_OWNER_ID: {
     code: 'INVALID_OWNER_ID',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "L'identifiant du propriétaire (ownerId) est invalide.",
+    message: "The owner identifier (ownerId) is invalid.",
   },
 
   OWNER_NOT_FOUND: {
     code: 'OWNER_NOT_FOUND',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Aucun utilisateur propriétaire n’a été trouvé avec cet identifiant",
+    message: "No owner user was found with this identifier.",
   },
+
   REFRESH_TOKEN_REQUIRED: {
     code: 'REFRESH_TOKEN_REQUIRED',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: 'Refresh token is required',
+    message: "Refresh token is required.",
   },
+
   INVALID_REFRESH_TOKEN: {
     code: 'INVALID_REFRESH_TOKEN',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: 'Invalid refresh token',
+    message: "Invalid refresh token.",
   },
+
   REFRESH_KEY_EXPIRED: {
     code: 'REFRESH_KEY_EXPIRED',
     status: HTTP_STATUS.UNAUTHORIZED,
-    message: 'Refresh key has expired',
+    message: "Refresh key has expired.",
   },
 
   INVALID_AUTH_HEADER: {
     code: 'INVALID_AUTH_HEADER',
     status: HTTP_STATUS.UNAUTHORIZED,
-    message: 'Missing or malformed authorization header',
+    message: "Missing or malformed authorization header.",
   },
 
-UNAUTHORIZED: {
-  code: 'UNAUTHORIZED',
-  status: HTTP_STATUS.UNAUTHORIZED,
-  message: 'Invalid or expired authorization token.',
-},
+  UNAUTHORIZED: {
+    code: 'UNAUTHORIZED',
+    status: HTTP_STATUS.UNAUTHORIZED,
+    message: 'Invalid or expired authorization token.',
+  },
 
   INVALID_API_KEY: {
     code: 'INVALID_API_KEY',
@@ -105,5 +109,4 @@ UNAUTHORIZED: {
     status: HTTP_STATUS.UNAUTHORIZED,
     message: 'API key has expired',
   },
-
 };

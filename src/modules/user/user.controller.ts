@@ -5,9 +5,8 @@ import { sendSuccess } from "../../core/utils/responseHandler";
 import { asyncHandler } from "../../core/utils/asyncHandler";
 import { AppError } from "../../core/errors/app.error";
 import { USER_ERRORS } from "./user.errors";
-import { COMMON_ERRORS } from "../../core/errors/common.error";
 import mongoose from "mongoose";
-import { validateSignupInput } from "../auth/auth.validator";
+import { validateMemberInput } from "./user.validator";
 
 export const getMe = asyncHandler(async (req: Request, res: Response) => {
   const result = await UserService.getMe(req.auth!.userId);
@@ -15,8 +14,7 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const addMember = asyncHandler(async (req: Request, res: Response) => {
-  console.log(req.body);
-  await validateSignupInput(req.body, true);
+  await validateMemberInput(req.body);
   const result = await UserService.addMember(req.auth!.userId,req.body);
   return sendSuccess(res, result);
 });
