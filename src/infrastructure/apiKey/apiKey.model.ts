@@ -5,14 +5,19 @@ export interface IApiKey extends Document {
   key: string;
   refreshKey: string;
   expiresAt: Date;
-  createdAt: Date;
 }
 
-const ApiKeySchema = new Schema<IApiKey>({
+const apiKeySchema = new Schema<IApiKey>({
   key: { type: String, required: true },
   refreshKey: { type: String, required: true },
   expiresAt: { type: Date, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
+},
+  {
+    timestamps: true,
+  }
+);
 
-export default mongoose.model<IApiKey>('ApiKey', ApiKeySchema);
+apiKeySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+
+export default mongoose.model<IApiKey>('ApiKey', apiKeySchema);

@@ -40,7 +40,7 @@ export class DeviceService {
       throw new AppError(DEVICE_ERRORS.OWNER_NOT_FOUND);
     }
 
-    if (owner.userType === USER_TYPE.MEMBER || owner.userType === USER_TYPE.OWNER) {
+    if (owner.userType === USER_TYPE.MEMBER || owner.userType === USER_TYPE.ADMIN) {
       throw new AppError(DEVICE_ERRORS.INVALID_OWNER_TYPE);
     }
 

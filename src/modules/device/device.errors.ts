@@ -16,7 +16,7 @@ export const DEVICE_ERRORS = {
   INVALID_OWNER_TYPE: {
     code: "INVALID_OWNER_TYPE",
     status: HTTP_STATUS.FORBIDDEN,
-    message: "User is not allowed to own a device",
+    message: "Only owner-type users can have a pack",
   },
   
   DEVICE_ALREADY_EXISTS: {
@@ -79,15 +79,10 @@ export const DEVICE_ERRORS = {
     message: "deviceId, accessoryId and type are required",
   },
 
-  DEVICE_PASSWORD_INCORRECT: {
-    code: "DEVICE_PASSWORD_INCORRECT",
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "Device password is incorrect",
-  },
   INVALID_CREDENTIALS: {
     code: "INVALID_CREDENTIALS",
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "Invalid device ID or device password (devCode).",
+    message: "Invalid device ID or device password.",
   },
 
   DEVICE_OFFLINE: {
