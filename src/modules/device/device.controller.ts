@@ -39,8 +39,6 @@ export const addAccessory = asyncHandler(async (req, res) => {
   return sendSuccess(res, accessory);
 });
 
-
-
 export const findByDeviceId = asyncHandler(async (req, res) => {
   const ownerId = req.params.deviceId as string;
   const pack = await DeviceService.findByDeviceId(ownerId);

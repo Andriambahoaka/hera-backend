@@ -1,4 +1,3 @@
-// models/ApiClient.ts
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IApiClient extends Document {

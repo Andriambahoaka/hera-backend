@@ -26,6 +26,7 @@ export const SUCCESS = {
   // Image
   IMAGE_UPDATED: "User image updated successfully.",
 
+
   // Device Token
   TOKEN_ADDED: "Token added successfully.",
   TOKEN_DELETED: "Token deleted successfully.",

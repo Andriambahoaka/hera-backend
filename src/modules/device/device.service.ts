@@ -58,14 +58,14 @@ export class DeviceService {
 
     await DolynkClient.addDevice(deviceId, devCode);
 
-    const pack = new Device({
+    const device = new Device({
       ownerId,
       deviceId,
       deviceName,
       devCode,
     });
 
-    return pack.save();
+    return device.save();
   }
 
   static async addAccessory(

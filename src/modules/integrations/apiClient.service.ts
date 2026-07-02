@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import ApiClient from "./apiClient.model";
 
-
 export const generateAccessToken = (clientId: string) => {
   return jwt.sign(
     { clientId, type: "client" },

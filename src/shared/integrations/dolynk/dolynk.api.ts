@@ -33,7 +33,7 @@ export class DolynkApi {
 
       const mappedError = errorMap[data.code] ?? new AppError({
           code: data.code,
-          status: HTTP_STATUS.BAD_REQUEST,
+          status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
           message: data.msg,
         });
       throw mappedError;

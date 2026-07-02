@@ -51,7 +51,6 @@ export class DolynkClient {
     const encodedDevCode = device?.devCode;
     const areaIds = Array.from({ length: 32 }, (_, i) => i + 1);
     const armingMode = isArmed ? "T" : "D";
-    console.log(armingMode);
 
     const payload = {
       deviceId,

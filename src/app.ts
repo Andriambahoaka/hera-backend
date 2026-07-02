@@ -109,7 +109,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/oauth", oauthRoutes);
 app.use("/api/user-types", userTypeRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/devices", deviceRoutes);
+app.use("/api/packs", deviceRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/dolynk", dolynkRoutes);
