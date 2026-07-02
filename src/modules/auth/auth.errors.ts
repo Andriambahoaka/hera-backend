@@ -1,11 +1,37 @@
 import { HTTP_STATUS } from "../../core/constants/httpStatus";
 
 export const AUTH_ERRORS = {
+  //signup errors
   USER_EXISTS: {
-    code: 'USER_EXISTS',
+    code: "USER_EXISTS",
     status: HTTP_STATUS.CONFLICT,
-    message: 'User already exists',
+    message: "Un utilisateur avec cette adresse e-mail existe déjà.",
   },
+
+  MISSING_OWNER_FIELDS: {
+    code: "MISSING_OWNER_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Les champs « nom » et « adresse e-mail » sont obligatoires.",
+  },
+
+  INVALID_EMAIL_FORMAT: {
+    code: "INVALID_EMAIL_FORMAT",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Le format de l'adresse e-mail est invalide.",
+  },
+  INVALID_OWNER_ID: {
+    code: 'INVALID_OWNER_ID',
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "The owner identifier (ownerId) is invalid.",
+  },
+
+  OWNER_NOT_FOUND: {
+    code: 'OWNER_NOT_FOUND',
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "No owner user was found with this identifier.",
+  },
+
+
   INVALID_CREDENTIALS: {
     code: 'INVALID_CREDENTIALS',
     status: HTTP_STATUS.UNAUTHORIZED,
@@ -33,17 +59,8 @@ export const AUTH_ERRORS = {
     message: "The fields 'ownerId', 'name', 'email', and 'userType' are required.",
   },
 
-  MISSING_OWNER_FIELDS: {
-    code: 'MISSING_OWNER_FIELDS',
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "The fields 'name' and 'email' are required.",
-  },
 
-  INVALID_EMAIL_FORMAT: {
-    code: 'INVALID_EMAIL_FORMAT',
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "The email address format is invalid.",
-  },
+
 
   INVALID_USER_TYPE: {
     code: 'INVALID_USER_TYPE',
@@ -55,18 +72,6 @@ export const AUTH_ERRORS = {
     code: 'OWNER_ID_NOT_ALLOWED',
     status: HTTP_STATUS.BAD_REQUEST,
     message: "The field 'ownerId' must be null for owner-type users.",
-  },
-
-  INVALID_OWNER_ID: {
-    code: 'INVALID_OWNER_ID',
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "The owner identifier (ownerId) is invalid.",
-  },
-
-  OWNER_NOT_FOUND: {
-    code: 'OWNER_NOT_FOUND',
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "No owner user was found with this identifier.",
   },
 
   REFRESH_TOKEN_REQUIRED: {
@@ -99,12 +104,6 @@ export const AUTH_ERRORS = {
     message: 'Invalid or expired authorization token.',
   },
 
-  CLIENT_AUTH_FAILED: {
-    code: "CLIENT_AUTH_FAILED",
-    status: HTTP_STATUS.UNAUTHORIZED,
-    message: "Invalid client credentials.",
-  },
-
   INVALID_API_KEY: {
     code: 'INVALID_API_KEY',
     status: HTTP_STATUS.UNAUTHORIZED,
@@ -115,9 +114,18 @@ export const AUTH_ERRORS = {
     status: HTTP_STATUS.UNAUTHORIZED,
     message: 'API key has expired',
   },
+
+  // API CLIENT ERRORS
   MISSING_CREDENTIALS: {
     code: 'MISSING_CREDENTIALS',
     status: HTTP_STATUS.BAD_REQUEST,
-    message: 'Missing client credentials (clientId and clientSecret)',
+    message: 'Identifiants client manquants (clientId et clientSecret)',
   },
+
+  CLIENT_AUTH_FAILED: {
+    code: "CLIENT_AUTH_FAILED",
+    status: HTTP_STATUS.UNAUTHORIZED,
+    message: "Identifiants client invalides.",
+  },
+
 };

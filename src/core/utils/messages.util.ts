@@ -1,14 +1,15 @@
 export const SUCCESS = {
   // User
-  USER_UPDATED: "User updated successfully.",
-  USER_DELETED: "User and pack access deleted successfully.",
-  USERS_FETCHED: "Users retrieved successfully.",
-  OWNERS_FETCHED: "Owners list retrieved successfully.",
-  USERS_BY_OWNER_FETCHED: "Users by owner retrieved successfully.",
-  USER_TYPE_CREATED: "UserType created successfully.",
-  OWNER_CREATED: "Owner successfully signed up.",
-  MEMBER_CREATED: "Member successfully created.",
-  MEMBER_UPDATED: "Member successfully updated.",
+  USER_UPDATED: "Utilisateur mis à jour avec succès.",
+  USER_DELETED: "Utilisateur et accès au pack supprimés avec succès.",
+  USERS_FETCHED: "Utilisateurs récupérés avec succès.",
+  OWNERS_FETCHED: "Liste des propriétaires récupérée avec succès.",
+  USERS_BY_OWNER_FETCHED: "Utilisateurs par propriétaire récupérés avec succès.",
+  USER_TYPE_CREATED: "Type d'utilisateur créé avec succès.",
+  OWNER_CREATED: "Propriétaire inscrit avec succès.",
+  MEMBER_CREATED: "Membre créé avec succès.",
+  MEMBER_UPDATED: "Membre mis à jour avec succès.",
+
 
   LOGIN_SUCCESS: "Login successful.",
   LOGOUT_SUCCESS: "Logged out successfully.",
