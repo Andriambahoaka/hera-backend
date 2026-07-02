@@ -99,6 +99,12 @@ export const AUTH_ERRORS = {
     message: 'Invalid or expired authorization token.',
   },
 
+  CLIENT_AUTH_FAILED: {
+    code: "CLIENT_AUTH_FAILED",
+    status: HTTP_STATUS.UNAUTHORIZED,
+    message: "Invalid client credentials.",
+  },
+
   INVALID_API_KEY: {
     code: 'INVALID_API_KEY',
     status: HTTP_STATUS.UNAUTHORIZED,
@@ -108,5 +114,10 @@ export const AUTH_ERRORS = {
     code: 'API_KEY_EXPIRED',
     status: HTTP_STATUS.UNAUTHORIZED,
     message: 'API key has expired',
+  },
+  MISSING_CREDENTIALS: {
+    code: 'MISSING_CREDENTIALS',
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: 'Missing client credentials (clientId and clientSecret)',
   },
 };

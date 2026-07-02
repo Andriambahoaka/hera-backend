@@ -1,32 +1,32 @@
 import { Router } from 'express';
 import * as deviceController from './device.controller';
-import apiKeyAuth from '../../core/middleware/apikey.middleware';
-import { requireAuth } from '../auth/auth.middleware';
+import { clientAuth } from '../../core/middleware/clientAuth.middleware';
+import { userAuth } from '../auth/auth.middleware';
 
 const router = Router();
 
-router.post('/', apiKeyAuth, deviceController.add);
-router.get('/', apiKeyAuth, deviceController.findAll);
+router.post('/', clientAuth, deviceController.add);
+router.get('/', clientAuth, deviceController.findAll);
 
-router.get('/owner',requireAuth, deviceController.findAllByOwner);
+router.get('/owner', userAuth, deviceController.findAllByOwner);
 
-router.get('/granted-access', requireAuth, deviceController.findGrantedAccess);
+router.get('/granted-access', userAuth, deviceController.findGrantedAccess);
 
 router.post('/access', deviceController.addOrUpdateAccess);
 
 router.put('/', deviceController.update);
 
-router.post('/set-area-arm', requireAuth, deviceController.setAreaArmMode);
-router.post('/get-area-arm', requireAuth, deviceController.getAreaArmMode);
+router.post('/set-area-arm', userAuth, deviceController.setAreaArmMode);
+router.post('/get-area-arm', userAuth, deviceController.getAreaArmMode);
 
-router.post('/add-accessory',apiKeyAuth,deviceController.addAccessory);
-router.post('/get-accessories-info', requireAuth,deviceController.getAccessoriesInfo);
-router.post('/get-accessory-status',requireAuth, deviceController.getAccessoryStatus);
-router.put('/set-accessory', requireAuth, deviceController.setAccessory);
+router.post('/add-accessory', clientAuth, deviceController.addAccessory);
+router.post('/get-accessories-info', userAuth, deviceController.getAccessoriesInfo);
+router.post('/get-accessory-status', userAuth, deviceController.getAccessoryStatus);
+router.put('/set-accessory', userAuth, deviceController.setAccessory);
 
-router.post('/get-screenshot-url', requireAuth, deviceController.getPirCamSnapUrl);
+router.post('/get-screenshot-url', userAuth, deviceController.getPirCamSnapUrl);
 
-router.get('/access/:userId',deviceController.findAccessibleDevices);
+router.get('/access/:userId', deviceController.findAccessibleDevices);
 
 router.get('/:deviceId', deviceController.findByDeviceId);
 

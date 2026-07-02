@@ -19,7 +19,7 @@ import userTypeRoutes from "./modules/user/userType.route";
 import deviceRoutes from "./modules/device/device.route";
 import notificationRoutes from "./modules/notification/notification.route";
 import activityRoutes from "./modules/activity/activity.route";
-import apiKeysRoutes from "./infrastructure/apiKey/apiKey.route";
+import oauthRoutes from "./modules/integrations/apiClient.route";
 import dolynkRoutes from "./modules/dolynk-auth/dolynk-auth.routes";
 
 import admin from "./core/config/firebase";
@@ -106,7 +106,7 @@ app.use("/api/auth", authLimiter);
 // API Routes
 // =============================
 app.use("/api/auth", authRoutes);
-app.use("/api/api-keys", apiKeysRoutes);
+app.use("/api/oauth", oauthRoutes);
 app.use("/api/user-types", userTypeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/devices", deviceRoutes);

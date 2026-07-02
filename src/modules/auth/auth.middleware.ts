@@ -15,7 +15,7 @@ const verifyToken = (token: string): JwtPayload => {
   return jwt.verify(token, secret) as JwtPayload;
 };
 
-export const requireAuth = (
+export const userAuth = (
   req: Request,
   res: Response,
   next: NextFunction

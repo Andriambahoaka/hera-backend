@@ -3,35 +3,35 @@ import express from "express";
 import multer from "multer";
 
 import * as UserController from "./user.controller";
-import apiKeyAuth from "../../core/middleware/apikey.middleware";
+import { clientAuth } from "../../core/middleware/clientAuth.middleware";
 import mobileKeyAuth from "../../core/middleware/mobileKey.middleware";
-import { requireAuth } from "../auth/auth.middleware";
+import { userAuth } from "../auth/auth.middleware";
 
 
 const router = express.Router();
 const upload = multer();
 
-router.get('/me', requireAuth, UserController.getMe);
+router.get('/me', userAuth, UserController.getMe);
 
 // Password 
-router.post('/create-password', requireAuth, UserController.createPassword);
-router.put('/update-password', requireAuth, UserController.updatePassword);
+router.post('/create-password', userAuth, UserController.createPassword);
+router.put('/update-password', userAuth, UserController.updatePassword);
 
 // Device tokens
-router.post('/device-token', requireAuth, UserController.addDeviceToken);
-router.post('/logout', requireAuth, UserController.logout);
+router.post('/device-token', userAuth, UserController.addDeviceToken);
+router.post('/logout', userAuth, UserController.logout);
 
 // User image upload
-router.post('/image', requireAuth, upload.single('image'), UserController.uploadImageFile);
+router.post('/image', userAuth, upload.single('image'), UserController.uploadImageFile);
 
 // Member management
-router.post('/add-member', requireAuth, UserController.addMember);
-router.put('/update-member', requireAuth, UserController.updateMember);
-router.get('/members', requireAuth, UserController.findAllMembers);
+router.post('/add-member', userAuth, UserController.addMember);
+router.put('/update-member', userAuth, UserController.updateMember);
+router.get('/members', userAuth, UserController.findAllMembers);
 
 router.get('/', mobileKeyAuth, UserController.findAll);
-router.get('/owners', apiKeyAuth, UserController.findAllOwners);
-router.delete('/:id',requireAuth, UserController.deleteUserById);
-router.get('/id', apiKeyAuth, UserController.getUserIdByEmail);
+router.get('/owners', clientAuth, UserController.findAllOwners);
+router.delete('/:id', userAuth, UserController.deleteUserById);
+router.get('/id', userAuth, UserController.getUserIdByEmail);
 
 export default router;
