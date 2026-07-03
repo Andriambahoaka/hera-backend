@@ -32,6 +32,6 @@ router.get('/members', userAuth, UserController.findAllMembers);
 router.get('/', mobileKeyAuth, UserController.findAll);
 router.get('/owners', clientAuth, UserController.findAllOwners);
 router.delete('/:id', userAuth, UserController.deleteUserById);
-router.get('/id', userAuth, UserController.getUserIdByEmail);
+router.get('/id', clientAuth, UserController.getUserIdByEmail);
 
 export default router;
