@@ -38,10 +38,10 @@ export const DEVICE_ERRORS = {
     message: "Le nom du dispositif existe déjà",
   },
 
-  DEVICE_NOT_EXIST: {
+  UNKNOWN_DEVICE: {
     code: "DEVICE_NOT_EXIST",
     status: HTTP_STATUS.NOT_FOUND,
-    message: "Le dispositif n'existe pas",
+    message: "Le dispositif fourni n'est pas reconnu.",
   },
 
   DEVICE_OFFLINE: {

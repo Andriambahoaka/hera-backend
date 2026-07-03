@@ -19,7 +19,7 @@ export class DolynkClient {
       `/${DEVICE_SEGMENT}/addDevice`,
       payload,
       {
-        IDV001: new AppError(DEVICE_ERRORS.DEVICE_NOT_EXIST),
+        IDV001: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
         IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
         IDV006: new AppError(DEVICE_ERRORS.INVALID_CREDENTIALS),
         IDV0022: new AppError(DEVICE_ERRORS.MODEL_NOT_SUPPORTED),
