@@ -20,9 +20,7 @@ import deviceRoutes from "./modules/device/device.route";
 import notificationRoutes from "./modules/notification/notification.route";
 import activityRoutes from "./modules/activity/activity.route";
 import oauthRoutes from "./modules/integrations/apiClient.route";
-import dolynkRoutes from "./modules/dolynk-auth/dolynk-auth.routes";
 
-import admin from "./core/config/firebase";
 
 
 import { APP } from "./core/utils/messages.util";
@@ -112,7 +110,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/packs", deviceRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/activities", activityRoutes);
-app.use("/api/dolynk", dolynkRoutes);
 app.use(errorMiddleware);
 
 // =============================
