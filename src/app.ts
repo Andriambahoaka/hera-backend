@@ -12,7 +12,6 @@ import morgan from "morgan";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 
-
 import userRoutes from "./modules/user/user.route";
 import authRoutes from "./modules/auth/auth.route";
 import userTypeRoutes from "./modules/user/userType.route";
@@ -20,8 +19,6 @@ import deviceRoutes from "./modules/device/device.route";
 import notificationRoutes from "./modules/notification/notification.route";
 import activityRoutes from "./modules/activity/activity.route";
 import oauthRoutes from "./modules/integrations/apiClient.route";
-
-
 
 import { APP } from "./core/utils/messages.util";
 import { errorMiddleware } from "./core/middleware/error.middleware";

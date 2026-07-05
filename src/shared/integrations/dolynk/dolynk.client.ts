@@ -21,25 +21,27 @@ export class DolynkClient {
       {
         IDV001: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
         IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
-        IDV006: new AppError(DEVICE_ERRORS.INVALID_CREDENTIALS),
+        IDV006: new AppError(DEVICE_ERRORS.DEVICE_PASSWORD_INCORRECT),
         IDV0022: new AppError(DEVICE_ERRORS.MODEL_NOT_SUPPORTED),
-        IDV0034: new AppError(DEVICE_ERRORS.INVALID_CREDENTIALS),
-        PRM0132: new AppError(DEVICE_ERRORS.INVALID_DEVICE_PRODUCT),
+        IDV0034: new AppError(DEVICE_ERRORS.DEVICE_PASSWORD_INCORRECT),
+        PRM0132: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
         default: new AppError(DEVICE_ERRORS.DEVICE_ADD_FAILED)
       }
     );
   }
 
-  static async addAccessory(deviceId: string, accessoryInfo: any) {
+  static async addAccessory(deviceId: string, accessoryInfos: any) {
     const payload = {
       deviceId,
-      accessoryInfo,
+      accessoryInfos,
     };
+    console.log("addAccessory payload:", payload);
 
     return DolynkApi.postRequest(
       `/${ALARM_SEGMENT}/setAccessoryPair`,
       payload,
       {
+        PRM0132: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
         default: new AppError(DEVICE_ERRORS.ACCESSORY_ADD_FAILED),
       }
     );
@@ -69,7 +71,9 @@ export class DolynkClient {
       `/${ALARM_SEGMENT}/setAreaArmMode`,
       payload,
       {
+        IDV001: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
         IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
+        PRM0132: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
         default: new AppError(DEVICE_ERRORS.DEVICE_SET_AREA_ARM_FAILED)
       }
     );

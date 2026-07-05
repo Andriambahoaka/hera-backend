@@ -39,7 +39,7 @@ export const DEVICE_ERRORS = {
   },
 
   UNKNOWN_DEVICE: {
-    code: "DEVICE_NOT_EXIST",
+    code: "UNKNOWN_DEVICE",
     status: HTTP_STATUS.NOT_FOUND,
     message: "Le dispositif fourni n'est pas reconnu.",
   },
@@ -50,11 +50,17 @@ export const DEVICE_ERRORS = {
     message: "Le dispositif est hors ligne",
   },
 
-  INVALID_CREDENTIALS: {
-    code: "INVALID_CREDENTIALS",
-    status: HTTP_STATUS.BAD_REQUEST,
-    message: "Identifiants du dispositif invalides",
+  DEVICE_PASSWORD_INCORRECT: {
+    code: "DEVICE_PASSWORD_INCORRECT",
+    status: HTTP_STATUS.UNPROCESSABLE_ENTITY,
+    message: "Le mot de passe du dispositif est incorrect",
   },
+
+  DEVICE_LOCKED: {
+  code: "DEVICE_LOCKED",
+  status: HTTP_STATUS.LOCKED, 
+  message: "Trop de tentatives de saisie du mot de passe. Le dispositif est verrouillé.",
+},
 
   MODEL_NOT_SUPPORTED: {
     code: "MODEL_NOT_SUPPORTED",
