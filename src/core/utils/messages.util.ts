@@ -32,6 +32,13 @@ export const SUCCESS = {
   TOKEN_ADDED: "Token added successfully.",
   TOKEN_DELETED: "Token deleted successfully.",
   TOKEN_REFRESHED: "New token generated.",
+
+  //accessory
+  ACCESSORY_PAIRED: {
+    code: "ACCESSORY_PAIRED",
+    message: "L'accessoire a été associé avec succès à la centrale.",
+  },
+
 };
 
 export const APP = {

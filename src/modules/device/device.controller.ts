@@ -1,11 +1,12 @@
 
 import { DeviceService } from './device.service';
 import { asyncHandler } from "../../core/utils/asyncHandler";
-import { sendSuccess } from "../../core/utils/responseHandler";
+import { sendCreated, sendSuccess } from "../../core/utils/responseHandler";
 import { AppError } from '../../core/errors/app.error';
 import { DEVICE_ERRORS } from './device.errors';
 import { Request } from "express";
 import { USER_ERRORS } from '../user/user.errors';
+import { SUCCESS } from '../../core/utils/messages.util';
 
 export const add = asyncHandler(async (req, res) => {
   const {
@@ -35,8 +36,13 @@ export const addAccessory = asyncHandler(async (req, res) => {
     throw new AppError(DEVICE_ERRORS.MISSING_ACCESSORY_FIELDS);
   }
 
+  const {id, name, model} = accessoryInfo;
+  if (!id || !name || !model) {
+    throw new AppError(DEVICE_ERRORS.MISSING_ACCESSORY_INFOS);
+  }
+
   const accessory = await DeviceService.addAccessory(deviceId, accessoryInfo);
-  return sendSuccess(res, accessory);
+  return sendCreated(res, SUCCESS.ACCESSORY_PAIRED);
 });
 
 export const findByDeviceId = asyncHandler(async (req, res) => {

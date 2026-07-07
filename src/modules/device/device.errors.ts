@@ -84,7 +84,13 @@ export const DEVICE_ERRORS = {
   MISSING_ACCESSORY_FIELDS: {
     code: "MISSING_ACCESSORY_FIELDS",
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "deviceId et accessoryInfo sont requis",
+    message: "Les champs 'deviceId' et 'accessoryInfo' sont requis",
+  },
+
+  MISSING_ACCESSORY_INFOS: {
+    code: "MISSING_ACCESSORY_INFOS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Les champs 'id', 'name' et 'model' sont requis.",
   },
 
   MISSING_DEVICE_ID_FIELD: {
@@ -96,7 +102,7 @@ export const DEVICE_ERRORS = {
   DEVICE_NOT_FOUND: {
     code: "DEVICE_NOT_FOUND",
     status: HTTP_STATUS.NOT_FOUND,
-    message: "Dispositif introuvable",
+    message: "La centrale est introuvable.",
   },
 
 
@@ -163,7 +169,7 @@ export const DEVICE_ERRORS = {
   ACCESSORY_NOT_SUPPORTED: {
     code: "ACCESSORY_NOT_SUPPORTED",
     status: HTTP_STATUS.BAD_REQUEST,
-    message: "The accessory type is not supported'",
+    message: "Le modèle d'accessoire n'est pas pris en charge",
   },
 
   INVALID_ACCESS_LIST: {

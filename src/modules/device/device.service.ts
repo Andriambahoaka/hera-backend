@@ -16,6 +16,7 @@ import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/enums/notificationType.enum';
 import { ActivityService } from '../activity/activity.service';
 import { ActivityType } from '../activity/activity.model';
+import { SUCCESS } from '../../core/utils/messages.util';
 
 
 export class DeviceService {
@@ -72,14 +73,10 @@ export class DeviceService {
     deviceId: string,
     accessoryInfo: {
       id: string;
-      areaId?: number;
       name?: string;
       model?: string;
     }
   ) {
-    if (!deviceId) {
-      throw new AppError(DEVICE_ERRORS.MISSING_DEVICE_ID_FIELD);
-    }
 
     const device = await Device.findOne({ deviceId });
     if (!device) {

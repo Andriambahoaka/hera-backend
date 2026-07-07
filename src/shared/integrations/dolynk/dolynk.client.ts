@@ -30,10 +30,10 @@ export class DolynkClient {
     );
   }
 
-  static async addAccessory(deviceId: string, accessoryInfos: any) {
+  static async addAccessory(deviceId: string, accessoryInfo: any) {
     const payload = {
       deviceId,
-      accessoryInfos,
+      accessoryInfo,
     };
     console.log("addAccessory payload:", payload);
 
@@ -41,7 +41,7 @@ export class DolynkClient {
       `/${ALARM_SEGMENT}/setAccessoryPair`,
       payload,
       {
-        PRM0132: new AppError(DEVICE_ERRORS.UNKNOWN_DEVICE),
+        PRM001: new AppError(DEVICE_ERRORS.ACCESSORY_NOT_SUPPORTED),
         default: new AppError(DEVICE_ERRORS.ACCESSORY_ADD_FAILED),
       }
     );
