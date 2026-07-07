@@ -33,6 +33,13 @@ export const SUCCESS = {
   TOKEN_DELETED: "Token deleted successfully.",
   TOKEN_REFRESHED: "New token generated.",
 
+
+  //device 
+  PACK_CREATED: {
+    "code": "PACK_CREATED",
+    "message": "Le pack a été ajouté avec succès."
+  },
+
   //accessory
   ACCESSORY_PAIRED: {
     code: "ACCESSORY_PAIRED",

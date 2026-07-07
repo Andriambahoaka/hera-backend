@@ -36,6 +36,7 @@ export class DolynkApi {
           status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
           message: data.msg,
         });
+        console.log("mappedError", mappedError);
       throw mappedError;
     } catch (error) {
       if (error instanceof AppError) throw error;

@@ -135,13 +135,12 @@ export class DolynkClient {
 
     const accessoryPath = ACCESSORY_ENDPOINTS[type as keyof typeof ACCESSORY_ENDPOINTS];
 
+
     if (!accessoryPath) {
       throw new AppError(DEVICE_ERRORS.ACCESSORY_NOT_SUPPORTED);
     }
 
     const sensitivityKey = type === "PIRCam" ? "sensentivity" : "sensitivity";
-
-
 
     const accessoryInfo = Object.fromEntries(
       Object.entries({

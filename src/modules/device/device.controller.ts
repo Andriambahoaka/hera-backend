@@ -20,13 +20,13 @@ export const add = asyncHandler(async (req, res) => {
     throw new AppError(DEVICE_ERRORS.MISSING_REQUIRED_FIELDS);
   }
 
-  const device = await DeviceService.add({
+  await DeviceService.add({
     ownerId,
     deviceId,
     deviceName,
     devCode,
   });
-  return sendSuccess(res, device);
+  return sendCreated(res, SUCCESS.PACK_CREATED);
 });
 
 export const addAccessory = asyncHandler(async (req, res) => {
