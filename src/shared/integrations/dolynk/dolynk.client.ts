@@ -35,7 +35,6 @@ export class DolynkClient {
       deviceId,
       accessoryInfo,
     };
-    console.log("addAccessory payload:", payload);
 
     return DolynkApi.postRequest(
       `/${ALARM_SEGMENT}/setAccessoryPair`,
@@ -165,6 +164,8 @@ export class DolynkClient {
       {
         PRM001: new AppError(DEVICE_ERRORS.ACCESSORY_NOT_SUPPORTED),
         IDV002: new AppError(DEVICE_ERRORS.DEVICE_OFFLINE),
+        BIZ002: new AppError(DEVICE_ERRORS.DEVICE_IS_ARMED),
+        IDV101217: new AppError(DEVICE_ERRORS.DEVICE_IS_ARMED),
         default: new AppError(COMMON_ERRORS.INTERNAL_SERVER_ERROR),
       },
     );

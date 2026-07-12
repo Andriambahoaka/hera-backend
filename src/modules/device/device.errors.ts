@@ -187,4 +187,9 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "Invalid device ID",
   },
+  DEVICE_IS_ARMED: {
+    code: "DEVICE_IS_ARMED",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "The device is armed. Please disarm it before making changes.",
+  },
 };
