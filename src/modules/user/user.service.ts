@@ -63,7 +63,7 @@ export class UserService {
   // =============================
 
   static async getMe(userId: string) {
-    const user = await User.findById(userId).select("-password -imagePublicId");
+    const user = await User.findById(userId).select("-password -imagePublicId -devicesToken");
 
     if (!user) {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
@@ -343,7 +343,7 @@ export class UserService {
     const owners = await User.find({
       $or: [{ _id: { $in: Array.from(ownerIds) } }, { ownerId: null }],
     })
-      .select("-password -firstLogin -devicesToken -imagePublicId -ownerId")
+      .select("-password -userType -firstLogin -devicesToken -imagePublicId -ownerId")
       .lean();
 
     return {
