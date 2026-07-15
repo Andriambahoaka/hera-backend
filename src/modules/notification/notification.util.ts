@@ -28,7 +28,7 @@ export const getMessageBodyFromMsgType = (
 
   switch (msgType) {
     case NotificationType.ALARM_LOCAL:
-      return `Votre détecteur vient de se déclencher et de pfrendre une photo à ${packName}.`;
+      return `Votre détecteur vient de se déclencher et de prendre une photo à ${packName}.`;
 
     case NotificationType.ARMED:
       return `Votre centrale dans ${packName} vient d'être armée ${endingMessage}.`;

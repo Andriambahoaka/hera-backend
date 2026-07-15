@@ -171,6 +171,7 @@ export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
   if (!deviceId || !accessoryId || channel == null) {
     throw new AppError(DEVICE_ERRORS.MISSING_PIRCAM_REQUIRED_FIELDS);
   }
+  
   const result = await DeviceService.getPirCamSnapUrl(deviceId, accessoryId, channel);
 
   return sendSuccess(res, result);

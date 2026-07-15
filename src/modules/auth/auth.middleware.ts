@@ -4,6 +4,8 @@ import { AppError } from "../../core/errors/app.error";
 import { COMMON_ERRORS } from "../../core/errors/common.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import { extractBearerToken } from "./auth.utils";
+import User from "../user/user.model";
+import { asyncHandler } from "../../core/utils/asyncHandler";
 
 const verifyToken = (token: string): JwtPayload => {
   const secret = process.env.JWT_SECRET;
@@ -15,11 +17,11 @@ const verifyToken = (token: string): JwtPayload => {
   return jwt.verify(token, secret) as JwtPayload;
 };
 
-export const userAuth = (
+export const userAuth = asyncHandler(async (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
 
   const token = extractBearerToken(req.headers.authorization);
 
@@ -33,10 +35,16 @@ export const userAuth = (
       throw new AppError(AUTH_ERRORS.UNAUTHORIZED);
     }
 
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      throw new AppError(AUTH_ERRORS.UNAUTHORIZED);
+    }
+
     req.auth = { userId: decoded.userId };
     next();
 
   } catch (err) {
     throw new AppError(AUTH_ERRORS.UNAUTHORIZED);
   }
-};
+});

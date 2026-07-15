@@ -73,6 +73,7 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
     if (!refreshToken) {
     throw new AppError(AUTH_ERRORS.REFRESH_TOKEN_REQUIRED);
   }
+
   const result = await refreshTokenService(refreshToken);
   return sendSuccess(res, result);
 });

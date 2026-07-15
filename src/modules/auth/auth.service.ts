@@ -28,7 +28,7 @@ const {
   RESET_PASSWORD_SECRET = "",
 } = process.env;
 
-const ACCESS_TOKEN_EXPIRY = "24h";
+const ACCESS_TOKEN_EXPIRY = "1h";
 const REFRESH_TOKEN_EXPIRY = "30d";
 const RESET_EXPIRY = "1h";
 
@@ -141,20 +141,16 @@ export const refreshTokenService = async (refreshToken: string) => {
   let decoded: any;
 
   try {
-    decoded = jwt.verify(
-      refreshToken,
-      JWT_SECRET
-    );
-  } catch (err: any) {
-
+    decoded = jwt.verify(refreshToken, JWT_SECRET);
+  } catch {
     throw new AppError(AUTH_ERRORS.INVALID_REFRESH_TOKEN);
   }
 
   const user = await User.findById(decoded.userId);
-  if (!user) {
-    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
-  }
 
+  if (!user) {
+    throw new AppError(AUTH_ERRORS.UNAUTHORIZED);
+  }
 
   const newAccessToken = generateToken(
     user._id,
