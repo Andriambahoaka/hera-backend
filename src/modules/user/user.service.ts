@@ -30,7 +30,7 @@ export class UserService {
   static uploadFromBuffer(fileBuffer: Buffer) {
     return new Promise<any>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
-        { folder: "user_images" },
+        { folder: "hera/users/profile-images" },
         (error, result) => {
           if (error) return reject(error);
           resolve(result);
@@ -212,24 +212,26 @@ export class UserService {
     return user;
   }
 
-  static async uploadImageFile(id: string, fileBuffer: Buffer) {
-    const user = await this.findUserOrFail(id);
+static async uploadImageFile(id: string, fileBuffer: Buffer) {
+  const user = await this.findUserOrFail(id);
 
-    if (user.imagePublicId) {
-      await cloudinary.uploader.destroy(user.imagePublicId);
-    }
+  const oldImagePublicId = user.imagePublicId;
 
-    const result = await this.uploadFromBuffer(fileBuffer);
+  const result = await this.uploadFromBuffer(fileBuffer);
 
-    user.imageUrl = result.secure_url;
-    user.imagePublicId = result.public_id;
+  user.imageUrl = result.secure_url;
+  user.imagePublicId = result.public_id;
 
-    await user.save();
+  await user.save();
 
-    return {
-      imageUrl: result.secure_url,
-    };
+  if (oldImagePublicId) {
+    await cloudinary.uploader.destroy(oldImagePublicId);
   }
+
+  return {
+    imageUrl: result.secure_url,
+  };
+}
 
   static async findAllUsers() {
     const users = await User.find().select("-password -firstLogin -devicesToken -imagePublicId");
