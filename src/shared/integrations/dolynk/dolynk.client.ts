@@ -66,6 +66,8 @@ export class DolynkClient {
       }
     };
 
+    console.log("Payload for setAreaArmMode:", payload);
+
     return DolynkApi.postRequest(
       `/${ALARM_SEGMENT}/setAreaArmMode`,
       payload,

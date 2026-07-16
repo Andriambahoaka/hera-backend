@@ -14,7 +14,6 @@ import mongoose from "mongoose";
 
 import { AUTH_ERRORS } from "../auth/auth.errors";
 import { CreateUserDto } from "./dto/user.dto";
-import { USER_TYPE } from "./enums/userType.enum";
 
 import { generateTempPassword } from "../../shared/utils/password.util";
 import * as emailService from "../../infrastructure/email/email.service";
@@ -212,26 +211,26 @@ export class UserService {
     return user;
   }
 
-static async uploadImageFile(id: string, fileBuffer: Buffer) {
-  const user = await this.findUserOrFail(id);
+  static async uploadImageFile(id: string, fileBuffer: Buffer) {
+    const user = await this.findUserOrFail(id);
 
-  const oldImagePublicId = user.imagePublicId;
+    const oldImagePublicId = user.imagePublicId;
 
-  const result = await this.uploadFromBuffer(fileBuffer);
+    const result = await this.uploadFromBuffer(fileBuffer);
 
-  user.imageUrl = result.secure_url;
-  user.imagePublicId = result.public_id;
+    user.imageUrl = result.secure_url;
+    user.imagePublicId = result.public_id;
 
-  await user.save();
+    await user.save();
 
-  if (oldImagePublicId) {
-    await cloudinary.uploader.destroy(oldImagePublicId);
+    if (oldImagePublicId) {
+      await cloudinary.uploader.destroy(oldImagePublicId);
+    }
+
+    return {
+      imageUrl: result.secure_url,
+    };
   }
-
-  return {
-    imageUrl: result.secure_url,
-  };
-}
 
   static async findAllUsers() {
     const users = await User.find().select("-password -firstLogin -devicesToken -imagePublicId");
