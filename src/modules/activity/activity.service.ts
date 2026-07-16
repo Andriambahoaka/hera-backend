@@ -5,6 +5,8 @@ import User from "../user/user.model";
 import { USER_ERRORS } from "../user/user.errors";
 import { USER_TYPE } from "../user/enums/userType.enum";
 import { ActivityType } from "./activity.model";
+import { ACCESS_TYPE } from "../device/device.enum";
+import DeviceAccess from "../device/deviceAccess.model";
 
 export class ActivityService {
 
@@ -60,21 +62,12 @@ static async findActivitiesByDate(
 
   const skip = (page - 1) * limit;
 
-  const query: any = {
+  const query = await this.buildActivityQuery(
+    userId,
+    user.userType,
     ownerId,
-  };
-
-  if (date) {
-    const startDate = new Date(date);
-
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 1);
-
-    query.createdAt = {
-      $gte: startDate,
-      $lt: endDate,
-    };
-  }
+    date
+  );
 
   const [activities, total] = await Promise.all([
     Activity.find(query)
@@ -93,6 +86,77 @@ static async findActivitiesByDate(
       total,
       hasMore: skip + activities.length < total,
     },
+  };
+}
+
+private static async buildActivityQuery(
+  userId: string,
+  userType: USER_TYPE,
+  ownerId: string,
+  date?: string
+) {
+  const query: any = {
+    ownerId,
+  };
+
+  if (userType !== USER_TYPE.OWNER) {
+    const accessibleDeviceIds =
+      await this.getActivityAccessibleDeviceIds(userId);
+
+    query.$or = [
+      {
+        type: {
+          $in: [
+            ActivityType.ADD_MEMBER,
+            ActivityType.DELETE_MEMBER,
+            ActivityType.UPDATE_ACCESS,
+            ActivityType.UPDATE_ROLE,
+          ],
+        },
+      },
+      {
+        type: {
+          $in: [
+            ActivityType.ARMED,
+            ActivityType.DISARMED,
+          ],
+        },
+        "targetDevice._id": {
+          $in: accessibleDeviceIds,
+        },
+      },
+    ];
+  }
+
+  if (date) {
+    query.createdAt = this.getDateFilter(date);
+  }
+
+  return query;
+}
+
+private static async getActivityAccessibleDeviceIds(
+  userId: string
+) {
+  const accesses = await DeviceAccess.find({
+    userId,
+    access: ACCESS_TYPE.ACTIVITY,
+  }).select("device");
+
+  return accesses.map(
+    (access) => access.device
+  );
+}
+
+private static getDateFilter(date: string) {
+  const startDate = new Date(date);
+
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 1);
+
+  return {
+    $gte: startDate,
+    $lt: endDate,
   };
 }
 
