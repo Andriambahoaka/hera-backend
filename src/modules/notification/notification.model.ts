@@ -1,5 +1,5 @@
 // models/Notification.ts
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IDevice {
   _id: mongoose.Types.ObjectId;
@@ -7,7 +7,8 @@ export interface IDevice {
   ownerId: mongoose.Types.ObjectId;
 }
 
-export interface INotification extends Document {
+export interface INotification {
+  _id: Types.ObjectId;
   device: IDevice;
   accessKey?: string;
   productId?: string;
