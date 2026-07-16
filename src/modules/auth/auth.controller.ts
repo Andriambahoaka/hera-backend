@@ -6,6 +6,7 @@ import {
   forgotPasswordService,
   refreshTokenService,
   resetPasswordService,
+  resendWelcomeEmailService,
 } from "./auth.service";
 
 import { sendSuccess, } from "../../core/utils/responseHandler";
@@ -16,6 +17,7 @@ import { AppError } from "../../core/errors/app.error";
 import { AUTH_ERRORS } from "./auth.errors";
 import { USER_ERRORS } from "../user/user.errors";
 import { getTokenFromHeader } from "./auth.utils";
+import { UserService } from "../user/user.service";
 
 // =============================
 // AUTH CONTROLLERS
@@ -41,15 +43,11 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   const token = getTokenFromHeader(req);
 
-  console.log("token azo",token);
-
   if (!token) {
     throw new AppError(USER_ERRORS.RESET_PASSWORD_TOKEN_MISSING);
   }
 
   const { newPassword } = req.body;
-
-    console.log("token azo",newPassword);
 
   const result = await resetPasswordService(token, newPassword);
   return sendSuccess(res, result);
@@ -77,4 +75,19 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   const result = await refreshTokenService(refreshToken);
   return sendSuccess(res, result);
 });
+
+export const resendWelcomeEmail = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+    if (!email) {
+      throw new AppError(AUTH_ERRORS.EMAIL_REQUIRED);
+    }
+
+    const result = await resendWelcomeEmailService(req.body.email);
+
+    return sendSuccess(res, result);
+  }
+);
+
+
 

@@ -19,6 +19,7 @@ export const SUCCESS = {
   MEMBER_INVITE_SUBJECT: "Invitation à rejoindre Hera App",
   RESET_EMAIL_SUBJECT: "Réinitialisation de votre mot de passe – [HERA]",
   RESET_EMAIL_SENT: "Email de réinitialisation envoyé.",
+  WELCOME_EMAIL_SENT: "Weclome email sent !.",
 
   // Password
   PASSWORD_UPDATED: "Password updated successfully.",

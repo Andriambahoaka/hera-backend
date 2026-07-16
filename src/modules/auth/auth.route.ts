@@ -1,14 +1,15 @@
 import express from 'express';
 import * as authController from './auth.controller';
-import {clientAuth} from '../../core/middleware/clientAuth.middleware';
+import { clientAuth } from '../../core/middleware/clientAuth.middleware';
 
 
 const router = express.Router();
 
-router.post('/signup',clientAuth,authController.signup);
-router.post('/login',authController.login);
+router.post('/signup', clientAuth, authController.signup);
+router.post('/login', authController.login);
 router.post('/forgot-password', authController.forgotPassword);
-router.post('/reset-password',authController.resetPassword);
+router.post('/reset-password', authController.resetPassword);
 router.post('/refresh', authController.refreshToken);
+router.post("/resend-welcome-email",clientAuth,authController.resendWelcomeEmail);
 
 export default router;

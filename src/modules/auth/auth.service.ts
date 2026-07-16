@@ -170,3 +170,30 @@ export const refreshTokenService = async (refreshToken: string) => {
   };
 };
 
+export const resendWelcomeEmailService = async (
+  email: string
+) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+  }
+
+  const tempPassword = generateTempPassword();
+  const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+  user.password = hashedPassword;
+  await user.save();
+
+  await emailService.sendWelcomeEmail(
+    user.name,
+    user.email,
+    tempPassword
+  );
+
+  return {
+    code: "WELCOME_EMAIL_SENT",
+    message: SUCCESS.WELCOME_EMAIL_SENT,
+  };
+};
+
