@@ -119,3 +119,13 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   const result = await UserService.logout(req.auth!.userId, deviceToken);
   return sendSuccess(res, result);
 });
+
+export const deleteUserByAdmin = asyncHandler(
+  async (req: Request, res: Response) => {
+    const id  = req.params.id as string;
+
+    const result = await UserService.deleteUserByAdmin(id);
+
+    return sendSuccess(res, result);
+  }
+);

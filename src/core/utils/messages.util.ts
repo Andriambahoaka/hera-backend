@@ -41,6 +41,11 @@ export const SUCCESS = {
     "message": "Le pack a été ajouté avec succès."
   },
 
+  PACK_DELETED: {
+    "code": "PACK_DELETED",
+    "message": "Pack deleted with success."
+  },
+
   //accessory
   ACCESSORY_PAIRED: {
     code: "ACCESSORY_PAIRED",

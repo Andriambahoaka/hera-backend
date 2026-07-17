@@ -364,4 +364,22 @@ export class DeviceService {
     return DolynkClient.setAccessory(deviceId, id, name, type, sensitivity, volume, entryDelay, imageInfo);
   }
 
+  static async deleteDevice(deviceId: string) {
+  const device = await Device.findOne({ deviceId });
+
+  if (!device) {
+    throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+  }
+
+  await Device.deleteOne({ deviceId });
+  
+  await DeviceAccess.deleteMany({
+    deviceId: device._id, 
+  });
+
+
+  return SUCCESS.PACK_DELETED;
+  
+  }
+
 }

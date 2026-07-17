@@ -21,6 +21,9 @@ import { DeviceService } from "../device/device.service";
 import { ActivityService } from "../activity/activity.service";
 import { ActivityType } from "../activity/activity.model";
 import { getActivityActor } from "../activity/activity.helper";
+import Notification from "../notification/notification.model";
+import Device from "../device/device.model";
+import { USER_TYPE } from "./enums/userType.enum";
 
 export class UserService {
   // =============================
@@ -389,7 +392,121 @@ export class UserService {
     return { message: SUCCESS.LOGOUT_SUCCESS };
   }
 
+  static async deleteUserByAdmin(id: string) {
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      const user = await User.findById(id).session(session);
+
+      if (!user) {
+        throw new AppError(USER_ERRORS.USER_NOT_FOUND);
+      }
 
 
-  
+      /**
+       * Delete user device permissions
+       */
+      await DeviceAccess.deleteMany(
+        {
+          userId: id,
+        },
+        {
+          session,
+        }
+      );
+
+
+      /**
+       * Delete user notifications
+       */
+      await Notification.deleteMany(
+        {
+          userId: id,
+        },
+        {
+          session,
+        }
+      );
+
+
+      /**
+       * Delete owned resources
+       */
+      if (user.userType === USER_TYPE.OWNER) {
+        const packs = await Device.find({
+          ownerId: id,
+        })
+          .select("_id")
+          .session(session);
+
+
+        const packIds = packs.map(
+          (pack) => pack._id
+        );
+
+
+        if (packIds.length > 0) {
+          /**
+           * Remove access linked to owner's packs
+           */
+          await DeviceAccess.deleteMany(
+            {
+              packId: {
+                $in: packIds,
+              },
+            },
+            {
+              session,
+            }
+          );
+
+
+          /**
+           * Remove packs
+           */
+          await Device.deleteMany(
+            {
+              ownerId: id,
+            },
+            {
+              session,
+            }
+          );
+        }
+      }
+
+      /**
+       * Finally delete user
+       */
+      await User.findByIdAndDelete(
+        id,
+        {
+          session,
+        }
+      );
+
+
+      await session.commitTransaction();
+
+
+      return {
+        message: SUCCESS.USER_DELETED,
+      };
+
+    } catch (error) {
+
+      await session.abortTransaction();
+
+      throw error;
+
+    } finally {
+
+      await session.endSession();
+
+    }
+  }
+
+
 }

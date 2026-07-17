@@ -6,6 +6,7 @@ import * as UserController from "./user.controller";
 import { clientAuth } from "../../core/middleware/clientAuth.middleware";
 import mobileKeyAuth from "../../core/middleware/mobileKey.middleware";
 import { userAuth } from "../auth/auth.middleware";
+import { adminMiddleware } from "../../core/middleware/adminKey.middleware";
 
 
 const router = express.Router();
@@ -33,5 +34,7 @@ router.get('/', mobileKeyAuth, UserController.findAll);
 router.get('/owners', clientAuth, UserController.findAllOwners);
 router.delete('/:id', userAuth, UserController.deleteUserById);
 router.get('/id', clientAuth, UserController.getUserIdByEmail);
+
+router.delete('/admin/:id', adminMiddleware, UserController.deleteUserByAdmin);
 
 export default router;

@@ -36,7 +36,7 @@ export const addAccessory = asyncHandler(async (req, res) => {
     throw new AppError(DEVICE_ERRORS.MISSING_ACCESSORY_FIELDS);
   }
 
-  const {id, name, model} = accessoryInfo;
+  const { id, name, model } = accessoryInfo;
   if (!id || !name || !model) {
     throw new AppError(DEVICE_ERRORS.MISSING_ACCESSORY_INFOS);
   }
@@ -68,7 +68,7 @@ export const findAllByOwner = asyncHandler(async (req, res) => {
 });
 
 export const addOrUpdateAccess = asyncHandler(async (req, res) => {
-  const { userId ,deviceAccessId, access } = req.body;
+  const { userId, deviceAccessId, access } = req.body;
   if (!userId || !deviceAccessId || !access) {
     throw new AppError(DEVICE_ERRORS.MISSING_ACCESS_FIELDS);
   }
@@ -77,8 +77,8 @@ export const addOrUpdateAccess = asyncHandler(async (req, res) => {
 });
 
 export const addOrUpdateMultipleAccess = asyncHandler(async (req, res) => {
-  const { userId ,accessList } = req.body;
-  if (!userId ||!accessList) {
+  const { userId, accessList } = req.body;
+  if (!userId || !accessList) {
     throw new AppError(USER_ERRORS.MISSING_USER_ID_OR_ACCESS_LIST);
   }
 
@@ -106,7 +106,7 @@ export const setAreaArmMode = asyncHandler(async (req, res) => {
     throw new AppError(DEVICE_ERRORS.MISSING_ARMING_REQUIRED_FIELDS);
   }
 
-  const result = await DeviceService.setAreaArmMode(deviceId, isArmed,req.auth!.userId);
+  const result = await DeviceService.setAreaArmMode(deviceId, isArmed, req.auth!.userId);
 
   return sendSuccess(res, result);
 });
@@ -171,19 +171,27 @@ export const getPirCamSnapUrl = asyncHandler(async (req, res) => {
   if (!deviceId || !accessoryId || channel == null) {
     throw new AppError(DEVICE_ERRORS.MISSING_PIRCAM_REQUIRED_FIELDS);
   }
-  
+
   const result = await DeviceService.getPirCamSnapUrl(deviceId, accessoryId, channel);
 
   return sendSuccess(res, result);
 });
 
 export const setAccessory = asyncHandler(async (req, res) => {
-  const { deviceId,id, name, type, sensitivity, volume, entryDelay, imageInfo} = req.body;
-  if (!deviceId  || !type || !id) {
+  const { deviceId, id, name, type, sensitivity, volume, entryDelay, imageInfo } = req.body;
+  if (!deviceId || !type || !id) {
     throw new AppError(DEVICE_ERRORS.MISSING_SET_ACCESSORY_REQUIRED_FIELDS);
   }
 
   const result = await DeviceService.setAccessory(deviceId, id, name, type, sensitivity, volume, entryDelay, imageInfo);
+
+  return sendSuccess(res, result);
+});
+
+export const deleteDevice = asyncHandler(async (req, res) => {
+  const { deviceId } = req.params as { deviceId: string };
+
+  const result = await DeviceService.deleteDevice(deviceId);
 
   return sendSuccess(res, result);
 });

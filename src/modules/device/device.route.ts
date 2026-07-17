@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as deviceController from './device.controller';
 import { clientAuth } from '../../core/middleware/clientAuth.middleware';
 import { userAuth } from '../auth/auth.middleware';
+import { adminMiddleware } from '../../core/middleware/adminKey.middleware';
 
 const router = Router();
 
@@ -29,5 +30,6 @@ router.post('/get-screenshot-url', userAuth, deviceController.getPirCamSnapUrl);
 router.get('/access/:userId', deviceController.findAccessibleDevices);
 
 router.get('/:deviceId', deviceController.findByDeviceId);
+router.delete('/:deviceId', adminMiddleware, deviceController.deleteDevice);
 
 export default router;
