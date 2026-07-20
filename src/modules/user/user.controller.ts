@@ -109,7 +109,8 @@ export const addDeviceToken = asyncHandler(async (req: Request, res: Response) =
   return sendSuccess(res, result);
 });
 
-export const logout = asyncHandler(async (req: Request, res: Response) => {
+export const logout = asyncHandler(
+  async (req: Request, res: Response) => {
   const { deviceToken } = req.body;
 
   if (!deviceToken) {
@@ -125,6 +126,15 @@ export const deleteUserByAdmin = asyncHandler(
     const id  = req.params.id as string;
 
     const result = await UserService.deleteUserByAdmin(id);
+
+    return sendSuccess(res, result);
+  }
+);
+
+export const completeOnboarding = asyncHandler(
+  async (req: Request, res: Response) => {
+
+    const result = await UserService.completeOnboarding(req.auth!.userId);
 
     return sendSuccess(res, result);
   }

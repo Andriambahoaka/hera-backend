@@ -10,6 +10,7 @@ export interface IUser extends Document {
   userType: number;
   ownerId?: string | null;
   firstLogin: boolean;
+  onboardingCompleted: boolean;
   devicesToken: string[];
   imageUrl?: string | null;
   imagePublicId?: string | null;
@@ -23,6 +24,10 @@ const userSchema = new Schema<IUser>({
   userType: { type: Number, required: true },
   ownerId: { type: String, default: null },
   firstLogin: { type: Boolean, default: true },
+  onboardingCompleted: {
+    type: Boolean,
+    default: false
+  },
   devicesToken: [{ type: String }],
   imageUrl: { type: String, default: null },
   imagePublicId: { type: String, default: null }

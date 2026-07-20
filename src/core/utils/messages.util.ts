@@ -35,6 +35,11 @@ export const SUCCESS = {
   TOKEN_REFRESHED: "New token generated.",
 
 
+    ONBOARDING_COMPLETED: {
+    "code": "ONBOARDING_COMPLETED",
+    "message": "Onboarding completed successfully."
+  },
+
   //device 
   PACK_CREATED: {
     "code": "PACK_CREATED",

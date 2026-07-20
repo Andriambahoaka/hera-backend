@@ -8,7 +8,6 @@ import mobileKeyAuth from "../../core/middleware/mobileKey.middleware";
 import { userAuth } from "../auth/auth.middleware";
 import { adminMiddleware } from "../../core/middleware/adminKey.middleware";
 
-
 const router = express.Router();
 const upload = multer();
 
@@ -36,5 +35,7 @@ router.delete('/:id', userAuth, UserController.deleteUserById);
 router.get('/id', clientAuth, UserController.getUserIdByEmail);
 
 router.delete('/admin/:id', adminMiddleware, UserController.deleteUserByAdmin);
+
+router.patch("/me/onboarding", userAuth, UserController.completeOnboarding);
 
 export default router;

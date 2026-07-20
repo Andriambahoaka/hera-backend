@@ -392,6 +392,15 @@ export class UserService {
     return { message: SUCCESS.LOGOUT_SUCCESS };
   }
 
+
+  static async completeOnboarding(userId: string) {
+    await User.findByIdAndUpdate(
+      userId, { onboardingCompleted: true, }
+    );
+
+    return SUCCESS.ONBOARDING_COMPLETED;
+  }
+
   static async deleteUserByAdmin(id: string) {
     const session = await mongoose.startSession();
 
@@ -404,36 +413,15 @@ export class UserService {
         throw new AppError(USER_ERRORS.USER_NOT_FOUND);
       }
 
-
-      /**
-       * Delete user device permissions
-       */
       await DeviceAccess.deleteMany(
-        {
-          userId: id,
-        },
-        {
-          session,
-        }
+        { userId: id }, { session }
       );
 
-
-      /**
-       * Delete user notifications
-       */
       await Notification.deleteMany(
-        {
-          userId: id,
-        },
-        {
-          session,
-        }
+        { userId: id, }, { session }
       );
 
 
-      /**
-       * Delete owned resources
-       */
       if (user.userType === USER_TYPE.OWNER) {
         const packs = await Device.find({
           ownerId: id,
@@ -448,9 +436,6 @@ export class UserService {
 
 
         if (packIds.length > 0) {
-          /**
-           * Remove access linked to owner's packs
-           */
           await DeviceAccess.deleteMany(
             {
               packId: {
@@ -462,10 +447,6 @@ export class UserService {
             }
           );
 
-
-          /**
-           * Remove packs
-           */
           await Device.deleteMany(
             {
               ownerId: id,
@@ -477,19 +458,13 @@ export class UserService {
         }
       }
 
-      /**
-       * Finally delete user
-       */
+
       await User.findByIdAndDelete(
-        id,
-        {
-          session,
-        }
+        id, { session, }
       );
 
 
       await session.commitTransaction();
-
 
       return {
         message: SUCCESS.USER_DELETED,
