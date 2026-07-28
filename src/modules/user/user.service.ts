@@ -402,85 +402,36 @@ export class UserService {
   }
 
   static async deleteUserByAdmin(id: string) {
-    const session = await mongoose.startSession();
+    const user = await User.findById(id);
 
-    try {
-      session.startTransaction();
-
-      const user = await User.findById(id).session(session);
-
-      if (!user) {
-        throw new AppError(USER_ERRORS.USER_NOT_FOUND);
-      }
-
-      await DeviceAccess.deleteMany(
-        { userId: id }, { session }
-      );
-
-      await Notification.deleteMany(
-        { userId: id, }, { session }
-      );
-
-
-      if (user.userType === USER_TYPE.OWNER) {
-        const packs = await Device.find({
-          ownerId: id,
-        })
-          .select("_id")
-          .session(session);
-
-
-        const packIds = packs.map(
-          (pack) => pack._id
-        );
-
-
-        if (packIds.length > 0) {
-          await DeviceAccess.deleteMany(
-            {
-              packId: {
-                $in: packIds,
-              },
-            },
-            {
-              session,
-            }
-          );
-
-          await Device.deleteMany(
-            {
-              ownerId: id,
-            },
-            {
-              session,
-            }
-          );
-        }
-      }
-
-
-      await User.findByIdAndDelete(
-        id, { session, }
-      );
-
-
-      await session.commitTransaction();
-
-      return {
-        message: SUCCESS.USER_DELETED,
-      };
-
-    } catch (error) {
-
-      await session.abortTransaction();
-
-      throw error;
-
-    } finally {
-
-      await session.endSession();
-
+    if (!user) {
+      throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
+
+    await DeviceAccess.deleteMany({ userId: id });
+    await Notification.deleteMany({ userId: id });
+
+    if (user.userType === USER_TYPE.OWNER) {
+      const packs = await Device.find({ ownerId: id }).select("_id");
+
+      const packIds = packs.map(pack => pack._id);
+
+      if (packIds.length > 0) {
+        await DeviceAccess.deleteMany({
+          packId: { $in: packIds },
+        });
+
+        await Device.deleteMany({
+          ownerId: id,
+        });
+      }
+    }
+
+    await User.findByIdAndDelete(id);
+
+    return {
+      message: SUCCESS.USER_DELETED,
+    };
   }
 
 
