@@ -5,4 +5,5 @@ export enum NotificationType {
   ONLINE = "online",
   OFFLINE = "offline",
   SENSOR_ABNORMAL = "SensorAbnormal",
+  PHOTO_CAPTURED = "photoCaptured",
 }

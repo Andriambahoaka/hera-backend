@@ -354,9 +354,17 @@ export class DeviceService {
     return status;
   }
 
-  static async getPirCamSnapUrl(deviceId: string, accessoryId: string, channel: number) {
+  static async getPirCamSnapUrl(deviceId: string, accessoryId: string, channel: number, userId: string) {
     const response = await DolynkClient.getPirCamSnapUrl(deviceId, accessoryId, channel);
-    const picUrl = response.data.picUrl;
+        const picUrl = response.data.picUrl;
+    const notificationDto = {
+      deviceId,
+      msgType: NotificationType.PHOTO_CAPTURED,
+      userId: userId,
+      filePath: picUrl,
+    };
+    await NotificationService.createAndSend(notificationDto);
+
     return { picUrl };
   }
 
@@ -365,21 +373,21 @@ export class DeviceService {
   }
 
   static async deleteDevice(deviceId: string) {
-  const device = await Device.findOne({ deviceId });
+    const device = await Device.findOne({ deviceId });
 
-  if (!device) {
-    throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
-  }
+    if (!device) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+    }
 
-  await Device.deleteOne({ deviceId });
-  
-  await DeviceAccess.deleteMany({
-    deviceId: device._id, 
-  });
+    await Device.deleteOne({ deviceId });
+
+    await DeviceAccess.deleteMany({
+      deviceId: device._id,
+    });
 
 
-  return SUCCESS.PACK_DELETED;
-  
+    return SUCCESS.PACK_DELETED;
+
   }
 
 }

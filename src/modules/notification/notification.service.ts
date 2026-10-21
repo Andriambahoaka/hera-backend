@@ -50,8 +50,6 @@ export class NotificationService {
 
     const responses = [];
 
-    console.log("Recipients:", recipients);
-
     if (recipients.otherTokens.length) {
       responses.push(
         await this.send({
@@ -155,6 +153,7 @@ export class NotificationService {
       deviceName: device.deviceName,
       ownerId: device.ownerId.toString(),
       createdAt: notification.createdAt?.toISOString() ?? "",
+      filePath: notification.filePath ?? "",
 
       ...(triggeringUser && {
         userId: triggeringUser._id.toString(),

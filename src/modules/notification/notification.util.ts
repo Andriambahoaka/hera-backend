@@ -14,6 +14,8 @@ export const getMessageTitleFromMsgType = (msgType: string): string => {
       return "Extinction de l'alarme";
     case NotificationType.SENSOR_ABNORMAL:
       return "Autoprotection déclenchée";
+    case NotificationType.PHOTO_CAPTURED:
+      return "Capture instantanée";
     default:
       return "Hera";
   }
@@ -44,6 +46,9 @@ export const getMessageBodyFromMsgType = (
 
     case NotificationType.SENSOR_ABNORMAL:
       return `Une tentative d'altération d'un accessoire a été détectée à ${packName}.`;
+
+    case NotificationType.PHOTO_CAPTURED:
+      return `Photo capturée dans ${packName} ${endingMessage}.`;
 
     default:
       return `Nouvelle notification reçue : ${msgType}`;
