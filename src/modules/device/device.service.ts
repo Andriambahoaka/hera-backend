@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Device from './device.model';
+import Device, { IDevice } from './device.model';
 import User from '../user/user.model';
 
 import { AppError } from "../../core/errors/app.error";
@@ -7,16 +7,16 @@ import { DEVICE_ERRORS } from "./device.errors";
 import { DolynkClient } from '../../shared/integrations/dolynk/dolynk.client';
 import { DolynkCrypto } from '../../shared/integrations/dolynk/dolynk.crypto';
 import { USER_TYPE } from '../user/enums/userType.enum';
-import { fromDevice } from './utils/deviceAccessFactory';
 import { USER_ERRORS } from '../user/user.errors';
 import { ImageInfo } from '../../shared/integrations/dolynk/dolynk.types';
 import { UserService } from '../user/user.service';
-import DeviceAccess from './deviceAccess.model';
+import DeviceAccess, { AccessLevel } from './deviceAccess.model';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/enums/notificationType.enum';
 import { ActivityService } from '../activity/activity.service';
 import { ActivityType } from '../activity/activity.model';
 import { SUCCESS } from '../../core/utils/messages.util';
+import { AccessRequest, DeviceWithAccess } from './device.type';
 
 
 export class DeviceService {
@@ -148,38 +148,33 @@ export class DeviceService {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-    if (user.userType === USER_TYPE.MEMBER || user.userType === USER_TYPE.ADMIN) {
-      const accesses = await DeviceAccess.find({
-        userId,
-        access: { $exists: true, $ne: [] },
-      })
-        .populate("device")
-        .lean();
-
-      return accesses.map(access => ({
-        ...access,
-        hasAccess: true,
-      }));
-    }
-
-    const ownerId =
-      user.userType === USER_TYPE.OWNER
-        ? userId
-        : user.ownerId;
-
     if (user.userType === USER_TYPE.OWNER) {
-      const devices = await Device.find({ ownerId }).lean();
+      const devices = await Device.find({ ownerId: userId }).lean<IDevice[]>();
 
       return devices.map(device => ({
-        ...fromDevice(device, userId),
-        hasAccess: true,
+        device,
+        accessLevel: AccessLevel.ADMIN,
       }));
     }
+
+    if (user.userType === USER_TYPE.MEMBER || user.userType === USER_TYPE.ADMIN) {
+      const accesses = await DeviceAccess.find({ userId })
+        .populate<{ device: IDevice | null }>("device")
+        .lean();
+
+      return accesses
+        .filter(a => a.device !== null)
+        .map(a => ({
+          device: a.device as IDevice,
+          accessLevel: a.accessLevel,
+        }));
+    }
+
 
     return [];
   }
 
-  static async findAccessibleDevices(userId: string) {
+  static async findAccessibleDevices(userId: string): Promise<DeviceWithAccess[]> {
     const user = await User.findById(userId)
       .select("ownerId userType")
       .lean();
@@ -195,23 +190,21 @@ export class DeviceService {
 
     const [devices, deviceAccesses] = await Promise.all([
       Device.find({ ownerId }).lean(),
-      DeviceAccess.find({ userId }).lean(),
+      DeviceAccess.find({ userId }).select("device accessLevel").lean(),
     ]);
 
 
     const accessMap = new Map(
       deviceAccesses.map(access => [
         access.device.toString(),
-        access,
+        access.accessLevel,
       ]),
     );
 
     return devices.map(device => {
-      const access = accessMap.get(device._id.toString());
-
       return {
         device,
-        access: access?.access ?? [],
+        accessLevel: accessMap.get(device._id.toString()) ?? AccessLevel.NONE,
       };
     });
   }
@@ -221,67 +214,41 @@ export class DeviceService {
   // DEVICE ACCESS
   // =============================
 
-  static async addOrUpdateAccess(
-    userId: string,
-    deviceId: string,
-    access: number[],
-  ) {
-    await UserService.findUserOrFail(userId);
+  private static assertValidLevel(level: unknown): asserts level is AccessLevel {
+  if (!Object.values(AccessLevel).includes(level as AccessLevel)) {
+    throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD);
+  }
+}
 
-    if (!deviceId) {
-      throw new AppError(
-        DEVICE_ERRORS.INVALID_DEVICE_ACCESS_PAYLOAD,
-      );
-    }
+static async setMultipleAccess(
+  userId: string,
+  accessList: AccessRequest[],
+) {
+  await UserService.findUserOrFail(userId);
 
+  for (const { deviceId, accessLevel } of accessList) {
     if (!mongoose.Types.ObjectId.isValid(deviceId)) {
       throw new AppError(DEVICE_ERRORS.INVALID_DEVICE_ID);
     }
-
-    if (!access.length) {
-      await DeviceAccess.deleteOne({
-        userId,
-        device: deviceId,
-      });
-
-      return;
-    }
-
-    await DeviceAccess.findOneAndUpdate(
-      {
-        userId,
-        device: deviceId,
-      },
-      {
-        access,
-      },
-      {
-        upsert: true,
-        new: true,
-      },
-    );
+    this.assertValidLevel(accessLevel);
   }
 
-  static async addOrUpdateMultipleAccess(
-    userId: string,
-    accessList: any[],
-  ) {
-    await UserService.findUserOrFail(userId);
+  if (!accessList.length) return;
 
-    await DeviceAccess.deleteMany({ userId });
-
-    const documents = accessList
-      .filter(item => item.access?.length)
-      .map(item => ({
-        userId,
-        device: item.deviceId,
-        access: item.access,
-      }));
-
-    if (documents.length) {
-      await DeviceAccess.insertMany(documents);
-    }
-  }
+  await DeviceAccess.bulkWrite(
+    accessList.map(({ deviceId, accessLevel }) =>
+      accessLevel === AccessLevel.NONE
+        ? { deleteOne: { filter: { userId, device: deviceId } } }
+        : {
+            updateOne: {
+              filter: { userId, device: deviceId },
+              update: { $set: { accessLevel } },
+              upsert: true,
+            },
+          },
+    ),
+  );
+}
 
   static async setAreaArmMode(deviceId: string, isArmed: boolean, userId: string) {
     const response = await DolynkClient.setAreaArmMode(deviceId, isArmed);
@@ -356,7 +323,7 @@ export class DeviceService {
 
   static async getPirCamSnapUrl(deviceId: string, accessoryId: string, channel: number, userId: string) {
     const response = await DolynkClient.getPirCamSnapUrl(deviceId, accessoryId, channel);
-        const picUrl = response.data.picUrl;
+    const picUrl = response.data.picUrl;
     const notificationDto = {
       deviceId,
       msgType: NotificationType.PHOTO_CAPTURED,

@@ -116,7 +116,7 @@ export class UserService {
       password: tempPassword
     });
 
-    await DeviceService.addOrUpdateMultipleAccess(user._id, data.accessList);
+    await DeviceService.setMultipleAccess(user._id, data.accessList);
 
     await emailService.sendWelcomeEmail(
       user.name,
@@ -180,7 +180,7 @@ export class UserService {
     }
 
     if (accessChanged) {
-      await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
+      await DeviceService.setMultipleAccess(userId, accessList);
 
       await ActivityService.addActivity({
         ownerId: oldUser.ownerId.toString(),

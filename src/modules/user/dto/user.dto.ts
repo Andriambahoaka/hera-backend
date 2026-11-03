@@ -1,3 +1,4 @@
+import { AccessRequest } from "../../device/device.type";
 import { IDeviceAccess } from "../../device/deviceAccess.model";
 export interface CreateUserDto {
   name: string;
@@ -7,5 +8,5 @@ export interface CreateUserDto {
   userType: number;
   ownerId?: string | null;
   ownerName?: string | null;
-  accessList: IDeviceAccess[];
+  accessList: AccessRequest[];
 }

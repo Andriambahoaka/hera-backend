@@ -7,6 +7,7 @@ import { DEVICE_ERRORS } from './device.errors';
 import { Request } from "express";
 import { USER_ERRORS } from '../user/user.errors';
 import { SUCCESS } from '../../core/utils/messages.util';
+import { AccessoryRequest } from './device.type';
 
 export const add = asyncHandler(async (req, res) => {
   const {
@@ -67,16 +68,7 @@ export const findAllByOwner = asyncHandler(async (req, res) => {
   return sendSuccess(res, devices);
 });
 
-export const addOrUpdateAccess = asyncHandler(async (req, res) => {
-  const { userId, deviceAccessId, access } = req.body;
-  if (!userId || !deviceAccessId || !access) {
-    throw new AppError(DEVICE_ERRORS.MISSING_ACCESS_FIELDS);
-  }
-  const results = await DeviceService.addOrUpdateAccess(userId, deviceAccessId, access);
-  return sendSuccess(res, results);
-});
-
-export const addOrUpdateMultipleAccess = asyncHandler(async (req, res) => {
+export const setMultipleAccess = asyncHandler(async (req, res) => {
   const { userId, accessList } = req.body;
   if (!userId || !accessList) {
     throw new AppError(USER_ERRORS.MISSING_USER_ID_OR_ACCESS_LIST);
@@ -85,7 +77,7 @@ export const addOrUpdateMultipleAccess = asyncHandler(async (req, res) => {
   if (!Array.isArray(accessList)) {
     throw new AppError(DEVICE_ERRORS.INVALID_ACCESS_LIST);
   }
-  const results = await DeviceService.addOrUpdateMultipleAccess(userId, accessList);
+  const results = await DeviceService.setMultipleAccess(userId, accessList);
   return sendSuccess(res, results);
 });
 
@@ -121,11 +113,6 @@ export const getAreaArmMode = asyncHandler(async (req, res) => {
 
   return sendSuccess(res, result);
 });
-
-type AccessoryRequest = {
-  deviceId: string;
-  accessoriesId: string[];
-};
 
 const getAccessoryRequestData = (req: Request): AccessoryRequest => {
   const { deviceId, accessoryId } = req.body;

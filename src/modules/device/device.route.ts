@@ -13,7 +13,7 @@ router.get('/owner', userAuth, deviceController.findAllByOwner);
 
 router.get('/granted-access', userAuth, deviceController.findGrantedAccess);
 
-router.post('/access', deviceController.addOrUpdateAccess);
+router.post('/access', userAuth, deviceController.setMultipleAccess);
 
 router.put('/', deviceController.update);
 
