@@ -8,6 +8,7 @@ import { Request } from "express";
 import { USER_ERRORS } from '../user/user.errors';
 import { SUCCESS } from '../../core/utils/messages.util';
 import { AccessoryRequest } from './device.type';
+import { assertCanManageUser } from '../user/household';
 
 export const add = asyncHandler(async (req, res) => {
   const {
@@ -46,15 +47,29 @@ export const addAccessory = asyncHandler(async (req, res) => {
   return sendCreated(res, SUCCESS.ACCESSORY_PAIRED);
 });
 
+// Access already checked by requireDeviceAccess().
 export const findByDeviceId = asyncHandler(async (req, res) => {
-  const ownerId = req.params.deviceId as string;
-  const pack = await DeviceService.findByDeviceId(ownerId);
-  return sendSuccess(res, pack);
+  return sendSuccess(res, req.deviceAccess!.device);
 });
 
+const UPDATABLE_DEVICE_FIELDS = ["deviceName", "urgencyNumber"] as const;
+
+// Access (level 3) already checked by requireDeviceAccess().
 export const update = asyncHandler(async (req, res) => {
-  const { deviceId, ...fields } = req.body;
-  const device = await DeviceService.update(deviceId, fields);
+  const fields: { deviceName?: string; urgencyNumber?: string } = {};
+
+  for (const key of UPDATABLE_DEVICE_FIELDS) {
+    const value = req.body[key];
+    if (value === undefined) continue;
+    if (typeof value !== "string") throw new AppError(DEVICE_ERRORS.NO_UPDATABLE_FIELDS);
+    fields[key] = value;
+  }
+
+  if (!Object.keys(fields).length) {
+    throw new AppError(DEVICE_ERRORS.NO_UPDATABLE_FIELDS);
+  }
+
+  const device = await DeviceService.update(req.deviceAccess!.device.deviceId, fields);
   return sendSuccess(res, device);
 });
 
@@ -88,6 +103,7 @@ export const findGrantedAccess = asyncHandler(async (req, res) => {
 
 export const findAccessibleDevices = asyncHandler(async (req, res) => {
   const userId = req.params.userId as string;
+  await assertCanManageUser(req.auth!.userId, userId);
   const devices = await DeviceService.findAccessibleDevices(userId);
   return sendSuccess(res, devices);
 });

@@ -3,11 +3,6 @@ import { asyncHandler } from "../../core/utils/asyncHandler";
 import { sendSuccess } from "../../core/utils/responseHandler";
 import { NotificationService } from "./notification.service";
 
-export const postNotification = asyncHandler(async (req: Request, res: Response) => {
-  const result = await NotificationService.createAndSend(req.body);
-  return sendSuccess(res, result);
-});
-
 export const findAllForUser = asyncHandler(async (req: Request, res: Response) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 50);

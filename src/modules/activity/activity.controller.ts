@@ -4,11 +4,6 @@ import { sendSuccess } from "../../core/utils/responseHandler";
 import { ActivityService } from "./activity.service";
 
 
-export const addActivity = asyncHandler(async (req: Request, res: Response) => {
-  const result = await ActivityService.addActivity(req.body);
-  return sendSuccess(res, result);
-});
-
 export const findActivitiesByDate = asyncHandler(async (
   req: Request,
   res: Response

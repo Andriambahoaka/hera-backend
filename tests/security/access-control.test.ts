@@ -11,17 +11,8 @@
  *   Owners are implicitly level 3 on their own devices.
  */
 
-describe("Phase 2: endpoints without authentication", () => {
-  it.todo("PUT /api/packs requires authentication and level 3 on the device");
-  it.todo("GET /api/packs/:deviceId requires authentication and access to the device");
-  it.todo("GET /api/packs/access/:userId requires authentication and the same household");
-  it.todo("POST /api/activities no longer exists");
-  it.todo("POST /api/user-types requires the admin key");
-  it.todo("POST /api/notifications (Dolynk webhook) rejects requests without the webhook secret");
-  it.todo("POST /api/notifications ignores userId and unknown fields from the payload");
-  it.todo("POST /api/notifications does not return FCM tokens");
-  it.todo("device responses never include devCode");
-});
+// Phase 2 (endpoints without authentication) is covered by
+// tests/integration/{devices,webhook,closed-endpoints}.test.ts.
 
 describe("Phase 3: tokens", () => {
   it.todo("a refresh token cannot be used as an access token");

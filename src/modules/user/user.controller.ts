@@ -21,7 +21,6 @@ export const addMember = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateMember = asyncHandler(async (req, res) => {
   const { _id, accessList, ...fields } = req.body;
-  console.log(req.body);
   const user = await UserService.updateMember(req.auth!.userId,_id, fields, accessList);
   return sendSuccess(res,user);
 });

@@ -15,8 +15,6 @@ export class DolynkApi {
 
     const headers = DolynkHeaders.generate(body, appAccessToken);
 
-        console.log(`${DOLYNK_CONFIG.BASE_URL}/open-api/${endpoint}`);
-
     try {
       const response = await axios.post(
         `${DOLYNK_CONFIG.BASE_URL}/open-api/${endpoint}`,
@@ -25,7 +23,6 @@ export class DolynkApi {
       );
 
       const data = response.data;
-      console.log(data);
 
       if (data.success === true) {
         return data;
@@ -36,7 +33,7 @@ export class DolynkApi {
           status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
           message: data.msg,
         });
-        console.log("mappedError", mappedError);
+        console.warn(`Dolynk ${endpoint} failed with code ${data.code}`);
       throw mappedError;
     } catch (error) {
       if (error instanceof AppError) throw error;

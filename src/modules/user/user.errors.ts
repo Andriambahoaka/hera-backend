@@ -1,6 +1,11 @@
 import { HTTP_STATUS } from "../../core/constants/httpStatus";
 
 export const USER_ERRORS = {
+  NOT_SAME_HOUSEHOLD: {
+    code: "NOT_SAME_HOUSEHOLD",
+    status: HTTP_STATUS.FORBIDDEN,
+    message: "You can only manage users of your own household.",
+  },
   USER_NOT_FOUND: {
     code: "USER_NOT_FOUND",
     status: HTTP_STATUS.NOT_FOUND,

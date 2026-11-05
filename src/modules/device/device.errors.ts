@@ -192,4 +192,14 @@ export const DEVICE_ERRORS = {
     status: HTTP_STATUS.BAD_REQUEST,
     message: "The device is armed. Please disarm it before making changes.",
   },
+  DEVICE_ACCESS_DENIED: {
+    code: "DEVICE_ACCESS_DENIED",
+    status: HTTP_STATUS.FORBIDDEN,
+    message: "Votre niveau d'accès ne permet pas cette action sur ce dispositif.",
+  },
+  NO_UPDATABLE_FIELDS: {
+    code: "NO_UPDATABLE_FIELDS",
+    status: HTTP_STATUS.BAD_REQUEST,
+    message: "Only deviceName and urgencyNumber can be updated, as strings.",
+  },
 };

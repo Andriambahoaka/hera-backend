@@ -48,7 +48,7 @@ export class DolynkClient {
 
 
   static async setAreaArmMode(deviceId: string, isArmed: boolean) {
-    const device = await Device.findOne({ deviceId }, { devCode: 1 });
+    const device = await Device.findOne({ deviceId }).select("+devCode");
     const encodedDevCode = device?.devCode;
     const areaIds = Array.from({ length: 32 }, (_, i) => i + 1);
     const armingMode = isArmed ? "T" : "D";
@@ -66,7 +66,6 @@ export class DolynkClient {
       }
     };
 
-    console.log("Payload for setAreaArmMode:", payload);
 
     return DolynkApi.postRequest(
       `/${ALARM_SEGMENT}/setAreaArmMode`,

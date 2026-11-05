@@ -136,7 +136,7 @@ app.get("/deeplink", (req: Request, res: Response) => {
     ? `${APP_DOMAIN}/${to}?token=${encodeURIComponent(token)}`
     : `${APP_DOMAIN}/${to}`;
 
-  console.log("Redirecting to:", deepLink);
+  // Not logged: the URL carries the password-reset token.
   res.redirect(deepLink);
 });
 

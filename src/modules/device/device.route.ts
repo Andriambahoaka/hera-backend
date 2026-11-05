@@ -3,6 +3,8 @@ import * as deviceController from './device.controller';
 import { clientAuth } from '../../core/middleware/clientAuth.middleware';
 import { userAuth } from '../auth/auth.middleware';
 import { adminMiddleware } from '../../core/middleware/adminKey.middleware';
+import { requireDeviceAccess } from './device.access';
+import { AccessLevel } from './deviceAccess.model';
 
 const router = Router();
 
@@ -15,7 +17,7 @@ router.get('/granted-access', userAuth, deviceController.findGrantedAccess);
 
 router.post('/access', userAuth, deviceController.setMultipleAccess);
 
-router.put('/', deviceController.update);
+router.put('/', userAuth, requireDeviceAccess(AccessLevel.ADMIN), deviceController.update);
 
 router.post('/set-area-arm', userAuth, deviceController.setAreaArmMode);
 router.post('/get-area-arm', userAuth, deviceController.getAreaArmMode);
@@ -27,9 +29,9 @@ router.put('/set-accessory', userAuth, deviceController.setAccessory);
 
 router.post('/get-screenshot-url', userAuth, deviceController.getPirCamSnapUrl);
 
-router.get('/access/:userId', deviceController.findAccessibleDevices);
+router.get('/access/:userId', userAuth, deviceController.findAccessibleDevices);
 
-router.get('/:deviceId', deviceController.findByDeviceId);
+router.get('/:deviceId', userAuth, requireDeviceAccess(AccessLevel.BASIC), deviceController.findByDeviceId);
 router.delete('/:deviceId', adminMiddleware, deviceController.deleteDevice);
 
 export default router;
