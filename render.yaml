@@ -1,0 +1,55 @@
+# Pre-production on Render (free plan), built from the Dockerfile.
+# Render: New > Blueprint > pick this repo. Values marked `sync: false`
+# are asked once in the Render dashboard and never stored in git.
+services:
+  - type: web
+    name: hera-api-preprod
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: global-refactor
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      # Required
+      - key: MONGO_URI
+        sync: false
+      # Until Phase 3 ships, both must hold the same value (openssl rand -hex 32).
+      - key: JWT_SECRET
+        sync: false
+      - key: RESET_PASSWORD_SECRET
+        sync: false
+      - key: MASTER_ADMIN_KEY
+        generateValue: true
+      - key: MOBILE_API_KEY
+        sync: false
+      # Required in production (NODE_ENV=production is set by the Dockerfile)
+      - key: APP_DOMAIN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: BREVO_SMTP_USERNAME
+        sync: false
+      - key: BREVO_SMTP_PASSWORD
+        sync: false
+      - key: BREVO_EMAIL_SENDER
+        sync: false
+      - key: DOLYNK_PRODUCT_ID
+        sync: false
+      - key: DOLYNK_ACCESS_KEY
+        sync: false
+      - key: DOLYNK_SECRET_ACCESS_KEY
+        sync: false
