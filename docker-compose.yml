@@ -2,22 +2,57 @@ services:
   api:
     build: .
     container_name: backend_api
-    restart: always
+    restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
       - .env
+    environment:
+      NODE_ENV: production
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
 
   mongo:
     image: mongo:7
     container_name: backend_mongo
-    restart: always
+    restart: unless-stopped
+    # No "ports:" on purpose: MongoDB is reachable only from the api container
+    # over the internal Docker network (host "mongo"). For admin access from
+    # your machine, use an SSH tunnel instead of publishing the port.
+    #
+    # Root credentials and the replica set key live in .env.mongo, separate
+    # from the api's .env, so the api container never sees root credentials.
+    env_file:
+      - .env.mongo
+    # Single-node replica set (required for transactions). With authentication
+    # enabled, replica set members need a shared key file; it is written from
+    # MONGO_REPLICA_KEY at startup with the permissions mongod requires.
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        printf '%s' "$$MONGO_REPLICA_KEY" > /etc/mongo-keyfile
+        chmod 400 /etc/mongo-keyfile
+        chown 999:999 /etc/mongo-keyfile
+        exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /etc/mongo-keyfile
     volumes:
       - mongo_data:/data/db
-    ports:
-      - "27017:27017"
+    # Also initiates the replica set on first start (idempotent afterwards).
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mongosh --quiet
+          -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD"
+          --authenticationDatabase admin
+          --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }).ok }"
+          | grep -q 1
+      interval: 10s
+      timeout: 10s
+      start_period: 30s
+      retries: 10
 
 volumes:
   mongo_data:

@@ -1,11 +1,15 @@
 node_modules/
+dist/
+coverage/
+.DS_Store
+
+# Environment / secrets: only .env.example is committed
+.env
+.env.*
+!.env.example
+!.env.mongo.example
+env.test
+*.pem
 
 # Firebase Admin SDK key
 firebase-adminsdk.json
-
-# Environment variables
-.env
-
-# Build output
-dist/
-

@@ -1,5 +1,24 @@
+# Dependencies and build output (rebuilt inside the image)
 node_modules
-npm-debug.log
+dist
+coverage
+
+# Secrets: never send to the Docker build context
+.env
+.env.*
+!.env.example
+env.test
+*.pem
+firebase-adminsdk.json
+
+# Not needed in the image
 .git
 .gitignore
-.env
+.DS_Store
+tests
+*.md
+jest.config.js
+tsconfig.test.json
+docker-compose*.yml
+Dockerfile
+.dockerignore

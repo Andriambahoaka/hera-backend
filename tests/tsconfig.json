@@ -1,0 +1,5 @@
+{
+  // Lets the editor (which only discovers files named tsconfig.json) use the
+  // test config, so Jest globals like describe/it/expect are typed in tests/.
+  "extends": "../tsconfig.test.json"
+}

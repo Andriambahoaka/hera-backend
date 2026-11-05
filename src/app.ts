@@ -1,8 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
 import path from "path";
 import fs from "fs";
 
@@ -28,7 +24,6 @@ import { errorMiddleware } from "./core/middleware/error.middleware";
 // =============================
 const {
   NODE_ENV = "development",
-  MONGO_URI,
   CORS_ORIGINS,
 } = process.env;
 
@@ -66,7 +61,9 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
+if (NODE_ENV !== "test") {
+  app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
+}
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -144,22 +141,8 @@ app.get("/deeplink", (req: Request, res: Response) => {
 });
 
 // =============================
-// MongoDB connection
-// =============================
-if (!MONGO_URI) {
-  console.error("[CONFIG] MONGO_URI manquant dans .env");
-  process.exit(1);
-}
-
-mongoose
-  .connect(MONGO_URI)
-  .then(() => console.log(APP.MONGO_CONNECTED))
-  .catch(err => {
-    console.error(APP.MONGO_CONNECTION_ERROR, err.message);
-    process.exit(1);
-  });
-
-// =============================
-// Export app (IMPORTANT)
+// Export app
+// The app has no side effects on import (no DB connection, no env loading),
+// so tests can import it directly. Startup lives in server.ts.
 // =============================
 export default app;

@@ -7,7 +7,7 @@ The API is built with Node.js and TypeScript and is designed to be deployed usin
 ---
 
 ## Tech Stack
-- Node.js 18+
+- Node.js 24 (LTS)
 - TypeScript
 - Express
 - MongoDB
@@ -39,23 +39,17 @@ src/
 
 ## Environment Variables
 
-The application relies on environment variables for configuration.
+Copy `.env.example` to `.env` and fill it in. It documents every variable.
 
-Create a '.env' file based on '.env.example'.
+The API validates its environment at startup (`src/core/config/env.ts`):
+in production it refuses to start if a required variable is missing or a
+secret is shorter than 32 characters. Only variable names are ever logged.
 
-### Required variables
-- 'NODE_ENV' – application environment (`development`, `production`)  
-- 'PORT' – port the API listens on (default: `3000`)  
-- 'MONGO_URI' – MongoDB connection string  
-- 'JWT_SECRET '– secret used to sign authentication tokens  
-- CORS_ORIGINS' – comma-separated list of allowed origins
+With Docker Compose, the MongoDB container also needs `.env.mongo`
+(see `.env.mongo.example`). It is separate so the API never sees root
+database credentials.
 
-### Example env
-NODE_ENV=production
-PORT=3000
-MONGO_URI=mongodb://mongo:27017/app_db
-JWT_SECRET=change_me
-CORS_ORIGINS=https://app.example.com
+Never commit `.env`, `.env.mongo`, or any file containing real secrets.
 
 ### Running Locally (without Docker)
 - Install dependencies
@@ -76,6 +70,19 @@ http://localhost:3000
 
 The API will be available at:
 http://localhost:3000
+
+### Tests
+
+  npm test              # all tests
+  npm run test:watch    # re-run on change
+  npm run test:coverage # coverage report
+  npm run typecheck     # type-check src and tests
+
+Tests use Jest + Supertest against an in-memory MongoDB replica set
+(downloaded automatically on first run; no Docker or real database needed).
+External services (Firebase, email, Dolynk, Cloudinary) are mocked in
+`tests/setup/mocks.ts`. `tests/security/access-control.test.ts` lists the
+pending security fixes as `todo` tests.
 
 ### Health Check
 
@@ -103,6 +110,9 @@ http://localhost:3000
   * The API listens on 0.0.0.0 for Docker compatibility
   * Port mapping can be adjusted depending on infrastructure needs
   * MongoDB data must be persisted using Docker volumes or managed backups
+  * MongoDB is not exposed outside the Docker network, requires authentication,
+    and runs as a single-node replica set (needed for transactions)
+  * Migrating an existing unauthenticated database: `docs/runbooks/mongo-hardening.md`
   * CI/CD can be added later (GitHub Actions, GitLab CI, etc.)
 
 ### License
