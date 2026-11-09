@@ -61,7 +61,8 @@ export const sendResetPasswordEmail = async ({
   token: string;
 }) => {
   
-  const resetLink = `${APP_DOMAIN}/deeplink?to=update-password&token=${token}`;
+  // Direct Universal Link / App Link (a redirect would not open the app on iOS).
+  const resetLink = `${APP_DOMAIN}/update-password?token=${encodeURIComponent(token)}`;
   const data = { name: name || "Utilisateur", to, resetLink ,APP_DOMAIN };
   const templateName = "resetPasswordEmail";
   const html = renderTemplate(templateName, data, "html");

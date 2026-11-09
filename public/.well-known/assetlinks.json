@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "fr.securis.hera",
+      "sha256_cert_fingerprints": [
+        "85:CF:1A:E2:CE:E6:DA:BA:B6:5E:28:8B:21:D8:2B:72:51:90:6A:DF:C0:4C:BD:0F:41:8C:A7:3F:94:9D:F5:8D"
+      ]
+    }
+  }
+]

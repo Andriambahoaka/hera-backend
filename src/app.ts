@@ -15,6 +15,7 @@ import deviceRoutes from "./modules/device/device.route";
 import notificationRoutes from "./modules/notification/notification.route";
 import activityRoutes from "./modules/activity/activity.route";
 import oauthRoutes from "./modules/integrations/apiClient.route";
+import deepLinkRoutes from "./modules/deeplink/deeplink.route";
 
 import { APP } from "./core/utils/messages.util";
 import { errorMiddleware } from "./core/middleware/error.middleware";
@@ -60,6 +61,11 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Access logs never contain token query parameters (password-reset links).
+export const redactUrl = (url: string) =>
+  url.replace(/([?&]token=)[^&#]*/gi, "$1[REDACTED]");
+morgan.token("url", (req: Request) => redactUrl(req.originalUrl || req.url));
 
 if (NODE_ENV !== "test") {
   app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
@@ -113,32 +119,8 @@ app.get("/healthz", (_: Request, res: Response) => {
   res.status(200).send(APP.HEALTH_OK);
 });
 
-app.get('/.well-known/assetlinks.json', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, '../public/.well-known/assetlinks.json')
-  );
-});
-
-// =============================
-// Deeplink (secure allowlist)
-// =============================
-const DEEPLINK_ALLOWED = new Set(["update-password"]);
-const { APP_DOMAIN } = process.env;
-
-app.get("/deeplink", (req: Request, res: Response) => {
-  const { to, token } = req.query as { to?: string; token?: string };
-
-  if (!to || !DEEPLINK_ALLOWED.has(to)) {
-    return res.status(400).send('Paramètre "to" invalide.');
-  }
-
-  const deepLink = token
-    ? `${APP_DOMAIN}/${to}?token=${encodeURIComponent(token)}`
-    : `${APP_DOMAIN}/${to}`;
-
-  // Not logged: the URL carries the password-reset token.
-  res.redirect(deepLink);
-});
+// Universal Links / App Links files, reset-link fallback page, legacy /deeplink.
+app.use(deepLinkRoutes);
 
 // =============================
 // Export app

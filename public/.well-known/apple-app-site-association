@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["2CYG6TV2X9.fr.securis.hera"],
+        "components": [
+          { "/": "/update-password", "comment": "Password reset link" }
+        ]
+      }
+    ]
+  }
+}
