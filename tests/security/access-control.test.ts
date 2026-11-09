@@ -32,7 +32,7 @@ describe("Phase 4: household management", () => {
   it.todo("update-member: cannot change email, password, ownerId, or promote to OWNER");
   it.todo("DELETE /api/users/:id: only OWNER or ADMIN, same household, cannot delete the owner");
   it.todo("GET /api/activities: members only see armed/disarmed activity for accessible devices");
-  it.todo("GET /api/users/members never returns password hashes or device tokens");
+  it.todo("GET /api/users/members never returns device tokens");
 });
 
 describe("Phase 5: data integrity", () => {

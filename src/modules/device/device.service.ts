@@ -221,9 +221,18 @@ export class DeviceService {
   }
 }
 
+/**
+ * Sets a user's access levels on devices of their household.
+ * - default: only the listed devices change (level 0 removes access);
+ * - replace: the list is the complete set, so any other existing access is removed
+ *   (used by update-member, where the app sends only the checked devices).
+ * Sends an "accessChanged" push for each device whose level changed, and
+ * returns those changes.
+ */
 static async setMultipleAccess(
   userId: string | mongoose.Types.ObjectId,
   accessList: AccessRequest[],
+  { replace = false }: { replace?: boolean } = {},
 ) {
   const user = await UserService.findUserOrFail(userId.toString());
 
@@ -234,46 +243,65 @@ static async setMultipleAccess(
     this.assertValidLevel(accessLevel);
   }
 
-  if (!accessList.length) return;
+  if (!accessList.length && !replace) return [];
 
-  // Every device must belong to the user's household.
+  // Every listed device must belong to the user's household.
   const requestedIds = [...new Set(accessList.map((a) => String(a.deviceId)))];
-  const devices = await Device.find({
-    _id: { $in: requestedIds },
-    ownerId: householdIdOf(user),
-  }).select("_id deviceId").lean();
-
-  if (devices.length !== requestedIds.length) {
-    throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+  if (requestedIds.length) {
+    const count = await Device.countDocuments({
+      _id: { $in: requestedIds },
+      ownerId: householdIdOf(user),
+    });
+    if (count !== requestedIds.length) {
+      throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
+    }
   }
 
-  const previous = await DeviceAccess.find({ userId: user._id, device: { $in: requestedIds } })
+  const previous = await DeviceAccess.find({
+    userId: user._id,
+    ...(replace ? {} : { device: { $in: requestedIds } }),
+  })
     .select("device accessLevel")
     .lean();
   const previousLevel = new Map(previous.map((a) => [a.device.toString(), a.accessLevel]));
 
+  const finalLevel = new Map<string, AccessLevel>(
+    accessList.map((a) => [String(a.deviceId), a.accessLevel])
+  );
+  if (replace) {
+    for (const id of previousLevel.keys()) {
+      if (!finalLevel.has(id)) finalLevel.set(id, AccessLevel.NONE);
+    }
+  }
+
+  const changedIds = [...finalLevel.keys()].filter(
+    (id) => (previousLevel.get(id) ?? AccessLevel.NONE) !== finalLevel.get(id)
+  );
+  if (!changedIds.length) return [];
+
   await DeviceAccess.bulkWrite(
-    accessList.map(({ deviceId, accessLevel }) =>
-      accessLevel === AccessLevel.NONE
-        ? { deleteOne: { filter: { userId: user._id, device: deviceId } } }
+    changedIds.map((id) =>
+      finalLevel.get(id) === AccessLevel.NONE
+        ? { deleteOne: { filter: { userId: user._id, device: id } } }
         : {
             updateOne: {
-              filter: { userId: user._id, device: deviceId },
-              update: { $set: { accessLevel } },
+              filter: { userId: user._id, device: id },
+              update: { $set: { accessLevel: finalLevel.get(id)! } },
               upsert: true,
             },
           },
     ),
   );
 
-  // Tell the member's app, only for devices whose level actually changed.
-  const dolynkIdOf = new Map(devices.map((d) => [d._id.toString(), d.deviceId]));
-  const finalLevel = new Map(accessList.map((a) => [String(a.deviceId), a.accessLevel]));
-  const changes = [...finalLevel]
-    .filter(([id, level]) => (previousLevel.get(id) ?? AccessLevel.NONE) !== level)
-    .map(([id, accessLevel]) => ({ deviceId: dolynkIdOf.get(id)!, accessLevel }));
+  // Tell the member's app (devices deleted since are skipped).
+  const devices = await Device.find({ _id: { $in: changedIds } }).select("_id deviceId").lean();
+  const changes = devices.map((d) => ({
+    deviceId: d.deviceId,
+    accessLevel: finalLevel.get(d._id.toString())!,
+  }));
 
   await NotificationService.sendAccessChanged(user._id, changes);
+  return changes;
 }
 
   static async setAreaArmMode(deviceId: string, isArmed: boolean, userId: string) {

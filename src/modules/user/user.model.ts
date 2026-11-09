@@ -19,7 +19,8 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  // Never loaded unless asked for with .select("+password") (login, password change).
+  password: { type: String, required: true, select: false },
   phoneNumber: { type: String },
   userType: { type: Number, required: true },
   ownerId: { type: String, default: null },
@@ -31,6 +32,14 @@ const userSchema = new Schema<IUser>({
   devicesToken: [{ type: String }],
   imageUrl: { type: String, default: null },
   imagePublicId: { type: String, default: null }
+}, {
+  // Also strip the hash from documents that loaded it (e.g. right after save()).
+  toJSON: {
+    transform: (_doc, ret: Record<string, unknown>) => {
+      delete ret.password;
+      return ret;
+    },
+  },
 });
 
 userSchema.plugin(uniqueValidator);

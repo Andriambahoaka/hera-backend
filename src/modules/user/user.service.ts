@@ -160,7 +160,9 @@ export class UserService {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);
     }
 
-    const accessChanged = accessList && accessList.length > 0;
+    // accessList, when sent, is the member's complete selection: devices left
+    // out (unchecked in the app) lose their access.
+    const accessListSent = Array.isArray(accessList);
 
     const roleChanged =
       fields.userType &&
@@ -180,8 +182,11 @@ export class UserService {
       throw new AppError(USER_ERRORS.OWNER_ID_REQUIRED);
     }
 
-    if (accessChanged) {
-      await DeviceService.setMultipleAccess(userId, accessList);
+    const accessChanges = accessListSent
+      ? await DeviceService.setMultipleAccess(userId, accessList, { replace: true })
+      : [];
+
+    if (accessChanges.length) {
 
       await ActivityService.addActivity({
         ownerId: oldUser.ownerId.toString(),
@@ -265,7 +270,7 @@ export class UserService {
   }
 
   static async updatePassword(userId: string, oldPassword: string, newPassword: string) {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("+password");
 
     if (!user) {
       throw new AppError(USER_ERRORS.USER_NOT_FOUND);

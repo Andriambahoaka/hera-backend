@@ -74,7 +74,7 @@ export const signupService = async (data: CreateUserDto) => {
 
 
 export const loginService = async (email: string, passwordInput: string) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("+password");
   if (!user) throw new AppError(AUTH_ERRORS.INVALID_CREDENTIALS);
 
   const isValid = await bcrypt.compare(passwordInput, user.password);

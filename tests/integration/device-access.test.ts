@@ -211,3 +211,62 @@ describe("access-change push", () => {
     expect(pushes()).toEqual([]);
   });
 });
+
+describe("update-member: accessList is the complete selection", () => {
+  async function twoPacks() {
+    const h = await household();
+    const pack2 = await createDevice(h.owner, { deviceId: "PACK2" });
+    await grantAccess(h.basic, pack2, AccessLevel.BASIC); // basic now has PACK1 + PACK2
+    return { ...h, pack2 };
+  }
+
+  const updateMember = (auth: string, member: { _id: object }, accessList?: object[]) =>
+    request(app)
+      .put("/api/users/update-member")
+      .set("Authorization", auth)
+      .send({ _id: String(member._id), name: "Renamed", ...(accessList && { accessList }) });
+
+  const levels = async (userId: object) =>
+    Object.fromEntries(
+      (await DeviceAccess.find({ userId }).populate<{ device: { deviceId: string } }>("device").lean())
+        .map((a) => [a.device.deviceId, a.accessLevel])
+    );
+
+  beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => undefined));
+  afterEach(() => jest.restoreAllMocks());
+
+  it("removes access to a device left out of the list (unchecked) and notifies the member", async () => {
+    const h = await twoPacks();
+    const res = await updateMember(bearer(h.owner), h.basic, [
+      { deviceId: h.device._id.toString(), accessLevel: AccessLevel.BASIC },
+    ]);
+
+    expect(res.status).toBe(200);
+    expect(await levels(h.basic._id)).toEqual({ PACK1: AccessLevel.BASIC });
+    expect(pushes()).toEqual([
+      { tokens: ["t-basic"], visible: false, data: { msgType: "accessChanged", deviceId: "PACK2", accessLevel: "0" } },
+    ]);
+  });
+
+  it("an empty list removes every access", async () => {
+    const h = await twoPacks();
+    await updateMember(bearer(h.owner), h.basic, []);
+    expect(await levels(h.basic._id)).toEqual({});
+  });
+
+  it("no accessList in the body leaves access unchanged", async () => {
+    const h = await twoPacks();
+    await updateMember(bearer(h.owner), h.basic);
+    expect(await levels(h.basic._id)).toEqual({ PACK1: AccessLevel.BASIC, PACK2: AccessLevel.BASIC });
+    expect(pushes()).toEqual([]);
+  });
+
+  it("sending the same selection changes nothing and sends no push", async () => {
+    const h = await twoPacks();
+    await updateMember(bearer(h.owner), h.basic, [
+      { deviceId: h.device._id.toString(), accessLevel: AccessLevel.BASIC },
+      { deviceId: h.pack2._id.toString(), accessLevel: AccessLevel.BASIC },
+    ]);
+    expect(pushes()).toEqual([]);
+  });
+});
