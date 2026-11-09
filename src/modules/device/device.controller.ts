@@ -92,6 +92,8 @@ export const setMultipleAccess = asyncHandler(async (req, res) => {
   if (!Array.isArray(accessList)) {
     throw new AppError(DEVICE_ERRORS.INVALID_ACCESS_LIST);
   }
+  // Only an OWNER/ADMIN of the same household, never on oneself.
+  await assertCanManageUser(req.auth!.userId, String(userId), { allowSelf: false });
   const results = await DeviceService.setMultipleAccess(userId, accessList);
   return sendSuccess(res, results);
 });

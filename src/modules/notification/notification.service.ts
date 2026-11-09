@@ -12,8 +12,11 @@ import { CreateNotificationDto, NotificationResponse } from "./notification.type
 import { DEVICE_ERRORS } from "../device/device.errors";
 import { USER_ERRORS } from "../user/user.errors";
 import { USER_TYPE } from "../user/enums/userType.enum";
-import DeviceAccess from "../device/deviceAccess.model";
-import { ACCESS_TYPE } from "../device/device.enum";
+import DeviceAccess, { AccessLevel } from "../device/deviceAccess.model";
+import { NotificationType } from "./enums/notificationType.enum";
+
+/** Events that change the alarm state: sent to every user with access. */
+const STATUS_MSG_TYPES = new Set<string>([NotificationType.ARMED, NotificationType.DISARMED]);
 
 export class NotificationService {
   static async createAndSend(payload: CreateNotificationDto) {
@@ -35,6 +38,7 @@ export class NotificationService {
     const recipients = await this.getRecipients(
       device._id,
       device.ownerId,
+      notification.msgType ?? "",
       userId
     );
 
@@ -79,6 +83,12 @@ export class NotificationService {
       );
     }
 
+    if (recipients.silentTokens.length) {
+      responses.push(
+        await this.sendData({ tokens: recipients.silentTokens, data })
+      );
+    }
+
     return {
       message: "Notification created and sent",
       recipients: recipients.users.length,
@@ -103,15 +113,34 @@ export class NotificationService {
     return device;
   }
 
+  /**
+   * Who receives a push for an event on a device:
+   * - the owner and users with level >= STANDARD get a visible notification;
+   * - for status events (armed/disarmed), BASIC users also get a data-only
+   *   push so their app re-syncs the alarm state without showing anything.
+   */
   private static async getRecipients(
     deviceObjectId: Types.ObjectId,
     ownerId: Types.ObjectId,
+    msgType: string,
     triggeringUserId?: Types.ObjectId | string
   ) {
+    const minLevel = STATUS_MSG_TYPES.has(msgType)
+      ? AccessLevel.BASIC
+      : AccessLevel.STANDARD;
+
     const deviceAccesses = await DeviceAccess.find({
       device: deviceObjectId,
-      access: ACCESS_TYPE.NOTIFICATION,
-    }).select("userId");
+      accessLevel: { $gte: minLevel },
+    }).select("userId accessLevel");
+
+    const silentUserIds = new Set(
+      deviceAccesses
+        .filter((a) => a.accessLevel < AccessLevel.STANDARD)
+        .map((a) => a.userId.toString())
+    );
+    // The owner is always notified, whatever an access record says.
+    silentUserIds.delete(ownerId.toString());
 
     const uniqueUserIds = [
       ownerId.toString(),
@@ -124,19 +153,27 @@ export class NotificationService {
       },
     }).select("name devicesToken");
 
-    const triggeringUser = users.find(
-      (u) => u._id.toString() === triggeringUserId?.toString()
-    );
+    const triggeringId = triggeringUserId?.toString();
+    const isSilent = (u: IUser) => silentUserIds.has(u._id.toString());
+    const isTriggering = (u: IUser) => u._id.toString() === triggeringId;
+
+    const triggeringUser = users.find(isTriggering);
 
     return {
       users,
 
       triggeringUser,
 
-      triggeringTokens: triggeringUser?.devicesToken ?? [],
+      triggeringTokens: triggeringUser && !isSilent(triggeringUser)
+        ? triggeringUser.devicesToken ?? []
+        : [],
 
       otherTokens: users
-        .filter((u) => u._id.toString() !== triggeringUserId?.toString())
+        .filter((u) => !isTriggering(u) && !isSilent(u))
+        .flatMap((u) => u.devicesToken ?? []),
+
+      silentTokens: users
+        .filter(isSilent)
         .flatMap((u) => u.devicesToken ?? []),
     };
   }
@@ -186,6 +223,54 @@ export class NotificationService {
     });
   }
 
+  /**
+   * Data-only push: nothing is displayed, the app only receives `data`
+   * (any message with a msgType makes it re-sync). FCM data values must be strings.
+   */
+  static async sendData(params: { tokens: string[]; data: Record<string, string> }) {
+    return admin.messaging().sendEachForMulticast({
+      tokens: params.tokens,
+      data: params.data,
+      android: { priority: "high" },
+      apns: {
+        headers: { "apns-push-type": "background", "apns-priority": "5" },
+        payload: { aps: { contentAvailable: true } },
+      },
+    });
+  }
+
+  /**
+   * Tells a user's app that their access to some devices changed (granted,
+   * changed or removed), one data-only push per device.
+   * Never throws: a failed push must not fail the access change itself.
+   */
+  static async sendAccessChanged(
+    userId: Types.ObjectId | string,
+    changes: { deviceId: string; accessLevel: AccessLevel }[]
+  ) {
+    try {
+      if (!changes.length) return;
+      const user = await User.findById(userId).select("devicesToken").lean();
+      const tokens = user?.devicesToken ?? [];
+      if (!tokens.length) return;
+
+      await Promise.all(
+        changes.map(({ deviceId, accessLevel }) =>
+          this.sendData({
+            tokens,
+            data: {
+              msgType: NotificationType.ACCESS_CHANGED,
+              deviceId,
+              accessLevel: String(accessLevel),
+            },
+          })
+        )
+      );
+    } catch (err) {
+      console.error("Access-change push failed:", (err as Error).message);
+    }
+  }
+
   static async findAllForUser(
     userId: string,
     page: number,
@@ -194,6 +279,8 @@ export class NotificationService {
 
     const deviceIds =
       await this.getAccessibleDeviceIds(userId);
+    console.log("userId", userId);
+    console.log("deviceIds", deviceIds);
 
 
     const filter =
@@ -341,8 +428,7 @@ export class NotificationService {
 
 
     const accesses = await DeviceAccess.find({
-      userId,
-      access: ACCESS_TYPE.NOTIFICATION,
+      userId
     }).select("device");
 
 

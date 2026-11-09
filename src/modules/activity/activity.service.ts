@@ -5,7 +5,6 @@ import User from "../user/user.model";
 import { USER_ERRORS } from "../user/user.errors";
 import { USER_TYPE } from "../user/enums/userType.enum";
 import { ActivityType } from "./activity.model";
-import { ACCESS_TYPE } from "../device/device.enum";
 import DeviceAccess from "../device/deviceAccess.model";
 
 export class ActivityService {
@@ -138,10 +137,8 @@ private static async buildActivityQuery(
 private static async getActivityAccessibleDeviceIds(
   userId: string
 ) {
-  const accesses = await DeviceAccess.find({
-    userId,
-    access: ACCESS_TYPE.ACTIVITY,
-  }).select("device");
+  // Any access level to a device lets a member see its activity.
+  const accesses = await DeviceAccess.find({ userId }).select("device");
 
   return accesses.map(
     (access) => access.device

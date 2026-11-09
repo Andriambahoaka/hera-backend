@@ -36,10 +36,11 @@ describe("PUT /api/packs", () => {
     expect(res.status).toBe(401);
   });
 
-  it("hides the device from users with no access (404)", async () => {
+  it("refuses users with no access (403)", async () => {
     const h = await household();
     const res = await put(bearer(h.otherOwner)).send({ deviceId: "PACK1", deviceName: "x" });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe("DEVICE_ACCESS_DENIED");
   });
 
   it("rejects level 2 (403)", async () => {
@@ -87,10 +88,10 @@ describe("GET /api/packs/:deviceId", () => {
     expect((await request(app).get("/api/packs/PACK1")).status).toBe(401);
   });
 
-  it("returns 404 to users with no access", async () => {
+  it("returns 403 to users with no access", async () => {
     const h = await household();
     const res = await request(app).get("/api/packs/PACK1").set("Authorization", bearer(h.otherMember));
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
   it("allows level 1 and never returns devCode", async () => {

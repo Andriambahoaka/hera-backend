@@ -1,5 +1,0 @@
-export enum ACCESS_TYPE {
-  NOTIFICATION = 1,
-  SETTING = 2,
-  ACTIVITY = 3,
-}

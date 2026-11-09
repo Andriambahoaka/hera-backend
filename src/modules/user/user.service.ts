@@ -3,7 +3,8 @@ import streamifier from "streamifier";
 
 import User, { IUser } from "./user.model";
 import UserType from "./userType.model";
-import DeviceAccess from "../device/deviceAccess.model";
+import DeviceAccess, { AccessLevel } from "../device/deviceAccess.model";
+import { NotificationService } from "../notification/notification.service";
 import cloudinary from "../../core/config/cloudinary";
 
 import { AppError } from "../../core/errors/app.error";
@@ -300,6 +301,17 @@ export class UserService {
 
   static async deleteUserById(actorId: string, id: string) {
     const user = await this.findUserOrFail(id);
+
+    // Tell the member's app it lost access, before its tokens disappear.
+    const accesses = await DeviceAccess.find({ userId: id })
+      .populate<{ device: { deviceId: string } | null }>("device", "deviceId")
+      .lean();
+    await NotificationService.sendAccessChanged(
+      id,
+      accesses
+        .filter((a) => a.device)
+        .map((a) => ({ deviceId: a.device!.deviceId, accessLevel: AccessLevel.NONE }))
+    );
 
     await DeviceAccess.deleteMany({ userId: id });
     await User.findByIdAndDelete(id);

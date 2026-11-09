@@ -22,16 +22,8 @@ describe("Phase 3: tokens", () => {
 });
 
 describe("Phase 4: device access levels", () => {
-  it.todo("set-area-arm: rejects a user with no access to the device");
-  it.todo("set-area-arm: allows level 1");
-  it.todo("get-area-arm: allows level 1");
-  it.todo("get-screenshot-url: allows level 1");
-  it.todo("get-accessories-info / get-accessory-status: allow level 1");
-  it.todo("set-accessory: rejects level 2, allows level 3");
   it.todo("GET /api/notifications: level 1 sees nothing, level 2 sees device notifications");
-  it.todo("push notifications are sent only to owner and level >= 2 users");
   it.todo("POST /api/packs/access: cannot grant a level above one's own");
-  it.todo("POST /api/packs/access: cannot target a user outside the household");
 });
 
 describe("Phase 4: household management", () => {

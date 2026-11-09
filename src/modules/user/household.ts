@@ -14,11 +14,18 @@ export function householdIdOf(user: { _id: unknown; userType: number; ownerId?: 
  * Allows a user to act on another user only if it is themselves, or if they are
  * an OWNER/ADMIN of the same household.
  */
-export async function assertCanManageUser(requesterId: string, targetId: unknown) {
+export async function assertCanManageUser(
+  requesterId: string,
+  targetId: unknown,
+  { allowSelf = true }: { allowSelf?: boolean } = {}
+) {
   if (typeof targetId !== "string" || !mongoose.Types.ObjectId.isValid(targetId)) {
     throw new AppError(USER_ERRORS.INVALID_USER_ID);
   }
-  if (requesterId === targetId) return;
+  if (requesterId === targetId) {
+    if (allowSelf) return;
+    throw new AppError(USER_ERRORS.NOT_SAME_HOUSEHOLD);
+  }
 
   const [requester, target] = await Promise.all([
     User.findById(requesterId).select("userType ownerId").lean(),

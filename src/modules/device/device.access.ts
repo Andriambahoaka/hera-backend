@@ -27,8 +27,9 @@ export async function getDeviceAccessLevel(
 
 /**
  * Loads a device by its Dolynk deviceId and checks the user's level on it.
- * - unknown device, or no access at all -> 404 (don't reveal which devices exist)
- * - access below `minLevel`             -> 403
+ * - unknown device                       -> 404 DEVICE_NOT_FOUND
+ * - no access, or access below minLevel  -> 403 DEVICE_ACCESS_DENIED
+ *   (one code, so the app can tell "access removed/too low" from other errors)
  */
 export async function findDeviceWithAccess(
   userId: string,
@@ -43,8 +44,7 @@ export async function findDeviceWithAccess(
   if (!device) throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
 
   const level = await getDeviceAccessLevel(userId, device);
-  if (level === AccessLevel.NONE) throw new AppError(DEVICE_ERRORS.DEVICE_NOT_FOUND);
-  if (level < minLevel) throw new AppError(DEVICE_ERRORS.DEVICE_ACCESS_DENIED);
+  if (level === AccessLevel.NONE || level < minLevel) throw new AppError(DEVICE_ERRORS.DEVICE_ACCESS_DENIED);
 
   return { device, level };
 }

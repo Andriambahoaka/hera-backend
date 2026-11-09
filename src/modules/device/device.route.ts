@@ -19,15 +19,17 @@ router.post('/access', userAuth, deviceController.setMultipleAccess);
 
 router.put('/', userAuth, requireDeviceAccess(AccessLevel.ADMIN), deviceController.update);
 
-router.post('/set-area-arm', userAuth, deviceController.setAreaArmMode);
-router.post('/get-area-arm', userAuth, deviceController.getAreaArmMode);
+// Level 1 (Basic): arm/disarm, alarm state, instant capture, accessory info/status.
+router.post('/set-area-arm', userAuth, requireDeviceAccess(AccessLevel.BASIC), deviceController.setAreaArmMode);
+router.post('/get-area-arm', userAuth, requireDeviceAccess(AccessLevel.BASIC), deviceController.getAreaArmMode);
 
 router.post('/add-accessory', clientAuth, deviceController.addAccessory);
-router.post('/get-accessories-info', userAuth, deviceController.getAccessoriesInfo);
-router.post('/get-accessory-status', userAuth, deviceController.getAccessoryStatus);
-router.put('/set-accessory', userAuth, deviceController.setAccessory);
+router.post('/get-accessories-info', userAuth, requireDeviceAccess(AccessLevel.BASIC), deviceController.getAccessoriesInfo);
+router.post('/get-accessory-status', userAuth, requireDeviceAccess(AccessLevel.BASIC), deviceController.getAccessoryStatus);
+// Level 3 (Admin): settings.
+router.put('/set-accessory', userAuth, requireDeviceAccess(AccessLevel.ADMIN), deviceController.setAccessory);
 
-router.post('/get-screenshot-url', userAuth, deviceController.getPirCamSnapUrl);
+router.post('/get-screenshot-url', userAuth, requireDeviceAccess(AccessLevel.BASIC), deviceController.getPirCamSnapUrl);
 
 router.get('/access/:userId', userAuth, deviceController.findAccessibleDevices);
 
