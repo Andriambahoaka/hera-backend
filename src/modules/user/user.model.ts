@@ -29,14 +29,16 @@ const userSchema = new Schema<IUser>({
     type: Boolean,
     default: false
   },
-  devicesToken: [{ type: String }],
+  // FCM push tokens: server-side only. Load with .select("devicesToken") when sending pushes.
+  devicesToken: { type: [{ type: String }], select: false },
   imageUrl: { type: String, default: null },
   imagePublicId: { type: String, default: null }
 }, {
-  // Also strip the hash from documents that loaded it (e.g. right after save()).
+  // Also strip the hash and push tokens from documents that loaded them (e.g. right after save()).
   toJSON: {
     transform: (_doc, ret: Record<string, unknown>) => {
       delete ret.password;
+      delete ret.devicesToken;
       return ret;
     },
   },

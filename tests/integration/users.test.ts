@@ -6,19 +6,26 @@ import { bearer, createMember, createUser, DEFAULT_PASSWORD } from "../helpers/f
 
 useTestDatabase();
 
-/** True if a bcrypt hash or a "password" key appears anywhere in the body. */
+const FCM_TOKEN = "fcm-token-must-not-leak";
+
+/** True if a bcrypt hash, a push token, or a "password"/"devicesToken" key appears anywhere in the body. */
 const exposesPassword = (body: unknown) => {
   const json = JSON.stringify(body);
-  return /"password"\s*:/.test(json) || /\$2[aby]\$\d{2}\$/.test(json);
+  return (
+    /"password"\s*:/.test(json) ||
+    /\$2[aby]\$\d{2}\$/.test(json) ||
+    /"devicesToken"\s*:/.test(json) ||
+    json.includes(FCM_TOKEN)
+  );
 };
 
-describe("user responses never include the password hash", () => {
+describe("user responses never include the password hash or push tokens", () => {
   beforeEach(() => jest.spyOn(console, "log").mockImplementation(() => undefined));
   afterEach(() => jest.restoreAllMocks());
 
   it("PUT /api/users/update-member", async () => {
-    const owner = await createUser();
-    const member = await createMember(owner);
+    const owner = await createUser({ devicesToken: [FCM_TOKEN] });
+    const member = await createMember(owner, undefined, { devicesToken: [FCM_TOKEN] });
     const res = await request(app)
       .put("/api/users/update-member")
       .set("Authorization", bearer(owner))
@@ -30,8 +37,8 @@ describe("user responses never include the password hash", () => {
   });
 
   it.each(["/api/users/me", "/api/users/members"])("GET %s", async (url) => {
-    const owner = await createUser();
-    await createMember(owner);
+    const owner = await createUser({ devicesToken: [FCM_TOKEN] });
+    await createMember(owner, undefined, { devicesToken: [FCM_TOKEN] });
     const res = await request(app).get(url).set("Authorization", bearer(owner));
 
     expect(res.status).toBe(200);
@@ -39,7 +46,7 @@ describe("user responses never include the password hash", () => {
   });
 
   it("POST /api/auth/login", async () => {
-    const owner = await createUser({ email: "login@test.local" });
+    const owner = await createUser({ email: "login@test.local", devicesToken: [FCM_TOKEN] });
     const res = await request(app).post("/api/auth/login").send({ email: owner.email, password: DEFAULT_PASSWORD });
 
     expect(res.status).toBe(200);
@@ -48,8 +55,9 @@ describe("user responses never include the password hash", () => {
 
   it("a user document serialized after loading the hash still hides it", async () => {
     const owner = await createUser();
-    const loaded = await User.findById(owner._id).select("+password");
+    const loaded = await User.findById(owner._id).select("+password +devicesToken");
     expect(loaded!.password).toMatch(/^\$2/);
+    expect(loaded!.devicesToken).toEqual([]);
     expect(exposesPassword(loaded!.toJSON())).toBe(false);
   });
 });

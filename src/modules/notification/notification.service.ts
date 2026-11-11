@@ -279,9 +279,6 @@ export class NotificationService {
 
     const deviceIds =
       await this.getAccessibleDeviceIds(userId);
-    console.log("userId", userId);
-    console.log("deviceIds", deviceIds);
-
 
     const filter =
       deviceIds === null
