@@ -99,6 +99,22 @@ export const verifyDolynkSignature = (req: Request, res: Response, next: NextFun
   next();
 };
 
+/**
+ * Dolynk sends clip URLs (Alibaba Cloud OSS) as http://, which iOS (ATS) and
+ * Android (cleartext policy) refuse to load. The same signed URL works over
+ * https (the OSS signature does not cover the scheme).
+ */
+export function secureFileUrl(url: unknown): unknown {
+  if (typeof url !== "string" || !url.startsWith("http://")) return url;
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.endsWith(".aliyuncs.com")) return url;
+    return "https://" + url.slice("http://".length);
+  } catch {
+    return url;
+  }
+}
+
 function pickAllowedFields(body: Record<string, unknown>) {
   const picked: Record<string, unknown> = {};
   for (const key of ALLOWED_FIELDS) {
@@ -117,6 +133,7 @@ export const receiveDolynkEvent = asyncHandler(async (req: Request, res: Respons
   // Exact id from verifyDolynkSignature (never the rounded body.id).
   const eventId = String(res.locals.dolynkEventId);
   const fields = pickAllowedFields(body);
+  if (fields.filePath !== undefined) fields.filePath = secureFileUrl(fields.filePath);
 
   if (typeof fields.deviceId !== "string" || typeof fields.msgType !== "string") {
     return ignore(res, eventId, "missing deviceId or msgType");

@@ -2,7 +2,7 @@ import crypto from "crypto";
 import request from "supertest";
 import app from "../../src/app";
 import Notification from "../../src/modules/notification/notification.model";
-import { MAX_EVENT_AGE_MS } from "../../src/modules/notification/dolynk.webhook";
+import { MAX_EVENT_AGE_MS, secureFileUrl } from "../../src/modules/notification/dolynk.webhook";
 import { useTestDatabase } from "../helpers/db";
 import { createDevice, createUser } from "../helpers/factories";
 import { mockSendEachForMulticast } from "../setup/mocks";
@@ -45,6 +45,26 @@ describe("POST /api/notifications (Dolynk webhook)", () => {
   });
 
   afterEach(() => jest.restoreAllMocks());
+
+  describe("clip URL (filePath)", () => {
+    const ossUrl = "bkt.oss-eu-central-1.aliyuncs.com/device/x/clip.mp4?Expires=1&OSSAccessKeyId=k&Signature=a%2Bb%3D";
+
+    it("is stored as https so the apps can load it, signature query untouched", async () => {
+      const res = await post(signedEvent({ filePath: `http://${ossUrl}` }));
+      expect(res.status).toBe(200);
+      const n = await Notification.findOne().lean();
+      expect(n!.filePath).toBe(`https://${ossUrl}`);
+    });
+
+    it.each([
+      [`https://${ossUrl}`, `https://${ossUrl}`],
+      ["http://example.com/clip.mp4", "http://example.com/clip.mp4"],
+      ["http://aliyuncs.com.evil.example/x", "http://aliyuncs.com.evil.example/x"],
+      ["not a url", "not a url"],
+    ])("leaves other URLs alone: %s", (input, expected) => {
+      expect(secureFileUrl(input)).toBe(expected);
+    });
+  });
 
   describe("19-digit numeric ids (beyond Number.MAX_SAFE_INTEGER)", () => {
     /** Raw JSON exactly like Dolynk: the id is an unquoted number that JSON.parse would round. */
