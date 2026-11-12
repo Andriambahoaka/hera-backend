@@ -45,6 +45,20 @@ describe("App Links / Universal Links", () => {
   });
 });
 
+describe("public assets", () => {
+  it("serves the email logo, loadable from other origins (webmail)", async () => {
+    const res = await request(app).get("/public/logo.png");
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toBe("image/png");
+    expect(res.headers["cross-origin-resource-policy"]).toBe("cross-origin");
+  });
+
+  it("does not expose dotfiles through /public", async () => {
+    const res = await request(app).get("/public/.well-known/assetlinks.json");
+    expect(res.status).toBe(404);
+  });
+});
+
 describe("access log redaction", () => {
   it.each([
     ["/update-password?token=abc.def", "/update-password?token=[REDACTED]"],

@@ -95,7 +95,16 @@ if (!fs.existsSync(uploadDir)) {
 // =============================
 // Static files
 // =============================
-app.use("/public", express.static(path.join(__dirname, "public")));
+// Repo-level public/ (one level above src/ and dist/). Images here are embedded
+// in emails, so they must be loadable from other origins (webmail clients).
+app.use(
+  "/public",
+  (_req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "../public"), { maxAge: "7d", dotfiles: "ignore" })
+);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // =============================
