@@ -49,32 +49,53 @@ export function computeDolynkSignature(id: string, secret: string): string {
   return crypto.createHmac("sha512", secret).update(id).digest("hex");
 }
 
-export function isValidDolynkSignature(body: unknown, secret: string | undefined): boolean {
-  if (!secret || !body || typeof body !== "object") return false;
-  const { id, sign } = body as { id?: unknown; sign?: unknown };
+/**
+ * The event id exactly as Dolynk sent it. Ids are 19-digit numbers sent as JSON
+ * numbers: JSON.parse rounds them (2120860749252259840 -> 2120860749252259800),
+ * which breaks both the signature and deduplication. So the digits are read
+ * from the raw body text when it is available.
+ */
+export function dolynkEventId(body: unknown, rawBody?: string): string | undefined {
+  if (rawBody) {
+    // Top-level "id" (preceded by "{" or ","), as a number or a string.
+    const m = rawBody.match(/[{,]\s*"id"\s*:\s*(?:"([^"]*)"|(-?\d+))\s*[,}]/);
+    if (m) return m[1] ?? m[2];
+  }
+  const id = (body as { id?: unknown } | undefined)?.id;
+  if (typeof id === "string") return id;
+  if (typeof id === "number" && Number.isSafeInteger(id)) return String(id);
+  return undefined;
+}
 
-  if ((typeof id !== "string" && typeof id !== "number") || String(id) === "") return false;
+export function isValidDolynkSignature(
+  id: string | undefined,
+  sign: unknown,
+  secret: string | undefined
+): boolean {
+  if (!secret || !id) return false;
   if (typeof sign !== "string" || !/^[0-9a-f]{128}$/i.test(sign)) return false;
 
-  const expected = Buffer.from(computeDolynkSignature(String(id), secret), "hex");
+  const expected = Buffer.from(computeDolynkSignature(id, secret), "hex");
   const received = Buffer.from(sign, "hex");
   return crypto.timingSafeEqual(expected, received);
 }
 
-export const verifyDolynkSignature = (req: Request, _res: Response, next: NextFunction) => {
-  const valid = isValidDolynkSignature(req.body, process.env.DOLYNK_SECRET_ACCESS_KEY);
+export const verifyDolynkSignature = (req: Request, res: Response, next: NextFunction) => {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  const id = dolynkEventId(body, req.rawBody);
+  const valid = isValidDolynkSignature(id, body.sign, process.env.DOLYNK_SECRET_ACCESS_KEY);
 
   // TEMPORARY (Dolynk payload discovery): logs every incoming event, valid or not.
   // The sign is shortened; the secret is never logged. Remove once the format is confirmed.
   if (process.env.NODE_ENV !== "test") {
-    const body = (req.body ?? {}) as Record<string, unknown>;
-    const shown = { ...body, sign: typeof body.sign === "string" ? `${body.sign.slice(0, 12)}…` : body.sign };
-    console.log(`[dolynk] incoming signatureValid=${valid} hasId=${body.id !== undefined}`, JSON.stringify(shown));
+    const shown = { ...body, id, sign: typeof body.sign === "string" ? `${body.sign.slice(0, 12)}…` : body.sign };
+    console.log(`[dolynk] incoming signatureValid=${valid} hasId=${id !== undefined}`, JSON.stringify(shown));
   }
 
   if (!valid) {
     throw new AppError(INVALID_SIGNATURE);
   }
+  res.locals.dolynkEventId = id;
   next();
 };
 
@@ -93,7 +114,8 @@ function ignore(res: Response, eventId: string, reason: string) {
 
 export const receiveDolynkEvent = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body as Record<string, unknown>;
-  const eventId = String(body.id);
+  // Exact id from verifyDolynkSignature (never the rounded body.id).
+  const eventId = String(res.locals.dolynkEventId);
   const fields = pickAllowedFields(body);
 
   if (typeof fields.deviceId !== "string" || typeof fields.msgType !== "string") {

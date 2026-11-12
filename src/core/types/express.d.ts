@@ -7,6 +7,8 @@ declare module "express" {
     auth?: {
       userId: string;
     };
+    /** Raw JSON text, kept only for the Dolynk webhook (see app.ts). */
+    rawBody?: string;
     /** Set by requireDeviceAccess(). */
     deviceAccess?: {
       device: IDevice;

@@ -71,7 +71,17 @@ if (NODE_ENV !== "test") {
   app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
 }
 app.use(compression());
-app.use(express.json({ limit: "10mb" }));
+app.use(
+  express.json({
+    limit: "10mb",
+    // Keep the raw text of Dolynk webhook bodies: their numeric event ids exceed
+    // Number.MAX_SAFE_INTEGER, so JSON.parse rounds them and the signature fails.
+    verify: (req, _res, buf) => {
+      const url = (req as Request).originalUrl ?? req.url ?? "";
+      if (url.startsWith("/api/notifications")) (req as Request).rawBody = buf.toString("utf8");
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 // =============================

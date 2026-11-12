@@ -46,6 +46,41 @@ describe("POST /api/notifications (Dolynk webhook)", () => {
 
   afterEach(() => jest.restoreAllMocks());
 
+  describe("19-digit numeric ids (beyond Number.MAX_SAFE_INTEGER)", () => {
+    /** Raw JSON exactly like Dolynk: the id is an unquoted number that JSON.parse would round. */
+    const rawEvent = (id: string, secret = process.env.DOLYNK_SECRET_ACCESS_KEY!) => {
+      const now = Date.now();
+      const sign = crypto.createHmac("sha512", secret).update(id).digest("hex");
+      return `{"localTime":${now},"msgType":"AlarmLocal","areaId":3,"productId":"${process.env.DOLYNK_PRODUCT_ID}",` +
+        `"accessKey":"${process.env.DOLYNK_ACCESS_KEY}","utcTime":${now},"sign":"${sign}","action":"Start",` +
+        `"accessoryId":"9F0E160PAJ00069","id":${id},"category":"ARC","deviceId":"J5Y5A7QZW59C"}`;
+    };
+    const postRaw = (raw: string) =>
+      request(app).post("/api/notifications").set("Content-Type", "application/json").send(raw);
+
+    it("accepts the real event shape (id signed with all its digits)", async () => {
+      expect(String(JSON.parse('{"id":2120860749252259840}').id)).not.toBe("2120860749252259840");
+      const res = await postRaw(rawEvent("2120860749252259840"));
+      expect(res.status).toBe(200);
+      expect(await Notification.countDocuments()).toBe(1);
+    });
+
+    it("rejects a sign made for the rounded id", async () => {
+      const raw = rawEvent("2120860749252259800").replace('"id":2120860749252259800', '"id":2120860749252259840');
+      expect((await postRaw(raw)).status).toBe(401);
+    });
+
+    it("treats ids that only differ in the last digits as different events", async () => {
+      await postRaw(rawEvent("2120860749252259840"));
+      await postRaw(rawEvent("2120860749252259841"));
+      expect(await Notification.countDocuments()).toBe(2);
+    });
+
+    it("still rejects an unknown secret", async () => {
+      expect((await postRaw(rawEvent("2120860749252259840", "not-our-secret"))).status).toBe(401);
+    });
+  });
+
   describe("signature", () => {
     it("rejects a request without sign", async () => {
       const { sign, ...unsigned } = signedEvent();
