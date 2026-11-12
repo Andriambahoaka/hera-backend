@@ -32,8 +32,6 @@ const REQUIRED_IN_PRODUCTION = [
   "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
   "CLOUDINARY_API_SECRET",
-  "BREVO_SMTP_USERNAME",
-  "BREVO_SMTP_PASSWORD",
   "BREVO_EMAIL_SENDER",
   "DOLYNK_PRODUCT_ID",
   "DOLYNK_ACCESS_KEY",
@@ -70,6 +68,15 @@ export function validateEnv(env: Env): EnvValidationResult {
         `${key} is ${isProduction ? "required in production" : "not set"}.`
       );
     }
+  }
+
+  // Email needs either the Brevo API key or both SMTP credentials.
+  const hasBrevoApi = !isBlank(env.BREVO_API_KEY);
+  const hasBrevoSmtp = !isBlank(env.BREVO_SMTP_USERNAME) && !isBlank(env.BREVO_SMTP_PASSWORD);
+  if (!hasBrevoApi && !hasBrevoSmtp) {
+    (isProduction ? errors : warnings).push(
+      `BREVO_API_KEY (or BREVO_SMTP_USERNAME and BREVO_SMTP_PASSWORD) is ${isProduction ? "required in production" : "not set"}.`
+    );
   }
 
   for (const key of SECRETS) {

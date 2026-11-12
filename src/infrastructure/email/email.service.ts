@@ -31,24 +31,55 @@ const transporter = nodemailer.createTransport({
 });
 
 
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+
+/** "Hera <noreply@x.fr>" or "noreply@x.fr" -> Brevo API sender object. */
+export const parseSender = (sender = "") => {
+  const m = sender.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
+  return m ? { name: m[1].trim() || undefined, email: m[2].trim() } : { email: sender.trim() };
+};
+
+type Mail = { to: string; subject: string; html: string; text: string };
+
 /**
- * Sends through Brevo SMTP and logs why a send failed (connection, auth, sender...).
- * Never logs credentials, the recipient address or the message content.
+ * Brevo transactional API over HTTPS (port 443). Used whenever BREVO_API_KEY is
+ * set: hosts like Render's free plan block outgoing SMTP ports (25/465/587).
  */
-const send = async (template: string, mail: nodemailer.SendMailOptions) => {
+const sendWithApi = (mail: Mail) =>
+  axios.post(
+    BREVO_API_URL,
+    {
+      sender: parseSender(BREVO_EMAIL_SENDER),
+      to: [{ email: mail.to }],
+      subject: mail.subject,
+      htmlContent: mail.html,
+      textContent: mail.text,
+    },
+    { headers: { "api-key": BREVO_API_KEY!, accept: "application/json" }, timeout: 10000 }
+  );
+
+const sendWithSmtp = (mail: Mail) =>
+  transporter.sendMail({ from: BREVO_EMAIL_SENDER, ...mail });
+
+/**
+ * Sends one email and logs why a send failed. Never logs credentials,
+ * the recipient address or the message content.
+ */
+const send = async (template: string, mail: Mail) => {
+  const via = BREVO_API_KEY ? "api" : "smtp";
   try {
-    await transporter.sendMail(mail);
+    await (via === "api" ? sendWithApi(mail) : sendWithSmtp(mail));
   } catch (err: any) {
     console.error(
-      `[email] ${template} send failed:`,
+      `[email] ${template} send failed (${via}):`,
       JSON.stringify({
-        code: err?.code,                 // e.g. ETIMEDOUT, ECONNECTION, EAUTH, EENVELOPE
+        code: err?.code,                 // ETIMEDOUT, ECONNECTION, EAUTH, EENVELOPE, ERR_BAD_REQUEST...
         command: err?.command,           // SMTP step: CONN, AUTH PLAIN, MAIL FROM, RCPT TO...
-        responseCode: err?.responseCode, // SMTP reply code from Brevo
-        response: err?.response,
+        responseCode: err?.responseCode, // SMTP reply code
+        response: typeof err?.response === "string" ? err.response : undefined, // SMTP reply text
+        status: err?.response?.status,   // API HTTP status (401 bad key, 400 bad sender...)
+        apiError: err?.response?.data,   // API error body: { code, message }
         message: err?.message,
-        smtpUserSet: Boolean(BREVO_SMTP_USERNAME),
-        smtpPasswordSet: Boolean(BREVO_SMTP_PASSWORD),
         senderSet: Boolean(BREVO_EMAIL_SENDER),
       })
     );
@@ -67,7 +98,6 @@ export const sendWelcomeEmail = async (
   const text = renderTemplate(templateName, data, "txt");
 
   await send(templateName, {
-    from: BREVO_EMAIL_SENDER,
     to: email,
     subject: SUCCESS.WELCOME_EMAIL_SUBJECT,
     html,
@@ -88,13 +118,13 @@ export const sendResetPasswordEmail = async ({
   
   // Direct Universal Link / App Link (a redirect would not open the app on iOS).
   const resetLink = `${APP_DOMAIN}/update-password?token=${encodeURIComponent(token)}`;
+  console.log(`Sending reset password email to ${to} with link: ${resetLink}`);
   const data = { name: name || "Utilisateur", to, resetLink ,APP_DOMAIN };
   const templateName = "resetPasswordEmail";
   const html = renderTemplate(templateName, data, "html");
   const text = renderTemplate(templateName, data, "txt");
 
   await send(templateName, {
-    from: BREVO_EMAIL_SENDER,
     to,
     subject: SUCCESS.RESET_EMAIL_SUBJECT,
     html,

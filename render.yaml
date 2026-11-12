@@ -41,6 +41,10 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      # Brevo web API key (xkeysib-...). Required here: Render's free plan blocks
+      # outgoing SMTP ports, so emails go through the API instead of SMTP.
+      - key: BREVO_API_KEY
+        sync: false
       - key: BREVO_SMTP_USERNAME
         sync: false
       - key: BREVO_SMTP_PASSWORD

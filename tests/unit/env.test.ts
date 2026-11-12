@@ -65,6 +65,16 @@ describe("validateEnv", () => {
     );
   });
 
+  it("accepts a Brevo API key instead of SMTP credentials", () => {
+    const env = { ...validBase, ...productionExtras, BREVO_SMTP_USERNAME: "", BREVO_SMTP_PASSWORD: "", BREVO_API_KEY: "k" };
+    expect(validateEnv(env).errors).toEqual([]);
+  });
+
+  it("requires a Brevo API key or SMTP credentials in production", () => {
+    const env = { ...validBase, ...productionExtras, BREVO_SMTP_PASSWORD: "", BREVO_API_KEY: "" };
+    expect(validateEnv(env).errors.join(" ")).toMatch(/BREVO_API_KEY/);
+  });
+
   it("rejects short secrets in production", () => {
     const env = { ...validBase, ...productionExtras, JWT_SECRET: "short" };
     expect(validateEnv(env).errors).toContain(
