@@ -62,7 +62,17 @@ export function isValidDolynkSignature(body: unknown, secret: string | undefined
 }
 
 export const verifyDolynkSignature = (req: Request, _res: Response, next: NextFunction) => {
-  if (!isValidDolynkSignature(req.body, process.env.DOLYNK_SECRET_ACCESS_KEY)) {
+  const valid = isValidDolynkSignature(req.body, process.env.DOLYNK_SECRET_ACCESS_KEY);
+
+  // TEMPORARY (Dolynk payload discovery): logs every incoming event, valid or not.
+  // The sign is shortened; the secret is never logged. Remove once the format is confirmed.
+  if (process.env.NODE_ENV !== "test") {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const shown = { ...body, sign: typeof body.sign === "string" ? `${body.sign.slice(0, 12)}…` : body.sign };
+    console.log(`[dolynk] incoming signatureValid=${valid} hasId=${body.id !== undefined}`, JSON.stringify(shown));
+  }
+
+  if (!valid) {
     throw new AppError(INVALID_SIGNATURE);
   }
   next();
