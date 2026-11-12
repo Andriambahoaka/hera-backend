@@ -31,6 +31,31 @@ const transporter = nodemailer.createTransport({
 });
 
 
+/**
+ * Sends through Brevo SMTP and logs why a send failed (connection, auth, sender...).
+ * Never logs credentials, the recipient address or the message content.
+ */
+const send = async (template: string, mail: nodemailer.SendMailOptions) => {
+  try {
+    await transporter.sendMail(mail);
+  } catch (err: any) {
+    console.error(
+      `[email] ${template} send failed:`,
+      JSON.stringify({
+        code: err?.code,                 // e.g. ETIMEDOUT, ECONNECTION, EAUTH, EENVELOPE
+        command: err?.command,           // SMTP step: CONN, AUTH PLAIN, MAIL FROM, RCPT TO...
+        responseCode: err?.responseCode, // SMTP reply code from Brevo
+        response: err?.response,
+        message: err?.message,
+        smtpUserSet: Boolean(BREVO_SMTP_USERNAME),
+        smtpPasswordSet: Boolean(BREVO_SMTP_PASSWORD),
+        senderSet: Boolean(BREVO_EMAIL_SENDER),
+      })
+    );
+    throw err;
+  }
+};
+
 export const sendWelcomeEmail = async (
   name: string,
   email: string,
@@ -41,7 +66,7 @@ export const sendWelcomeEmail = async (
   const html = renderTemplate(templateName, data, "html");
   const text = renderTemplate(templateName, data, "txt");
 
-  await transporter.sendMail({
+  await send(templateName, {
     from: BREVO_EMAIL_SENDER,
     to: email,
     subject: SUCCESS.WELCOME_EMAIL_SUBJECT,
@@ -68,7 +93,7 @@ export const sendResetPasswordEmail = async ({
   const html = renderTemplate(templateName, data, "html");
   const text = renderTemplate(templateName, data, "txt");
 
-  await transporter.sendMail({
+  await send(templateName, {
     from: BREVO_EMAIL_SENDER,
     to,
     subject: SUCCESS.RESET_EMAIL_SUBJECT,
